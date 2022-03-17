@@ -65,6 +65,10 @@ static inline void sfe_elem_load(const SfeObject *b_sfe,
                            boolean_T compwise,
                            ::coder::array<double, 1U> &load);
 
+static inline void sfe_elem_load_compwise1(const SfeObject *b_sfe,
+                                    const ::coder::array<double, 2U> &fs,
+                                    ::coder::array<double, 1U> &load);
+
 static inline void sfe_elem_mass(const SfeObject *b_sfe,
                            ::coder::array<double, 2U> &elemmat);
 
@@ -79,9 +83,10 @@ static inline void sfe_elem_nbc(const SfeObject *b_sfe,
                           const ::coder::array<double, 2U> &g,
                           ::coder::array<double, 1U> &load);
 
-static inline void sfe_elem_nbc(const SfeObject *b_sfe,
-                          const ::coder::array<double, 2U> &g,
-                          boolean_T compwise, ::coder::array<double, 1U> &load);
+static inline void sfe_elem_nbc_noncompwise1(const SfeObject *b_sfe,
+                                      const ::coder::array<double, 2U> &g,
+                                      boolean_T a__1,
+                                      ::coder::array<double, 1U> &load);
 
 static inline void sfe_elem_stiff(SfeObject *b_sfe, double nu,
                             ::coder::array<double, 2U> &elemmat);

@@ -82,12 +82,12 @@ namespace sfe
   void fe3_quadrule(int nv, int degree, ::coder::array<double, 1U> &ws, ::
     coder::array<double, 2U> &cs, int *nqp);
   static inline
-  void obtain_facets(int etype, signed char facetid, int *ret, short
-    lids_data[], int *lids_size);
-  static inline
   int obtain_facets(int etype);
   static inline
   int obtain_facets(int etype, signed char facetid);
+  static inline
+  void obtain_facets(int etype, signed char facetid, int *ret, short
+    lids_data[], int *lids_size);
   static inline
   void quad_9(double xi, double eta, double shape_funcs[9], double deriv
                      [18]);
@@ -116,18 +116,8 @@ namespace sfe
     2U> &cs, ::coder::array<double, 2U> &shapes, ::coder::array<double, 3U>
     &derivs);
   static inline
-  void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
-                       etypes_size, const ::coder::array<double, 2U> &xs, int qd);
-  static inline
-  void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
-                       etypes_size, const ::coder::array<double, 2U> &xs, const ::
-                       coder::array<double, 2U> &userquad);
-  static inline
-  void sfe_init(SfeObject *b_sfe, const int etypes[3], const ::coder::
-                       array<double, 2U> &xs, int qd);
-  static inline
-  void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
-                       etypes_size, const ::coder::array<double, 2U> &xs);
+  void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<double,
+    2U> &fs, ::coder::array<double, 1U> &load);
   static inline
   void sfe_init(SfeObject *b_sfe, const int etypes[3], const ::coder::
                        array<double, 2U> &xs, const ::coder::array<double, 2U>
@@ -135,6 +125,19 @@ namespace sfe
   static inline
   void sfe_init(SfeObject *b_sfe, const int etypes[3], const ::coder::
                        array<double, 2U> &xs);
+  static inline
+  void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
+                       etypes_size, const ::coder::array<double, 2U> &xs);
+  static inline
+  void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
+                       etypes_size, const ::coder::array<double, 2U> &xs, int qd);
+  static inline
+  void sfe_init(SfeObject *b_sfe, const int etypes[3], const ::coder::
+                       array<double, 2U> &xs, int qd);
+  static inline
+  void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
+                       etypes_size, const ::coder::array<double, 2U> &xs, const ::
+                       coder::array<double, 2U> &userquad);
   static inline
   void sfe_init_grad(SfeObject *b_sfe, int q);
   static inline
@@ -5864,6 +5867,50 @@ namespace sfe
   }
 
   static inline
+  void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<double,
+    2U> &fs, ::coder::array<double, 1U> &load)
+  {
+    int i;
+    int loop_ub;
+    int n;
+    int ncomps;
+
+    // sfe_elem_load - Computing load vector for an element
+    m2cAssert(b_sfe->nnodes[0] == fs.size(0), "");
+    n = b_sfe->nnodes[2];
+    ncomps = fs.size(1);
+    load.set_size(fs.size(1) * b_sfe->nnodes[2]);
+    loop_ub = fs.size(1) * b_sfe->nnodes[2];
+    for (i = 0; i < loop_ub; i++) {
+      load[i] = 0.0;
+    }
+
+    //  for each quadrature point
+    i = b_sfe->nqp;
+    for (int q{0}; q < i; q++) {
+      for (int k{0}; k < ncomps; k++) {
+        double a;
+        double v;
+        int m;
+
+        // interpolate_shape - Interpolate f with q-th shape function in the table
+        m = b_sfe->shapes_trial.size(1);
+        v = b_sfe->shapes_trial[b_sfe->shapes_trial.size(1) * q] * fs[k];
+        for (int b_i{2}; b_i <= m; b_i++) {
+          v += b_sfe->shapes_trial[(b_i + b_sfe->shapes_trial.size(1) * q) - 1] *
+            fs[k + fs.size(1) * (b_i - 1)];
+        }
+
+        a = v * b_sfe->wdetJ[q];
+        for (int b_i{0}; b_i < n; b_i++) {
+          load[k + b_i * ncomps] = load[k + b_i * ncomps] + a *
+            b_sfe->shapes_test[b_i + b_sfe->shapes_test.size(1) * q];
+        }
+      }
+    }
+  }
+
+  static inline
   void sfe_init(SfeObject *b_sfe, const int etypes[3], const ::coder::
                        array<double, 2U> &xs, const ::coder::array<double, 2U>
                        &userquad)
@@ -6802,318 +6849,6 @@ namespace sfe
 
   static inline
   void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
-                       etypes_size, const ::coder::array<double, 2U> &xs, int qd)
-  {
-    double dv[9];
-    double v;
-    int geom_dim;
-    int geom_etype;
-    int i;
-    int loop_ub;
-    int sfe_idx_0_tmp_tmp;
-    int topo_dim;
-
-    // sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-    if (etypes_data[0] != -1) {
-      int shape;
-      int test_etype;
-      boolean_T cond;
-      boolean_T flag;
-
-      // obtain_nnodes - Obtain number of nodes per element given etype
-      if ((etypes_size < 2) || (etypes_data[1] <= 0)) {
-        geom_etype = etypes_data[0];
-      } else {
-        geom_etype = etypes_data[1];
-      }
-
-      //  Obtain test type
-      if ((etypes_size < 3) || (etypes_data[2] <= 0)) {
-        test_etype = etypes_data[0];
-      } else {
-        test_etype = etypes_data[2];
-      }
-
-      if ((etypes_data[0] == geom_etype) && (etypes_data[0] == test_etype)) {
-        flag = true;
-      } else {
-        flag = false;
-      }
-
-      cond = flag;
-      if (!flag) {
-        int trialshape;
-
-        //  then the shapes must match
-        trialshape = etypes_data[0] >> 5 & 7;
-
-        // obtain_elemshape - Decode an element geometric shape from etype
-        if ((trialshape == (geom_etype >> 5 & 7)) && (trialshape == (test_etype >>
-              5 & 7))) {
-          // obtain_elemshape - Decode an element geometric shape from etype
-          cond = true;
-        } else {
-          cond = false;
-        }
-      }
-
-      m2cAssert(cond, "invalid element combinations");
-
-      //  Geometric dimension
-      geom_dim = xs.size(1);
-
-      //  Topological dimension
-      shape = etypes_data[0] >> 5 & 7;
-      topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
-
-      // obtain_nnodes - Obtain number of nodes per element given etype
-      m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-      if (qd == MAX_int32_T) {
-        m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
-                          "missing user quadrature data");
-      }
-
-      b_sfe->etypes[0] = etypes_data[0];
-      b_sfe->etypes[1] = geom_etype;
-      b_sfe->etypes[2] = test_etype;
-
-      //  Get number of nodes per element
-      b_sfe->nnodes[0] = iv[etypes_data[0] - 1];
-
-      // obtain_nnodes - Obtain number of nodes per element given etype
-      b_sfe->nnodes[1] = iv[geom_etype - 1];
-
-      // obtain_nnodes - Obtain number of nodes per element given etype
-      b_sfe->nnodes[2] = iv[test_etype - 1];
-      b_sfe->topo_dim = topo_dim;
-
-      //  Geometric dimension
-      if (xs.size(1) < topo_dim) {
-        geom_dim = topo_dim;
-      }
-
-      b_sfe->geom_dim = geom_dim;
-
-      //  Set up quadrature
-      if (qd != MAX_int32_T) {
-        if (qd <= 0) {
-          //  trial+test+nonlinear-geom?1:0
-          qd = (((etypes_data[0] >> 2 & 7) + (test_etype >> 2 & 7)) +
-                ((geom_etype >> 2 & 7) > 1)) + (geom_dim > topo_dim);
-        }
-
-        tabulate_quadratures(etypes_data[0], qd, &b_sfe->nqp, b_sfe->ws,
-                             b_sfe->cs);
-      } else {
-        m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                          "bad user quadrature data size");
-        b_sfe->nqp = 0;
-        b_sfe->ws.set_size(0);
-        b_sfe->cs.set_size(0, topo_dim);
-      }
-
-      //  Trial space shape functions & derivs
-      tabulate_shapefuncs(etypes_data[0], b_sfe->cs, b_sfe->shapes_trial,
-                          b_sfe->derivs_trial);
-
-      //  Geometry space shape functions & derivs
-      if (etypes_data[0] != geom_etype) {
-        tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                            b_sfe->derivs_geom);
-      } else {
-        loop_ub = b_sfe->shapes_trial.size(1) * b_sfe->shapes_trial.size(0);
-        b_sfe->shapes_geom.set_size(b_sfe->shapes_trial.size(0),
-          b_sfe->shapes_trial.size(1));
-        for (i = 0; i < loop_ub; i++) {
-          b_sfe->shapes_geom[i] = b_sfe->shapes_trial[i];
-        }
-
-        loop_ub = b_sfe->derivs_trial.size(2) * b_sfe->derivs_trial.size(1) *
-          b_sfe->derivs_trial.size(0);
-        b_sfe->derivs_geom.set_size(b_sfe->derivs_trial.size(0),
-          b_sfe->derivs_trial.size(1), b_sfe->derivs_trial.size(2));
-        for (i = 0; i < loop_ub; i++) {
-          b_sfe->derivs_geom[i] = b_sfe->derivs_trial[i];
-        }
-      }
-
-      //  Test space shape functions & derivs
-      if ((etypes_data[0] != test_etype) && (geom_etype != test_etype)) {
-        tabulate_shapefuncs(test_etype, b_sfe->cs, b_sfe->shapes_test,
-                            b_sfe->derivs_test);
-      } else if (etypes_data[0] == test_etype) {
-        loop_ub = b_sfe->shapes_trial.size(1) * b_sfe->shapes_trial.size(0);
-        b_sfe->shapes_test.set_size(b_sfe->shapes_trial.size(0),
-          b_sfe->shapes_trial.size(1));
-        for (i = 0; i < loop_ub; i++) {
-          b_sfe->shapes_test[i] = b_sfe->shapes_trial[i];
-        }
-
-        loop_ub = b_sfe->derivs_trial.size(2) * b_sfe->derivs_trial.size(1) *
-          b_sfe->derivs_trial.size(0);
-        b_sfe->derivs_test.set_size(b_sfe->derivs_trial.size(0),
-          b_sfe->derivs_trial.size(1), b_sfe->derivs_trial.size(2));
-        for (i = 0; i < loop_ub; i++) {
-          b_sfe->derivs_test[i] = b_sfe->derivs_trial[i];
-        }
-      } else {
-        loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-        b_sfe->shapes_test.set_size(b_sfe->shapes_geom.size(0),
-          b_sfe->shapes_geom.size(1));
-        for (i = 0; i < loop_ub; i++) {
-          b_sfe->shapes_test[i] = b_sfe->shapes_geom[i];
-        }
-
-        loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-          b_sfe->derivs_geom.size(0);
-        b_sfe->derivs_test.set_size(b_sfe->derivs_geom.size(0),
-          b_sfe->derivs_geom.size(1), b_sfe->derivs_geom.size(2));
-        for (i = 0; i < loop_ub; i++) {
-          b_sfe->derivs_test[i] = b_sfe->derivs_geom[i];
-        }
-      }
-    } else {
-      geom_etype = b_sfe->etypes[1];
-    }
-
-    //  potentially skip re-tabulating
-    sfe_idx_0_tmp_tmp = b_sfe->nqp;
-    b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-    for (int q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      i = xs.size(1);
-      for (int k{0}; k < i; k++) {
-        int m;
-
-        // interpolate_shape - Interpolate f with q-th shape function in the table
-        m = b_sfe->shapes_geom.size(1);
-        v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-        for (int b_i{2}; b_i <= m; b_i++) {
-          v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-            xs[k + xs.size(1) * (b_i - 1)];
-        }
-
-        b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-      }
-    }
-
-    //  Compute Jacobian
-    b_sfe->wdetJ.set_size(b_sfe->nqp);
-    if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-      double d;
-      int n;
-
-      //  A single Jacobian matrix (transpose) is needed for simplex elements
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(double));
-      n = xs.size(0);
-      for (int k{0}; k < n; k++) {
-        for (int b_i{0}; b_i < topo_dim; b_i++) {
-          for (int j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] * b_sfe->derivs_geom[b_i +
-              b_sfe->derivs_geom.size(2) * k];
-          }
-        }
-      }
-
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) + dv[5] * (dv[1] * dv[6]
-                - dv[0] * dv[7])) + dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        d = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          d += dv[2] * dv[2];
-        }
-
-        v = std::sqrt(d);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-
-      b_sfe->jacTs.set_size(3, 3);
-      for (i = 0; i < 9; i++) {
-        b_sfe->jacTs[i] = dv[i];
-      }
-
-      d = std::abs(v);
-      for (int q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-        b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-      }
-    } else {
-      //  Super-parametric
-      loop_ub = b_sfe->nqp * 3;
-      b_sfe->jacTs.set_size(loop_ub, 3);
-      for (int q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-        int n;
-        int y;
-        y = q * 3;
-
-        // compute_jact - Compute Jacobian^T and its determinant from q-th deriv in table
-        geom_dim = xs.size(1);
-        topo_dim = b_sfe->derivs_geom.size(2);
-        std::memset(&dv[0], 0, 9U * sizeof(double));
-        n = xs.size(0);
-        for (int k{0}; k < n; k++) {
-          for (int b_i{0}; b_i < topo_dim; b_i++) {
-            for (int j{0}; j < geom_dim; j++) {
-              i = j + 3 * b_i;
-              dv[i] += xs[j + xs.size(1) * k] * b_sfe->derivs_geom[(b_i +
-                b_sfe->derivs_geom.size(2) * k) + b_sfe->derivs_geom.size(2) *
-                b_sfe->derivs_geom.size(1) * q];
-            }
-          }
-        }
-
-        if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-          if (xs.size(1) == 1) {
-            v = dv[0];
-          } else if (xs.size(1) == 2) {
-            v = dv[0] * dv[4] - dv[1] * dv[3];
-          } else {
-            v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) + dv[5] * (dv[1] * dv[6]
-                  - dv[0] * dv[7])) + dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-          }
-        } else if (b_sfe->derivs_geom.size(2) == 1) {
-          v = dv[0] * dv[0] + dv[1] * dv[1];
-          if (xs.size(1) == 3) {
-            v += dv[2] * dv[2];
-          }
-
-          v = std::sqrt(v);
-        } else {
-          //  must be 2x3
-          dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-          dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-          dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-          v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-        }
-
-        for (i = 0; i < 3; i++) {
-          loop_ub = i + y;
-          b_sfe->jacTs[3 * loop_ub] = dv[3 * i];
-          b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i + 1];
-          b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i + 2];
-        }
-
-        b_sfe->wdetJ[q] = v;
-        b_sfe->wdetJ[q] = std::abs(b_sfe->wdetJ[q]) * b_sfe->ws[q];
-      }
-    }
-  }
-
-  static inline
-  void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
                        etypes_size, const ::coder::array<double, 2U> &xs)
   {
     double dv[9];
@@ -7530,6 +7265,318 @@ namespace sfe
         tabulate_shapefuncs(test_etype, b_sfe->cs, b_sfe->shapes_test,
                             b_sfe->derivs_test);
       } else if (etypes[0] == test_etype) {
+        loop_ub = b_sfe->shapes_trial.size(1) * b_sfe->shapes_trial.size(0);
+        b_sfe->shapes_test.set_size(b_sfe->shapes_trial.size(0),
+          b_sfe->shapes_trial.size(1));
+        for (i = 0; i < loop_ub; i++) {
+          b_sfe->shapes_test[i] = b_sfe->shapes_trial[i];
+        }
+
+        loop_ub = b_sfe->derivs_trial.size(2) * b_sfe->derivs_trial.size(1) *
+          b_sfe->derivs_trial.size(0);
+        b_sfe->derivs_test.set_size(b_sfe->derivs_trial.size(0),
+          b_sfe->derivs_trial.size(1), b_sfe->derivs_trial.size(2));
+        for (i = 0; i < loop_ub; i++) {
+          b_sfe->derivs_test[i] = b_sfe->derivs_trial[i];
+        }
+      } else {
+        loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+        b_sfe->shapes_test.set_size(b_sfe->shapes_geom.size(0),
+          b_sfe->shapes_geom.size(1));
+        for (i = 0; i < loop_ub; i++) {
+          b_sfe->shapes_test[i] = b_sfe->shapes_geom[i];
+        }
+
+        loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+          b_sfe->derivs_geom.size(0);
+        b_sfe->derivs_test.set_size(b_sfe->derivs_geom.size(0),
+          b_sfe->derivs_geom.size(1), b_sfe->derivs_geom.size(2));
+        for (i = 0; i < loop_ub; i++) {
+          b_sfe->derivs_test[i] = b_sfe->derivs_geom[i];
+        }
+      }
+    } else {
+      geom_etype = b_sfe->etypes[1];
+    }
+
+    //  potentially skip re-tabulating
+    sfe_idx_0_tmp_tmp = b_sfe->nqp;
+    b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+    for (int q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      i = xs.size(1);
+      for (int k{0}; k < i; k++) {
+        int m;
+
+        // interpolate_shape - Interpolate f with q-th shape function in the table
+        m = b_sfe->shapes_geom.size(1);
+        v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+        for (int b_i{2}; b_i <= m; b_i++) {
+          v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+            xs[k + xs.size(1) * (b_i - 1)];
+        }
+
+        b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+      }
+    }
+
+    //  Compute Jacobian
+    b_sfe->wdetJ.set_size(b_sfe->nqp);
+    if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+      double d;
+      int n;
+
+      //  A single Jacobian matrix (transpose) is needed for simplex elements
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(double));
+      n = xs.size(0);
+      for (int k{0}; k < n; k++) {
+        for (int b_i{0}; b_i < topo_dim; b_i++) {
+          for (int j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] * b_sfe->derivs_geom[b_i +
+              b_sfe->derivs_geom.size(2) * k];
+          }
+        }
+      }
+
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) + dv[5] * (dv[1] * dv[6]
+                - dv[0] * dv[7])) + dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        d = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          d += dv[2] * dv[2];
+        }
+
+        v = std::sqrt(d);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+
+      b_sfe->jacTs.set_size(3, 3);
+      for (i = 0; i < 9; i++) {
+        b_sfe->jacTs[i] = dv[i];
+      }
+
+      d = std::abs(v);
+      for (int q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+        b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+      }
+    } else {
+      //  Super-parametric
+      loop_ub = b_sfe->nqp * 3;
+      b_sfe->jacTs.set_size(loop_ub, 3);
+      for (int q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+        int n;
+        int y;
+        y = q * 3;
+
+        // compute_jact - Compute Jacobian^T and its determinant from q-th deriv in table
+        geom_dim = xs.size(1);
+        topo_dim = b_sfe->derivs_geom.size(2);
+        std::memset(&dv[0], 0, 9U * sizeof(double));
+        n = xs.size(0);
+        for (int k{0}; k < n; k++) {
+          for (int b_i{0}; b_i < topo_dim; b_i++) {
+            for (int j{0}; j < geom_dim; j++) {
+              i = j + 3 * b_i;
+              dv[i] += xs[j + xs.size(1) * k] * b_sfe->derivs_geom[(b_i +
+                b_sfe->derivs_geom.size(2) * k) + b_sfe->derivs_geom.size(2) *
+                b_sfe->derivs_geom.size(1) * q];
+            }
+          }
+        }
+
+        if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+          if (xs.size(1) == 1) {
+            v = dv[0];
+          } else if (xs.size(1) == 2) {
+            v = dv[0] * dv[4] - dv[1] * dv[3];
+          } else {
+            v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) + dv[5] * (dv[1] * dv[6]
+                  - dv[0] * dv[7])) + dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+          }
+        } else if (b_sfe->derivs_geom.size(2) == 1) {
+          v = dv[0] * dv[0] + dv[1] * dv[1];
+          if (xs.size(1) == 3) {
+            v += dv[2] * dv[2];
+          }
+
+          v = std::sqrt(v);
+        } else {
+          //  must be 2x3
+          dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+          dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+          dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+          v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+        }
+
+        for (i = 0; i < 3; i++) {
+          loop_ub = i + y;
+          b_sfe->jacTs[3 * loop_ub] = dv[3 * i];
+          b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i + 1];
+          b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i + 2];
+        }
+
+        b_sfe->wdetJ[q] = v;
+        b_sfe->wdetJ[q] = std::abs(b_sfe->wdetJ[q]) * b_sfe->ws[q];
+      }
+    }
+  }
+
+  static inline
+  void sfe_init(SfeObject *b_sfe, const int etypes_data[], int
+                       etypes_size, const ::coder::array<double, 2U> &xs, int qd)
+  {
+    double dv[9];
+    double v;
+    int geom_dim;
+    int geom_etype;
+    int i;
+    int loop_ub;
+    int sfe_idx_0_tmp_tmp;
+    int topo_dim;
+
+    // sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+    if (etypes_data[0] != -1) {
+      int shape;
+      int test_etype;
+      boolean_T cond;
+      boolean_T flag;
+
+      // obtain_nnodes - Obtain number of nodes per element given etype
+      if ((etypes_size < 2) || (etypes_data[1] <= 0)) {
+        geom_etype = etypes_data[0];
+      } else {
+        geom_etype = etypes_data[1];
+      }
+
+      //  Obtain test type
+      if ((etypes_size < 3) || (etypes_data[2] <= 0)) {
+        test_etype = etypes_data[0];
+      } else {
+        test_etype = etypes_data[2];
+      }
+
+      if ((etypes_data[0] == geom_etype) && (etypes_data[0] == test_etype)) {
+        flag = true;
+      } else {
+        flag = false;
+      }
+
+      cond = flag;
+      if (!flag) {
+        int trialshape;
+
+        //  then the shapes must match
+        trialshape = etypes_data[0] >> 5 & 7;
+
+        // obtain_elemshape - Decode an element geometric shape from etype
+        if ((trialshape == (geom_etype >> 5 & 7)) && (trialshape == (test_etype >>
+              5 & 7))) {
+          // obtain_elemshape - Decode an element geometric shape from etype
+          cond = true;
+        } else {
+          cond = false;
+        }
+      }
+
+      m2cAssert(cond, "invalid element combinations");
+
+      //  Geometric dimension
+      geom_dim = xs.size(1);
+
+      //  Topological dimension
+      shape = etypes_data[0] >> 5 & 7;
+      topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
+
+      // obtain_nnodes - Obtain number of nodes per element given etype
+      m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+      if (qd == MAX_int32_T) {
+        m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
+                          "missing user quadrature data");
+      }
+
+      b_sfe->etypes[0] = etypes_data[0];
+      b_sfe->etypes[1] = geom_etype;
+      b_sfe->etypes[2] = test_etype;
+
+      //  Get number of nodes per element
+      b_sfe->nnodes[0] = iv[etypes_data[0] - 1];
+
+      // obtain_nnodes - Obtain number of nodes per element given etype
+      b_sfe->nnodes[1] = iv[geom_etype - 1];
+
+      // obtain_nnodes - Obtain number of nodes per element given etype
+      b_sfe->nnodes[2] = iv[test_etype - 1];
+      b_sfe->topo_dim = topo_dim;
+
+      //  Geometric dimension
+      if (xs.size(1) < topo_dim) {
+        geom_dim = topo_dim;
+      }
+
+      b_sfe->geom_dim = geom_dim;
+
+      //  Set up quadrature
+      if (qd != MAX_int32_T) {
+        if (qd <= 0) {
+          //  trial+test+nonlinear-geom?1:0
+          qd = (((etypes_data[0] >> 2 & 7) + (test_etype >> 2 & 7)) +
+                ((geom_etype >> 2 & 7) > 1)) + (geom_dim > topo_dim);
+        }
+
+        tabulate_quadratures(etypes_data[0], qd, &b_sfe->nqp, b_sfe->ws,
+                             b_sfe->cs);
+      } else {
+        m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                          "bad user quadrature data size");
+        b_sfe->nqp = 0;
+        b_sfe->ws.set_size(0);
+        b_sfe->cs.set_size(0, topo_dim);
+      }
+
+      //  Trial space shape functions & derivs
+      tabulate_shapefuncs(etypes_data[0], b_sfe->cs, b_sfe->shapes_trial,
+                          b_sfe->derivs_trial);
+
+      //  Geometry space shape functions & derivs
+      if (etypes_data[0] != geom_etype) {
+        tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                            b_sfe->derivs_geom);
+      } else {
+        loop_ub = b_sfe->shapes_trial.size(1) * b_sfe->shapes_trial.size(0);
+        b_sfe->shapes_geom.set_size(b_sfe->shapes_trial.size(0),
+          b_sfe->shapes_trial.size(1));
+        for (i = 0; i < loop_ub; i++) {
+          b_sfe->shapes_geom[i] = b_sfe->shapes_trial[i];
+        }
+
+        loop_ub = b_sfe->derivs_trial.size(2) * b_sfe->derivs_trial.size(1) *
+          b_sfe->derivs_trial.size(0);
+        b_sfe->derivs_geom.set_size(b_sfe->derivs_trial.size(0),
+          b_sfe->derivs_trial.size(1), b_sfe->derivs_trial.size(2));
+        for (i = 0; i < loop_ub; i++) {
+          b_sfe->derivs_geom[i] = b_sfe->derivs_trial[i];
+        }
+      }
+
+      //  Test space shape functions & derivs
+      if ((etypes_data[0] != test_etype) && (geom_etype != test_etype)) {
+        tabulate_shapefuncs(test_etype, b_sfe->cs, b_sfe->shapes_test,
+                            b_sfe->derivs_test);
+      } else if (etypes_data[0] == test_etype) {
         loop_ub = b_sfe->shapes_trial.size(1) * b_sfe->shapes_trial.size(0);
         b_sfe->shapes_test.set_size(b_sfe->shapes_trial.size(0),
           b_sfe->shapes_trial.size(1));
@@ -14116,6 +14163,55 @@ namespace sfe
   }
 
   static inline
+  void sfe_elem_load_compwise1(const SfeObject *b_sfe, const ::coder::array<
+    double, 2U> &fs, ::coder::array<double, 1U> &load)
+  {
+    int i;
+    int loop_ub;
+    int n;
+    int ncomps;
+
+    // sfe_elem_load - Computing load vector for an element
+    m2cAssert(b_sfe->nnodes[0] == fs.size(0), "");
+    n = b_sfe->nnodes[2];
+    ncomps = fs.size(1);
+    load.set_size(fs.size(1) * b_sfe->nnodes[2]);
+    loop_ub = fs.size(1) * b_sfe->nnodes[2];
+    for (i = 0; i < loop_ub; i++) {
+      load[i] = 0.0;
+    }
+
+    //  for each quadrature point
+    i = b_sfe->nqp;
+    for (int q{0}; q < i; q++) {
+      int j;
+      j = 0;
+      for (int k{0}; k < ncomps; k++) {
+        double a;
+        double v;
+        int m;
+
+        // interpolate_shape - Interpolate f with q-th shape function in the table
+        m = b_sfe->shapes_trial.size(1);
+        v = b_sfe->shapes_trial[b_sfe->shapes_trial.size(1) * q] * fs[k];
+        for (int b_i{2}; b_i <= m; b_i++) {
+          v += b_sfe->shapes_trial[(b_i + b_sfe->shapes_trial.size(1) * q) - 1] *
+            fs[k + fs.size(1) * (b_i - 1)];
+        }
+
+        a = v * b_sfe->wdetJ[q];
+        for (int b_i{0}; b_i < n; b_i++) {
+          loop_ub = j + b_i;
+          load[loop_ub] = load[loop_ub] + a * b_sfe->shapes_test[b_i +
+            b_sfe->shapes_test.size(1) * q];
+        }
+
+        j += n;
+      }
+    }
+  }
+
+  static inline
   void sfe_elem_mass(const SfeObject *b_sfe, ::coder::array<double, 2U>
                       &elemmat)
   {
@@ -14342,125 +14438,18 @@ namespace sfe
   void sfe_elem_nbc(const SfeObject *b_sfe, const ::coder::array<double, 2U> &g,
                      ::coder::array<double, 1U> &load)
   {
-    int i;
-    int loop_ub;
-    int n;
-    int ncomps;
-
     // sfe_elem_nbc - Compute local Neumann boundary values as load vectors
     m2cAssert(b_sfe->facetid != 0, "must be a boundary element");
-
-    // sfe_elem_load - Computing load vector for an element
-    m2cAssert(b_sfe->nnodes[0] == g.size(0), "");
-    n = b_sfe->nnodes[2];
-    ncomps = g.size(1);
-    load.set_size(g.size(1) * b_sfe->nnodes[2]);
-    loop_ub = g.size(1) * b_sfe->nnodes[2];
-    for (i = 0; i < loop_ub; i++) {
-      load[i] = 0.0;
-    }
-
-    //  for each quadrature point
-    i = b_sfe->nqp;
-    for (int q{0}; q < i; q++) {
-      for (int k{0}; k < ncomps; k++) {
-        double a;
-        double v;
-        int m;
-
-        // interpolate_shape - Interpolate f with q-th shape function in the table
-        m = b_sfe->shapes_trial.size(1);
-        v = b_sfe->shapes_trial[b_sfe->shapes_trial.size(1) * q] * g[k];
-        for (int b_i{2}; b_i <= m; b_i++) {
-          v += b_sfe->shapes_trial[(b_i + b_sfe->shapes_trial.size(1) * q) - 1] *
-            g[k + g.size(1) * (b_i - 1)];
-        }
-
-        a = v * b_sfe->wdetJ[q];
-        for (int b_i{0}; b_i < n; b_i++) {
-          load[k + b_i * ncomps] = load[k + b_i * ncomps] + a *
-            b_sfe->shapes_test[b_i + b_sfe->shapes_test.size(1) * q];
-        }
-      }
-    }
+    sfe_elem_load(b_sfe, g, load);
   }
 
   static inline
-  void sfe_elem_nbc(const SfeObject *b_sfe, const ::coder::array<double, 2U> &g,
-                     boolean_T compwise, ::coder::array<double, 1U> &load)
+  void sfe_elem_nbc_noncompwise1(const SfeObject *b_sfe, const ::coder::array<
+    double, 2U> &g, boolean_T, ::coder::array<double, 1U> &load)
   {
-    int i;
-    int loop_ub;
-    int n;
-    int ncomps;
-
     // sfe_elem_nbc - Compute local Neumann boundary values as load vectors
     m2cAssert(b_sfe->facetid != 0, "must be a boundary element");
-
-    // sfe_elem_load - Computing load vector for an element
-    m2cAssert(b_sfe->nnodes[0] == g.size(0), "");
-    n = b_sfe->nnodes[2] - 1;
-    ncomps = g.size(1);
-    load.set_size(g.size(1) * b_sfe->nnodes[2]);
-    loop_ub = g.size(1) * b_sfe->nnodes[2];
-    for (i = 0; i < loop_ub; i++) {
-      load[i] = 0.0;
-    }
-
-    //  for each quadrature point
-    if (compwise) {
-      i = b_sfe->nqp;
-      for (int q{0}; q < i; q++) {
-        int j;
-        j = 0;
-        for (int k{0}; k < ncomps; k++) {
-          double a;
-          double v;
-          int m;
-
-          // interpolate_shape - Interpolate f with q-th shape function in the table
-          m = b_sfe->shapes_trial.size(1);
-          v = b_sfe->shapes_trial[b_sfe->shapes_trial.size(1) * q] * g[k];
-          for (int b_i{2}; b_i <= m; b_i++) {
-            v += b_sfe->shapes_trial[(b_i + b_sfe->shapes_trial.size(1) * q) - 1]
-              * g[k + g.size(1) * (b_i - 1)];
-          }
-
-          a = v * b_sfe->wdetJ[q];
-          for (int b_i{0}; b_i <= n; b_i++) {
-            loop_ub = j + b_i;
-            load[loop_ub] = load[loop_ub] + a * b_sfe->shapes_test[b_i +
-              b_sfe->shapes_test.size(1) * q];
-          }
-
-          j = (j + n) + 1;
-        }
-      }
-    } else {
-      //  tensor blocks of DOFs, not component-wise
-      i = b_sfe->nqp;
-      for (int q{0}; q < i; q++) {
-        for (int k{0}; k < ncomps; k++) {
-          double a;
-          double v;
-          int m;
-
-          // interpolate_shape - Interpolate f with q-th shape function in the table
-          m = b_sfe->shapes_trial.size(1);
-          v = b_sfe->shapes_trial[b_sfe->shapes_trial.size(1) * q] * g[k];
-          for (int b_i{2}; b_i <= m; b_i++) {
-            v += b_sfe->shapes_trial[(b_i + b_sfe->shapes_trial.size(1) * q) - 1]
-              * g[k + g.size(1) * (b_i - 1)];
-          }
-
-          a = v * b_sfe->wdetJ[q];
-          for (int b_i{0}; b_i <= n; b_i++) {
-            load[k + b_i * ncomps] = load[k + b_i * ncomps] + a *
-              b_sfe->shapes_test[b_i + b_sfe->shapes_test.size(1) * q];
-          }
-        }
-      }
-    }
+    sfe_elem_load(b_sfe, g, load);
   }
 
   static inline
