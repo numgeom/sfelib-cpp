@@ -1,7 +1,8 @@
+// Copyright 2022 The NumGeom Group, Stony Brook University
 //
 // sfe_internal_types.h
 //
-// Code generation for function 'sfe_bnd_init1'
+// Code generation for function 'sfe_bnd_init'
 //
 
 #ifndef SFE_INTERNAL_TYPES_H
