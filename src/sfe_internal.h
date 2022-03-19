@@ -10,6 +10,7 @@
 
 // Include files
 #include "rtwtypes.h"
+#include "m2c_lib.h"
 #include "coder_array.h"
 #include <cstddef>
 #include <cstdlib>
@@ -58,16 +59,12 @@ static inline void sfe_elem_le3d(SfeObject *b_sfe, double mu, double lambda,
 
 static inline void sfe_elem_load(const SfeObject *b_sfe,
                            const ::coder::array<double, 2U> &fs,
+                           boolean_T compwise,
                            ::coder::array<double, 1U> &load);
 
 static inline void sfe_elem_load(const SfeObject *b_sfe,
                            const ::coder::array<double, 2U> &fs,
-                           boolean_T compwise,
                            ::coder::array<double, 1U> &load);
-
-static inline void sfe_elem_load_compwise1(const SfeObject *b_sfe,
-                                    const ::coder::array<double, 2U> &fs,
-                                    ::coder::array<double, 1U> &load);
 
 static inline void sfe_elem_mass(const SfeObject *b_sfe,
                            ::coder::array<double, 2U> &elemmat);
@@ -83,10 +80,9 @@ static inline void sfe_elem_nbc(const SfeObject *b_sfe,
                           const ::coder::array<double, 2U> &g,
                           ::coder::array<double, 1U> &load);
 
-static inline void sfe_elem_nbc_noncompwise1(const SfeObject *b_sfe,
-                                      const ::coder::array<double, 2U> &g,
-                                      boolean_T a__1,
-                                      ::coder::array<double, 1U> &load);
+static inline void sfe_elem_nbc(const SfeObject *b_sfe,
+                          const ::coder::array<double, 2U> &g,
+                          boolean_T compwise, ::coder::array<double, 1U> &load);
 
 static inline void sfe_elem_stiff(SfeObject *b_sfe, double nu,
                             ::coder::array<double, 2U> &elemmat);
@@ -132,13 +128,9 @@ static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
                       const int etypes_size[1],
                       const ::coder::array<double, 2U> &xs);
 
-static inline void sfe_init_grad(SfeObject *b_sfe, int q);
+static inline void sfe_init_grad(SfeObject *b_sfe, int q, int op);
 
-static inline void sfe_init_grad_op01(SfeObject *b_sfe, int q);
-
-static inline void sfe_init_grad_op11(SfeObject *b_sfe, int q);
-
-static inline void sfe_init_grad_op_11(SfeObject *b_sfe, int q);
+static inline void sfe_init_grad2(SfeObject *b_sfe, int q);
 
 static inline void sfe_internal_initialize();
 
