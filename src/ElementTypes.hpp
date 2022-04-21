@@ -2,7 +2,7 @@
 //
 //	Copyright (C) 2022 NumGeom Group at Stony Brook University
 //
-// This file was automatically generated on 04-Mar-2022
+// This file was generated from update_etypeenum4cpp on 21-Apr-2022
 
 #ifndef SFE_ELEMENTTYPES_HPP
 #define SFE_ELEMENTTYPES_HPP
@@ -11,6 +11,7 @@ namespace sfe {
 
 enum ElementTypes {
   NODE_1       = 1,    // 0b00000001
+  SHAPE_NODE   = 0,    // 0b00000000
   BAR_2        = 36,   // 0b00100100
   BAR_3        = 40,   // 0b00101000
   BAR_4        = 44,   // 0b00101100
@@ -29,6 +30,7 @@ enum ElementTypes {
   BAR_GL_5     = 49,   // 0b00110001
   BAR_GL_6     = 53,   // 0b00110101
   BAR_GL_7     = 57,   // 0b00111001
+  SHAPE_BAR    = 1,    // 0b00000001
   QUAD_16      = 108,  // 0b01101100
   QUAD_25      = 112,  // 0b01110000
   QUAD_36      = 116,  // 0b01110100
@@ -47,6 +49,8 @@ enum ElementTypes {
   QUAD_GL_4    = 100,  // 0b01100100
   QUAD_GL_49   = 121,  // 0b01111001
   QUAD_GL_9    = 104,  // 0b01101000
+  SHAPE_QUAD   = 3,    // 0b00000011
+  SHAPE_TRI    = 2,    // 0b00000010
   TRI_10       = 76,   // 0b01001100
   TRI_15       = 80,   // 0b01010000
   TRI_21       = 84,   // 0b01010100
@@ -99,6 +103,7 @@ enum ElementTypes {
   PYRA_30      = 172,  // 0b10101100
   PYRA_5       = 164,  // 0b10100100
   PYRA_55      = 176,  // 0b10110000
+  PYRA_91      = 180,  // 0b10110100
   PYRA_FEK_14  = 168,  // 0b10101000
   PYRA_FEK_30  = 173,  // 0b10101101
   PYRA_FEK_5   = 164,  // 0b10100100
@@ -107,6 +112,10 @@ enum ElementTypes {
   PYRA_GL_30   = 173,  // 0b10101101
   PYRA_GL_5    = 164,  // 0b10100100
   PYRA_GL_55   = 177,  // 0b10110001
+  SHAPE_HEXA   = 7,    // 0b00000111
+  SHAPE_PRISM  = 6,    // 0b00000110
+  SHAPE_PYRA   = 5,    // 0b00000101
+  SHAPE_TET    = 4,    // 0b00000100
   TET_10       = 136,  // 0b10001000
   TET_20       = 140,  // 0b10001100
   TET_35       = 144,  // 0b10010000
