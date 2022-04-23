@@ -2,7 +2,7 @@
 //
 //	Copyright (C) 2022 NumGeom Group at Stony Brook University
 //
-// This file was automatically generated on 22-Apr-2022
+// This file was generated from update_etypeenum4cpp
 
 #ifndef SFE_ELEMENTTYPES_HPP
 #define SFE_ELEMENTTYPES_HPP
@@ -100,7 +100,6 @@ enum ElementTypes {
   PYRA_30      = 172,  // 0b10101100
   PYRA_5       = 164,  // 0b10100100
   PYRA_55      = 176,  // 0b10110000
-  PYRA_91      = 180,  // 0b10110100
   PYRA_FEK_14  = 168,  // 0b10101000
   PYRA_FEK_30  = 173,  // 0b10101101
   PYRA_FEK_5   = 164,  // 0b10100100
