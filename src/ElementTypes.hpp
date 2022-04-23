@@ -2,7 +2,7 @@
 //
 //	Copyright (C) 2022 NumGeom Group at Stony Brook University
 //
-// This file was generated from update_etypeenum4cpp
+// This file was automatically generated on 22-Apr-2022
 
 #ifndef SFE_ELEMENTTYPES_HPP
 #define SFE_ELEMENTTYPES_HPP
