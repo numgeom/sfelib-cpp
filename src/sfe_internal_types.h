@@ -9,30 +9,38 @@
 #define SFE_INTERNAL_TYPES_H
 
 // Include files
-#include "coder_array.h"
 #include "rtwtypes.h"
+#ifndef CODER_ARRAY_SIZE_TYPE_DEFINED
+#define CODER_ARRAY_SIZE_TYPE_DEFINED
+namespace coder {
+#ifdef M2C_SIZETYPE64
+typedef int64_T SizeType;
+#else
+typedef int SizeType;
+#endif // M2C_SIZETYPE64
+} // namespace coder
+#endif // CODER_ARRAY_SIZE_TYPE_DEFINED
+
+#include "coder_array.h"
 
 // Type Definitions
 namespace sfe {
 struct SfeObject {
-  int etypes[3];
-  int nnodes[3];
+  int etypes[2];
+  int nnodes[2];
   int geom_dim;
   int topo_dim;
   signed char facetid;
   int nqp;
   ::coder::array<double, 1U> ws;
   ::coder::array<double, 2U> cs;
-  ::coder::array<double, 2U> shapes_trial;
+  ::coder::array<double, 2U> shapes_sol;
   ::coder::array<double, 2U> shapes_geom;
-  ::coder::array<double, 2U> shapes_test;
-  ::coder::array<double, 3U> derivs_trial;
+  ::coder::array<double, 3U> derivs_sol;
   ::coder::array<double, 3U> derivs_geom;
-  ::coder::array<double, 3U> derivs_test;
   ::coder::array<double, 2U> cs_phy;
-  ::coder::array<double, 2U> grads_trial;
+  ::coder::array<double, 2U> grads_sol;
   ::coder::array<double, 2U> grads_geom;
-  ::coder::array<double, 2U> grads_test;
   ::coder::array<double, 2U> jacTs;
   ::coder::array<double, 1U> wdetJ;
   ::coder::array<double, 2U> dwork1;
