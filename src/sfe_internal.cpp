@@ -2,6 +2,7 @@
 // Main developers:
 //     sfelib: Qiao Chen, Xiangmin Jiao, Jacob Jones
 //     momp2cpp: Xiangmin Jiao, Qiao Chen
+//     ahmesh: Qiao Chen, Xiangmin Jiao, Jacob Jones, Vladimir Dedov
 //
 // sfe_internal.cpp
 //
@@ -66,49 +67,49 @@ static unsigned char obtain_facets(coder::SizeType etype, signed char facetid);
 
 static inline void sfe1_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
-    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &derivs);
+    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe2_tabulate_equi(coder::SizeType etype,
                                       const ::coder::array<double, 2U> &cs,
                                       ::coder::array<double, 2U> &sfvals,
-                                      ::coder::array<double, 3U> &derivs);
+                                      ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe2_tabulate_equi_tri(coder::SizeType etype,
                                           const ::coder::array<double, 2U> &cs,
                                           ::coder::array<double, 2U> &sfvals,
-                                          ::coder::array<double, 3U> &derivs);
+                                          ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe2_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
-    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &derivs);
+    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_prism(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
-    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &derivs);
+    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_pyra(coder::SizeType etype,
                                            const ::coder::array<double, 2U> &cs,
                                            ::coder::array<double, 2U> &sfvals,
-                                           ::coder::array<double, 3U> &derivs);
+                                           ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_tet(coder::SizeType etype,
                                           const ::coder::array<double, 2U> &cs,
                                           ::coder::array<double, 2U> &sfvals,
-                                          ::coder::array<double, 3U> &derivs);
+                                          ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe3_tabulate_gl_prism(coder::SizeType etype,
                                           const ::coder::array<double, 2U> &cs,
                                           ::coder::array<double, 2U> &sfvals,
-                                          ::coder::array<double, 3U> &derivs);
+                                          ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe3_tabulate_gl_pyra(coder::SizeType etype,
                                          const ::coder::array<double, 2U> &cs,
                                          ::coder::array<double, 2U> &sfvals,
-                                         ::coder::array<double, 3U> &derivs);
+                                         ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe3_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
-    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &derivs);
+    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
                             const ::coder::array<double, 2U> &xs,
@@ -150,7 +151,7 @@ static inline void tabulate_quadratures(coder::SizeType etype,
 static inline void tabulate_shapefuncs(coder::SizeType etype,
                                        const ::coder::array<double, 2U> &cs,
                                        ::coder::array<double, 2U> &sfvals,
-                                       ::coder::array<double, 3U> &derivs);
+                                       ::coder::array<double, 3U> &sdvals);
 
 } // namespace sfe
 
@@ -5270,7 +5271,7 @@ static unsigned char obtain_facets(coder::SizeType etype, signed char facetid)
 static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
                                      const ::coder::array<double, 2U> &cs,
                                      ::coder::array<double, 2U> &sfvals,
-                                     ::coder::array<double, 3U> &derivs)
+                                     ::coder::array<double, 3U> &sdvals)
 {
   coder::SizeType i;
   coder::SizeType nqp;
@@ -5278,7 +5279,7 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
   sfvals.set_size(cs.size(0), i);
-  derivs.set_size(cs.size(0), i, cs.size(1));
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   if ((etype & 3) == 0) {
     switch (etype) {
     case 36: {
@@ -5312,9 +5313,9 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_2_sfunc(cs[i1], &N[0], &deriv[0]);
         sfvals[sfvals.size(1) * q] = N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
         sfvals[sfvals.size(1) * q + 1] = N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = deriv[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[1];
       }
     } break;
     case 40: {
@@ -5348,12 +5349,12 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_3_sfunc(cs[i1], &b_N[0], &b_deriv[0]);
         sfvals[sfvals.size(1) * q] = b_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = b_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = b_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = b_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[2];
       }
     } break;
@@ -5388,15 +5389,15 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_4_sfunc(cs[i1], &c_N[0], &c_deriv[0]);
         sfvals[sfvals.size(1) * q] = c_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = c_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = c_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             c_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = c_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             c_deriv[2];
         sfvals[sfvals.size(1) * q + 3] = c_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             c_deriv[3];
       }
     } break;
@@ -5431,18 +5432,18 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_5_sfunc(cs[i1], &d_N[0], &d_deriv[0]);
         sfvals[sfvals.size(1) * q] = d_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = d_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = d_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = d_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[2];
         sfvals[sfvals.size(1) * q + 3] = d_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[3];
         sfvals[sfvals.size(1) * q + 4] = d_N[4];
-        derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[4];
       }
     } break;
@@ -5477,21 +5478,21 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_6_sfunc(cs[i1], &e_N[0], &e_deriv[0]);
         sfvals[sfvals.size(1) * q] = e_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = e_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = e_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = e_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = e_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[2];
         sfvals[sfvals.size(1) * q + 3] = e_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[3];
         sfvals[sfvals.size(1) * q + 4] = e_N[4];
-        derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[4];
         sfvals[sfvals.size(1) * q + 5] = e_N[5];
-        derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[5];
       }
     } break;
@@ -5526,24 +5527,24 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_7_sfunc(cs[i1], &f_N[0], &f_deriv[0]);
         sfvals[sfvals.size(1) * q] = f_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = f_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = f_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = f_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = f_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[2];
         sfvals[sfvals.size(1) * q + 3] = f_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[3];
         sfvals[sfvals.size(1) * q + 4] = f_N[4];
-        derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[4];
         sfvals[sfvals.size(1) * q + 5] = f_N[5];
-        derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[5];
         sfvals[sfvals.size(1) * q + 6] = f_N[6];
-        derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[6];
       }
     } break;
@@ -5582,15 +5583,15 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_gl_4_sfunc(cs[i1], &c_N[0], &c_deriv[0]);
         sfvals[sfvals.size(1) * q] = c_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = c_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = c_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             c_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = c_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             c_deriv[2];
         sfvals[sfvals.size(1) * q + 3] = c_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             c_deriv[3];
       }
     } break;
@@ -5625,18 +5626,18 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_gl_5_sfunc(cs[i1], &d_N[0], &d_deriv[0]);
         sfvals[sfvals.size(1) * q] = d_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = d_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = d_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = d_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[2];
         sfvals[sfvals.size(1) * q + 3] = d_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[3];
         sfvals[sfvals.size(1) * q + 4] = d_N[4];
-        derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[4];
       }
     } break;
@@ -5671,21 +5672,21 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_gl_6_sfunc(cs[i1], &e_N[0], &e_deriv[0]);
         sfvals[sfvals.size(1) * q] = e_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = e_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = e_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = e_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = e_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[2];
         sfvals[sfvals.size(1) * q + 3] = e_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[3];
         sfvals[sfvals.size(1) * q + 4] = e_N[4];
-        derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[4];
         sfvals[sfvals.size(1) * q + 5] = e_N[5];
-        derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[5];
       }
     } break;
@@ -5720,24 +5721,24 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
         }
         ::sfe_sfuncs::bar_gl_7_sfunc(cs[i1], &f_N[0], &f_deriv[0]);
         sfvals[sfvals.size(1) * q] = f_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = f_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = f_deriv[0];
         sfvals[sfvals.size(1) * q + 1] = f_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[1];
         sfvals[sfvals.size(1) * q + 2] = f_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[2];
         sfvals[sfvals.size(1) * q + 3] = f_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[3];
         sfvals[sfvals.size(1) * q + 4] = f_N[4];
-        derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[4];
         sfvals[sfvals.size(1) * q + 5] = f_N[5];
-        derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[5];
         sfvals[sfvals.size(1) * q + 6] = f_N[6];
-        derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
             f_deriv[6];
       }
     } break;
@@ -5748,19 +5749,19 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
 static inline void sfe2_tabulate_equi(coder::SizeType etype,
                                       const ::coder::array<double, 2U> &cs,
                                       ::coder::array<double, 2U> &sfvals,
-                                      ::coder::array<double, 3U> &derivs)
+                                      ::coder::array<double, 3U> &sdvals)
 {
   //  equi kernel
   if ((etype >> 5 & 7) == 2) {
-    sfe2_tabulate_equi_tri(etype, cs, sfvals, derivs);
+    sfe2_tabulate_equi_tri(etype, cs, sfvals, sdvals);
   } else {
-    coder::SizeType derivs_tmp;
     coder::SizeType nqp;
+    coder::SizeType sdvals_tmp;
     //  triangular
     nqp = cs.size(0) - 1;
-    derivs_tmp = iv[etype - 1];
-    sfvals.set_size(cs.size(0), derivs_tmp);
-    derivs.set_size(cs.size(0), derivs_tmp, cs.size(1));
+    sdvals_tmp = iv[etype - 1];
+    sfvals.set_size(cs.size(0), sdvals_tmp);
+    sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
     switch (etype) {
     case 100: {
       for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -5769,21 +5770,21 @@ static inline void sfe2_tabulate_equi(coder::SizeType etype,
         ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                    &N[0], &deriv[0]);
         sfvals[sfvals.size(1) * q] = N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = deriv[0];
-        derivs[derivs.size(2) * derivs.size(1) * q + 1] = deriv[1];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
         sfvals[sfvals.size(1) * q + 1] = N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = deriv[2];
-        derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[2];
+        sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             deriv[3];
         sfvals[sfvals.size(1) * q + 2] = N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             deriv[4];
-        derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             deriv[5];
         sfvals[sfvals.size(1) * q + 3] = N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             deriv[6];
-        derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             deriv[7];
       }
     } break;
@@ -5794,47 +5795,47 @@ static inline void sfe2_tabulate_equi(coder::SizeType etype,
         ::sfe_sfuncs::quad_9_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                    &b_N[0], &b_deriv[0]);
         sfvals[sfvals.size(1) * q] = b_N[0];
-        derivs[derivs.size(2) * derivs.size(1) * q] = b_deriv[0];
-        derivs[derivs.size(2) * derivs.size(1) * q + 1] = b_deriv[1];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
         sfvals[sfvals.size(1) * q + 1] = b_N[1];
-        derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[2];
-        derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             b_deriv[3];
         sfvals[sfvals.size(1) * q + 2] = b_N[2];
-        derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[4];
-        derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             b_deriv[5];
         sfvals[sfvals.size(1) * q + 3] = b_N[3];
-        derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[6];
-        derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             b_deriv[7];
         sfvals[sfvals.size(1) * q + 4] = b_N[4];
-        derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[8];
-        derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             b_deriv[9];
         sfvals[sfvals.size(1) * q + 5] = b_N[5];
-        derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[10];
-        derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             b_deriv[11];
         sfvals[sfvals.size(1) * q + 6] = b_N[6];
-        derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[12];
-        derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             b_deriv[13];
         sfvals[sfvals.size(1) * q + 7] = b_N[7];
-        derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[14];
-        derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             b_deriv[15];
         sfvals[sfvals.size(1) * q + 8] = b_N[8];
-        derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
             b_deriv[16];
-        derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+        sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
             b_deriv[17];
       }
     } break;
@@ -5846,11 +5847,11 @@ static inline void sfe2_tabulate_equi(coder::SizeType etype,
                                     &c_N[0], &c_deriv[0]);
         for (coder::SizeType i{0}; i < 16; i++) {
           sfvals[i + sfvals.size(1) * q] = c_N[i];
-          derivs_tmp = i << 1;
-          derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-              c_deriv[derivs_tmp];
-          derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                 1] = c_deriv[derivs_tmp + 1];
+          sdvals_tmp = i << 1;
+          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+              c_deriv[sdvals_tmp];
+          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                 1] = c_deriv[sdvals_tmp + 1];
         }
       }
     } break;
@@ -5862,11 +5863,11 @@ static inline void sfe2_tabulate_equi(coder::SizeType etype,
                                     &d_N[0], &d_deriv[0]);
         for (coder::SizeType i{0}; i < 25; i++) {
           sfvals[i + sfvals.size(1) * q] = d_N[i];
-          derivs_tmp = i << 1;
-          derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-              d_deriv[derivs_tmp];
-          derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                 1] = d_deriv[derivs_tmp + 1];
+          sdvals_tmp = i << 1;
+          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+              d_deriv[sdvals_tmp];
+          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                 1] = d_deriv[sdvals_tmp + 1];
         }
       }
     } break;
@@ -5878,11 +5879,11 @@ static inline void sfe2_tabulate_equi(coder::SizeType etype,
                                     &e_N[0], &e_deriv[0]);
         for (coder::SizeType i{0}; i < 36; i++) {
           sfvals[i + sfvals.size(1) * q] = e_N[i];
-          derivs_tmp = i << 1;
-          derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-              e_deriv[derivs_tmp];
-          derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                 1] = e_deriv[derivs_tmp + 1];
+          sdvals_tmp = i << 1;
+          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+              e_deriv[sdvals_tmp];
+          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                 1] = e_deriv[sdvals_tmp + 1];
         }
       }
     } break;
@@ -5894,11 +5895,11 @@ static inline void sfe2_tabulate_equi(coder::SizeType etype,
                                     &f_N[0], &f_deriv[0]);
         for (coder::SizeType i{0}; i < 49; i++) {
           sfvals[i + sfvals.size(1) * q] = f_N[i];
-          derivs_tmp = i << 1;
-          derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-              f_deriv[derivs_tmp];
-          derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                 1] = f_deriv[derivs_tmp + 1];
+          sdvals_tmp = i << 1;
+          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+              f_deriv[sdvals_tmp];
+          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                 1] = f_deriv[sdvals_tmp + 1];
         }
       }
     } break;
@@ -5909,15 +5910,15 @@ static inline void sfe2_tabulate_equi(coder::SizeType etype,
 static void sfe2_tabulate_equi_tri(coder::SizeType etype,
                                    const ::coder::array<double, 2U> &cs,
                                    ::coder::array<double, 2U> &sfvals,
-                                   ::coder::array<double, 3U> &derivs)
+                                   ::coder::array<double, 3U> &sdvals)
 {
-  coder::SizeType derivs_tmp;
   coder::SizeType nqp;
+  coder::SizeType sdvals_tmp;
   //  triangular
   nqp = cs.size(0) - 1;
-  derivs_tmp = iv[etype - 1];
-  sfvals.set_size(cs.size(0), derivs_tmp);
-  derivs.set_size(cs.size(0), derivs_tmp, cs.size(1));
+  sdvals_tmp = iv[etype - 1];
+  sfvals.set_size(cs.size(0), sdvals_tmp);
+  sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
   switch (etype) {
   case 68: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -5926,16 +5927,16 @@ static void sfe2_tabulate_equi_tri(coder::SizeType etype,
       ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                 &N[0], &deriv[0]);
       sfvals[sfvals.size(1) * q] = N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
       sfvals[sfvals.size(1) * q + 1] = N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = deriv[2];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[2];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[3];
       sfvals[sfvals.size(1) * q + 2] = N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[4];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[5];
     }
   } break;
@@ -5946,31 +5947,31 @@ static void sfe2_tabulate_equi_tri(coder::SizeType etype,
       ::sfe_sfuncs::tri_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                 &b_N[0], &b_deriv[0]);
       sfvals[sfvals.size(1) * q] = b_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = b_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = b_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
       sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = b_deriv[2];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[2];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[3];
       sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[4];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[5];
       sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[6];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[7];
       sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[8];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[9];
       sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[10];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[11];
     }
   } break;
@@ -5981,51 +5982,51 @@ static void sfe2_tabulate_equi_tri(coder::SizeType etype,
       ::sfe_sfuncs::tri_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                  &c_N[0], &c_deriv[0]);
       sfvals[sfvals.size(1) * q] = c_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = c_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = c_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
       sfvals[sfvals.size(1) * q + 1] = c_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = c_deriv[2];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = c_deriv[2];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[3];
       sfvals[sfvals.size(1) * q + 2] = c_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[4];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[5];
       sfvals[sfvals.size(1) * q + 3] = c_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[6];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[7];
       sfvals[sfvals.size(1) * q + 4] = c_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[8];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[9];
       sfvals[sfvals.size(1) * q + 5] = c_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[10];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[11];
       sfvals[sfvals.size(1) * q + 6] = c_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[12];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[13];
       sfvals[sfvals.size(1) * q + 7] = c_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[14];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[15];
       sfvals[sfvals.size(1) * q + 8] = c_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[16];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[17];
       sfvals[sfvals.size(1) * q + 9] = c_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[18];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[19];
     }
   } break;
@@ -6037,11 +6038,11 @@ static void sfe2_tabulate_equi_tri(coder::SizeType etype,
                                  &d_N[0], &d_deriv[0]);
       for (coder::SizeType i{0}; i < 15; i++) {
         sfvals[i + sfvals.size(1) * q] = d_N[i];
-        derivs_tmp = i << 1;
-        derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-            d_deriv[derivs_tmp];
-        derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) + 1] =
-            d_deriv[derivs_tmp + 1];
+        sdvals_tmp = i << 1;
+        sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[sdvals_tmp];
+        sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) + 1] =
+            d_deriv[sdvals_tmp + 1];
       }
     }
   } break;
@@ -6053,11 +6054,11 @@ static void sfe2_tabulate_equi_tri(coder::SizeType etype,
                                  &e_N[0], &e_deriv[0]);
       for (coder::SizeType i{0}; i < 21; i++) {
         sfvals[i + sfvals.size(1) * q] = e_N[i];
-        derivs_tmp = i << 1;
-        derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-            e_deriv[derivs_tmp];
-        derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) + 1] =
-            e_deriv[derivs_tmp + 1];
+        sdvals_tmp = i << 1;
+        sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[sdvals_tmp];
+        sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) + 1] =
+            e_deriv[sdvals_tmp + 1];
       }
     }
   } break;
@@ -6069,36 +6070,36 @@ static void sfe2_tabulate_equi_tri(coder::SizeType etype,
                                  &f_N[0], &f_deriv[0]);
       for (coder::SizeType i{0}; i < 28; i++) {
         sfvals[i + sfvals.size(1) * q] = f_N[i];
-        derivs_tmp = i << 1;
-        derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-            f_deriv[derivs_tmp];
-        derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) + 1] =
-            f_deriv[derivs_tmp + 1];
+        sdvals_tmp = i << 1;
+        sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[sdvals_tmp];
+        sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) + 1] =
+            f_deriv[sdvals_tmp + 1];
       }
     }
   } break;
   }
 }
 
-// sfe2_tabulate_shapefuncs - Tabulate shape functions and derivs at qpoints
+// sfe2_tabulate_shapefuncs - Tabulate shape functions and sdvals at qpoints
 static inline void sfe2_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
-    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &derivs)
+    ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals)
 {
   switch (etype & 3) {
   case 0:
-    sfe2_tabulate_equi(etype, cs, sfvals, derivs);
+    sfe2_tabulate_equi(etype, cs, sfvals, sdvals);
     break;
   case 1: {
     //  GL kernel
     if ((etype >> 5 & 7) == 2) {
-      coder::SizeType derivs_tmp;
       coder::SizeType nqp;
+      coder::SizeType sdvals_tmp;
       //  triangular
       nqp = cs.size(0) - 1;
-      derivs_tmp = iv[etype - 1];
-      sfvals.set_size(cs.size(0), derivs_tmp);
-      derivs.set_size(cs.size(0), derivs_tmp, cs.size(1));
+      sdvals_tmp = iv[etype - 1];
+      sfvals.set_size(cs.size(0), sdvals_tmp);
+      sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
       switch (etype) {
       case 77: {
         for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -6107,52 +6108,52 @@ static inline void sfe2_tabulate_shapefuncs(
           ::sfe_sfuncs::tri_gl_10_sfunc(
               cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &h_N[0], &h_deriv[0]);
           sfvals[sfvals.size(1) * q] = h_N[0];
-          derivs[derivs.size(2) * derivs.size(1) * q] = h_deriv[0];
-          derivs[derivs.size(2) * derivs.size(1) * q + 1] = h_deriv[1];
+          sdvals[sdvals.size(2) * sdvals.size(1) * q] = h_deriv[0];
+          sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = h_deriv[1];
           sfvals[sfvals.size(1) * q + 1] = h_N[1];
-          derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[2];
-          derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+          sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
               h_deriv[3];
           sfvals[sfvals.size(1) * q + 2] = h_N[2];
-          derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[4];
-          derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) +
+          sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) +
                  1] = h_deriv[5];
           sfvals[sfvals.size(1) * q + 3] = h_N[3];
-          derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[6];
-          derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) +
+          sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) +
                  1] = h_deriv[7];
           sfvals[sfvals.size(1) * q + 4] = h_N[4];
-          derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[8];
-          derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) +
+          sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) +
                  1] = h_deriv[9];
           sfvals[sfvals.size(1) * q + 5] = h_N[5];
-          derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[10];
-          derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) +
+          sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) +
                  1] = h_deriv[11];
           sfvals[sfvals.size(1) * q + 6] = h_N[6];
-          derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[12];
-          derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) +
+          sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) +
                  1] = h_deriv[13];
           sfvals[sfvals.size(1) * q + 7] = h_N[7];
-          derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[14];
-          derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) +
+          sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) +
                  1] = h_deriv[15];
           sfvals[sfvals.size(1) * q + 8] = h_N[8];
-          derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[16];
-          derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) +
+          sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) +
                  1] = h_deriv[17];
           sfvals[sfvals.size(1) * q + 9] = h_N[9];
-          derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+          sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
               h_deriv[18];
-          derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) +
+          sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) +
                  1] = h_deriv[19];
         }
       } break;
@@ -6164,11 +6165,11 @@ static inline void sfe2_tabulate_shapefuncs(
               cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &N[0], &deriv[0]);
           for (coder::SizeType i{0}; i < 15; i++) {
             sfvals[i + sfvals.size(1) * q] = N[i];
-            derivs_tmp = i << 1;
-            derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-                deriv[derivs_tmp];
-            derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                   1] = deriv[derivs_tmp + 1];
+            sdvals_tmp = i << 1;
+            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+                deriv[sdvals_tmp];
+            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                   1] = deriv[sdvals_tmp + 1];
           }
         }
       } break;
@@ -6180,11 +6181,11 @@ static inline void sfe2_tabulate_shapefuncs(
               cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &b_N[0], &b_deriv[0]);
           for (coder::SizeType i{0}; i < 21; i++) {
             sfvals[i + sfvals.size(1) * q] = b_N[i];
-            derivs_tmp = i << 1;
-            derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-                b_deriv[derivs_tmp];
-            derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                   1] = b_deriv[derivs_tmp + 1];
+            sdvals_tmp = i << 1;
+            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+                b_deriv[sdvals_tmp];
+            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                   1] = b_deriv[sdvals_tmp + 1];
           }
         }
       } break;
@@ -6192,13 +6193,13 @@ static inline void sfe2_tabulate_shapefuncs(
         break;
       }
     } else {
-      coder::SizeType derivs_tmp;
       coder::SizeType nqp;
+      coder::SizeType sdvals_tmp;
       //  quad
       nqp = cs.size(0) - 1;
-      derivs_tmp = iv[etype - 1];
-      sfvals.set_size(cs.size(0), derivs_tmp);
-      derivs.set_size(cs.size(0), derivs_tmp, cs.size(1));
+      sdvals_tmp = iv[etype - 1];
+      sfvals.set_size(cs.size(0), sdvals_tmp);
+      sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
       switch (etype) {
       case 109: {
         for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -6208,11 +6209,11 @@ static inline void sfe2_tabulate_shapefuncs(
               cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &d_N[0], &d_deriv[0]);
           for (coder::SizeType i{0}; i < 16; i++) {
             sfvals[i + sfvals.size(1) * q] = d_N[i];
-            derivs_tmp = i << 1;
-            derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-                d_deriv[derivs_tmp];
-            derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                   1] = d_deriv[derivs_tmp + 1];
+            sdvals_tmp = i << 1;
+            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+                d_deriv[sdvals_tmp];
+            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                   1] = d_deriv[sdvals_tmp + 1];
           }
         }
       } break;
@@ -6224,11 +6225,11 @@ static inline void sfe2_tabulate_shapefuncs(
               cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &e_N[0], &e_deriv[0]);
           for (coder::SizeType i{0}; i < 25; i++) {
             sfvals[i + sfvals.size(1) * q] = e_N[i];
-            derivs_tmp = i << 1;
-            derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-                e_deriv[derivs_tmp];
-            derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                   1] = e_deriv[derivs_tmp + 1];
+            sdvals_tmp = i << 1;
+            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+                e_deriv[sdvals_tmp];
+            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                   1] = e_deriv[sdvals_tmp + 1];
           }
         }
       } break;
@@ -6240,11 +6241,11 @@ static inline void sfe2_tabulate_shapefuncs(
               cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &f_N[0], &f_deriv[0]);
           for (coder::SizeType i{0}; i < 36; i++) {
             sfvals[i + sfvals.size(1) * q] = f_N[i];
-            derivs_tmp = i << 1;
-            derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-                f_deriv[derivs_tmp];
-            derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                   1] = f_deriv[derivs_tmp + 1];
+            sdvals_tmp = i << 1;
+            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+                f_deriv[sdvals_tmp];
+            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                   1] = f_deriv[sdvals_tmp + 1];
           }
         }
       } break;
@@ -6256,11 +6257,11 @@ static inline void sfe2_tabulate_shapefuncs(
               cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &g_N[0], &g_deriv[0]);
           for (coder::SizeType i{0}; i < 49; i++) {
             sfvals[i + sfvals.size(1) * q] = g_N[i];
-            derivs_tmp = i << 1;
-            derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-                g_deriv[derivs_tmp];
-            derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                   1] = g_deriv[derivs_tmp + 1];
+            sdvals_tmp = i << 1;
+            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+                g_deriv[sdvals_tmp];
+            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                   1] = g_deriv[sdvals_tmp + 1];
           }
         }
       } break;
@@ -6268,13 +6269,13 @@ static inline void sfe2_tabulate_shapefuncs(
     }
   } break;
   default: {
-    coder::SizeType derivs_tmp;
     coder::SizeType nqp;
+    coder::SizeType sdvals_tmp;
     //  FEK kernel
     nqp = cs.size(0) - 1;
-    derivs_tmp = iv[etype - 1];
-    sfvals.set_size(cs.size(0), derivs_tmp);
-    derivs.set_size(cs.size(0), derivs_tmp, cs.size(1));
+    sdvals_tmp = iv[etype - 1];
+    sfvals.set_size(cs.size(0), sdvals_tmp);
+    sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
     switch (etype) {
     case 82: {
       for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -6284,11 +6285,11 @@ static inline void sfe2_tabulate_shapefuncs(
             cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &N[0], &deriv[0]);
         for (coder::SizeType i{0}; i < 15; i++) {
           sfvals[i + sfvals.size(1) * q] = N[i];
-          derivs_tmp = i << 1;
-          derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-              deriv[derivs_tmp];
-          derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                 1] = deriv[derivs_tmp + 1];
+          sdvals_tmp = i << 1;
+          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+              deriv[sdvals_tmp];
+          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                 1] = deriv[sdvals_tmp + 1];
         }
       }
     } break;
@@ -6300,11 +6301,11 @@ static inline void sfe2_tabulate_shapefuncs(
             cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &b_N[0], &b_deriv[0]);
         for (coder::SizeType i{0}; i < 21; i++) {
           sfvals[i + sfvals.size(1) * q] = b_N[i];
-          derivs_tmp = i << 1;
-          derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-              b_deriv[derivs_tmp];
-          derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                 1] = b_deriv[derivs_tmp + 1];
+          sdvals_tmp = i << 1;
+          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+              b_deriv[sdvals_tmp];
+          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                 1] = b_deriv[sdvals_tmp + 1];
         }
       }
     } break;
@@ -6316,11 +6317,11 @@ static inline void sfe2_tabulate_shapefuncs(
             cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &c_N[0], &c_deriv[0]);
         for (coder::SizeType i{0}; i < 28; i++) {
           sfvals[i + sfvals.size(1) * q] = c_N[i];
-          derivs_tmp = i << 1;
-          derivs[derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q] =
-              c_deriv[derivs_tmp];
-          derivs[(derivs.size(2) * i + derivs.size(2) * derivs.size(1) * q) +
-                 1] = c_deriv[derivs_tmp + 1];
+          sdvals_tmp = i << 1;
+          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
+              c_deriv[sdvals_tmp];
+          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
+                 1] = c_deriv[sdvals_tmp + 1];
         }
       }
     } break;
@@ -6332,7 +6333,7 @@ static inline void sfe2_tabulate_shapefuncs(
 static void sfe3_tabulate_equi_prism(coder::SizeType etype,
                                      const ::coder::array<double, 2U> &cs,
                                      ::coder::array<double, 2U> &sfvals,
-                                     ::coder::array<double, 3U> &derivs)
+                                     ::coder::array<double, 3U> &sdvals)
 {
   coder::SizeType i;
   coder::SizeType nqp;
@@ -6340,7 +6341,7 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
   sfvals.set_size(cs.size(0), i);
-  derivs.set_size(cs.size(0), i, cs.size(1));
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   switch (etype) {
   case 196: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -6349,42 +6350,42 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
       ::sfe_sfuncs::prism_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                   cs[cs.size(1) * q + 2], &b_N[0], &b_deriv[0]);
       sfvals[sfvals.size(1) * q] = b_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = b_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = b_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = b_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = b_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[17];
     }
   } break;
@@ -6396,126 +6397,126 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
                                    cs[cs.size(1) * q + 2], &c_N[0],
                                    &c_deriv[0]);
       sfvals[sfvals.size(1) * q] = c_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = c_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = c_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = c_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = c_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = c_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = c_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = c_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = c_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = c_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = c_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = c_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[17];
       sfvals[sfvals.size(1) * q + 6] = c_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[20];
       sfvals[sfvals.size(1) * q + 7] = c_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[23];
       sfvals[sfvals.size(1) * q + 8] = c_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[26];
       sfvals[sfvals.size(1) * q + 9] = c_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[29];
       sfvals[sfvals.size(1) * q + 10] = c_N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[32];
       sfvals[sfvals.size(1) * q + 11] = c_N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[35];
       sfvals[sfvals.size(1) * q + 12] = c_N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[38];
       sfvals[sfvals.size(1) * q + 13] = c_N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[41];
       sfvals[sfvals.size(1) * q + 14] = c_N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[44];
       sfvals[sfvals.size(1) * q + 15] = c_N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[47];
       sfvals[sfvals.size(1) * q + 16] = c_N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[50];
       sfvals[sfvals.size(1) * q + 17] = c_N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[53];
     }
   } break;
@@ -6527,280 +6528,280 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
                                    cs[cs.size(1) * q + 2], &d_N[0],
                                    &d_deriv[0]);
       sfvals[sfvals.size(1) * q] = d_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = d_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = d_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = d_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = d_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = d_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = d_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = d_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = d_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = d_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = d_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = d_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = d_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[17];
       sfvals[sfvals.size(1) * q + 6] = d_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[20];
       sfvals[sfvals.size(1) * q + 7] = d_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[23];
       sfvals[sfvals.size(1) * q + 8] = d_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[26];
       sfvals[sfvals.size(1) * q + 9] = d_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[29];
       sfvals[sfvals.size(1) * q + 10] = d_N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[32];
       sfvals[sfvals.size(1) * q + 11] = d_N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[35];
       sfvals[sfvals.size(1) * q + 12] = d_N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[38];
       sfvals[sfvals.size(1) * q + 13] = d_N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[41];
       sfvals[sfvals.size(1) * q + 14] = d_N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[44];
       sfvals[sfvals.size(1) * q + 15] = d_N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[47];
       sfvals[sfvals.size(1) * q + 16] = d_N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[50];
       sfvals[sfvals.size(1) * q + 17] = d_N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[53];
       sfvals[sfvals.size(1) * q + 18] = d_N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[56];
       sfvals[sfvals.size(1) * q + 19] = d_N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[59];
       sfvals[sfvals.size(1) * q + 20] = d_N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[62];
       sfvals[sfvals.size(1) * q + 21] = d_N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[65];
       sfvals[sfvals.size(1) * q + 22] = d_N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[68];
       sfvals[sfvals.size(1) * q + 23] = d_N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[71];
       sfvals[sfvals.size(1) * q + 24] = d_N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[74];
       sfvals[sfvals.size(1) * q + 25] = d_N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[77];
       sfvals[sfvals.size(1) * q + 26] = d_N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[80];
       sfvals[sfvals.size(1) * q + 27] = d_N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[83];
       sfvals[sfvals.size(1) * q + 28] = d_N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[86];
       sfvals[sfvals.size(1) * q + 29] = d_N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[89];
       sfvals[sfvals.size(1) * q + 30] = d_N[30];
-      derivs[derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[90];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[91];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[92];
       sfvals[sfvals.size(1) * q + 31] = d_N[31];
-      derivs[derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[93];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[94];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[95];
       sfvals[sfvals.size(1) * q + 32] = d_N[32];
-      derivs[derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[96];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[97];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[98];
       sfvals[sfvals.size(1) * q + 33] = d_N[33];
-      derivs[derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[99];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[100];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[101];
       sfvals[sfvals.size(1) * q + 34] = d_N[34];
-      derivs[derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[102];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[103];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[104];
       sfvals[sfvals.size(1) * q + 35] = d_N[35];
-      derivs[derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[105];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[106];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[107];
       sfvals[sfvals.size(1) * q + 36] = d_N[36];
-      derivs[derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[108];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[109];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[110];
       sfvals[sfvals.size(1) * q + 37] = d_N[37];
-      derivs[derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[111];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[112];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[113];
       sfvals[sfvals.size(1) * q + 38] = d_N[38];
-      derivs[derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[114];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[115];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[116];
       sfvals[sfvals.size(1) * q + 39] = d_N[39];
-      derivs[derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[117];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[118];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[119];
     }
   } break;
@@ -6812,525 +6813,525 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
                                    cs[cs.size(1) * q + 2], &e_N[0],
                                    &e_deriv[0]);
       sfvals[sfvals.size(1) * q] = e_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = e_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = e_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = e_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = e_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = e_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = e_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = e_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = e_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = e_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = e_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = e_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = e_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = e_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[17];
       sfvals[sfvals.size(1) * q + 6] = e_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[20];
       sfvals[sfvals.size(1) * q + 7] = e_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[23];
       sfvals[sfvals.size(1) * q + 8] = e_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[26];
       sfvals[sfvals.size(1) * q + 9] = e_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[29];
       sfvals[sfvals.size(1) * q + 10] = e_N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[32];
       sfvals[sfvals.size(1) * q + 11] = e_N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[35];
       sfvals[sfvals.size(1) * q + 12] = e_N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[38];
       sfvals[sfvals.size(1) * q + 13] = e_N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[41];
       sfvals[sfvals.size(1) * q + 14] = e_N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[44];
       sfvals[sfvals.size(1) * q + 15] = e_N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[47];
       sfvals[sfvals.size(1) * q + 16] = e_N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[50];
       sfvals[sfvals.size(1) * q + 17] = e_N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[53];
       sfvals[sfvals.size(1) * q + 18] = e_N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[56];
       sfvals[sfvals.size(1) * q + 19] = e_N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[59];
       sfvals[sfvals.size(1) * q + 20] = e_N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[62];
       sfvals[sfvals.size(1) * q + 21] = e_N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[65];
       sfvals[sfvals.size(1) * q + 22] = e_N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[68];
       sfvals[sfvals.size(1) * q + 23] = e_N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[71];
       sfvals[sfvals.size(1) * q + 24] = e_N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[74];
       sfvals[sfvals.size(1) * q + 25] = e_N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[77];
       sfvals[sfvals.size(1) * q + 26] = e_N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[80];
       sfvals[sfvals.size(1) * q + 27] = e_N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[83];
       sfvals[sfvals.size(1) * q + 28] = e_N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[86];
       sfvals[sfvals.size(1) * q + 29] = e_N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[89];
       sfvals[sfvals.size(1) * q + 30] = e_N[30];
-      derivs[derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[90];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[91];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[92];
       sfvals[sfvals.size(1) * q + 31] = e_N[31];
-      derivs[derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[93];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[94];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[95];
       sfvals[sfvals.size(1) * q + 32] = e_N[32];
-      derivs[derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[96];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[97];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[98];
       sfvals[sfvals.size(1) * q + 33] = e_N[33];
-      derivs[derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[99];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[100];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[101];
       sfvals[sfvals.size(1) * q + 34] = e_N[34];
-      derivs[derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[102];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[103];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[104];
       sfvals[sfvals.size(1) * q + 35] = e_N[35];
-      derivs[derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[105];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[106];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[107];
       sfvals[sfvals.size(1) * q + 36] = e_N[36];
-      derivs[derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[108];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[109];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[110];
       sfvals[sfvals.size(1) * q + 37] = e_N[37];
-      derivs[derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[111];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[112];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[113];
       sfvals[sfvals.size(1) * q + 38] = e_N[38];
-      derivs[derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[114];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[115];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[116];
       sfvals[sfvals.size(1) * q + 39] = e_N[39];
-      derivs[derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[117];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[118];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[119];
       sfvals[sfvals.size(1) * q + 40] = e_N[40];
-      derivs[derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[120];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[121];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[122];
       sfvals[sfvals.size(1) * q + 41] = e_N[41];
-      derivs[derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[123];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[124];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[125];
       sfvals[sfvals.size(1) * q + 42] = e_N[42];
-      derivs[derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[126];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[127];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[128];
       sfvals[sfvals.size(1) * q + 43] = e_N[43];
-      derivs[derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[129];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[130];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[131];
       sfvals[sfvals.size(1) * q + 44] = e_N[44];
-      derivs[derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[132];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[133];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[134];
       sfvals[sfvals.size(1) * q + 45] = e_N[45];
-      derivs[derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[135];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[136];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[137];
       sfvals[sfvals.size(1) * q + 46] = e_N[46];
-      derivs[derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[138];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[139];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[140];
       sfvals[sfvals.size(1) * q + 47] = e_N[47];
-      derivs[derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[141];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[142];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[143];
       sfvals[sfvals.size(1) * q + 48] = e_N[48];
-      derivs[derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[144];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[145];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[146];
       sfvals[sfvals.size(1) * q + 49] = e_N[49];
-      derivs[derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[147];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[148];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[149];
       sfvals[sfvals.size(1) * q + 50] = e_N[50];
-      derivs[derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[150];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[151];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[152];
       sfvals[sfvals.size(1) * q + 51] = e_N[51];
-      derivs[derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[153];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[154];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[155];
       sfvals[sfvals.size(1) * q + 52] = e_N[52];
-      derivs[derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[156];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[157];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[158];
       sfvals[sfvals.size(1) * q + 53] = e_N[53];
-      derivs[derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[159];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[160];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[161];
       sfvals[sfvals.size(1) * q + 54] = e_N[54];
-      derivs[derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[162];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[163];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[164];
       sfvals[sfvals.size(1) * q + 55] = e_N[55];
-      derivs[derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[165];
-      derivs[(derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[166];
-      derivs[(derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[167];
       sfvals[sfvals.size(1) * q + 56] = e_N[56];
-      derivs[derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[168];
-      derivs[(derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[169];
-      derivs[(derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[170];
       sfvals[sfvals.size(1) * q + 57] = e_N[57];
-      derivs[derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[171];
-      derivs[(derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[172];
-      derivs[(derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[173];
       sfvals[sfvals.size(1) * q + 58] = e_N[58];
-      derivs[derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[174];
-      derivs[(derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[175];
-      derivs[(derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[176];
       sfvals[sfvals.size(1) * q + 59] = e_N[59];
-      derivs[derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[177];
-      derivs[(derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[178];
-      derivs[(derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[179];
       sfvals[sfvals.size(1) * q + 60] = e_N[60];
-      derivs[derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[180];
-      derivs[(derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[181];
-      derivs[(derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[182];
       sfvals[sfvals.size(1) * q + 61] = e_N[61];
-      derivs[derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[183];
-      derivs[(derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[184];
-      derivs[(derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[185];
       sfvals[sfvals.size(1) * q + 62] = e_N[62];
-      derivs[derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[186];
-      derivs[(derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[187];
-      derivs[(derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[188];
       sfvals[sfvals.size(1) * q + 63] = e_N[63];
-      derivs[derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[189];
-      derivs[(derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[190];
-      derivs[(derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[191];
       sfvals[sfvals.size(1) * q + 64] = e_N[64];
-      derivs[derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[192];
-      derivs[(derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[193];
-      derivs[(derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[194];
       sfvals[sfvals.size(1) * q + 65] = e_N[65];
-      derivs[derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[195];
-      derivs[(derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[196];
-      derivs[(derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[197];
       sfvals[sfvals.size(1) * q + 66] = e_N[66];
-      derivs[derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[198];
-      derivs[(derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[199];
-      derivs[(derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[200];
       sfvals[sfvals.size(1) * q + 67] = e_N[67];
-      derivs[derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[201];
-      derivs[(derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[202];
-      derivs[(derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[203];
       sfvals[sfvals.size(1) * q + 68] = e_N[68];
-      derivs[derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[204];
-      derivs[(derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[205];
-      derivs[(derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[206];
       sfvals[sfvals.size(1) * q + 69] = e_N[69];
-      derivs[derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[207];
-      derivs[(derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[208];
-      derivs[(derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[209];
       sfvals[sfvals.size(1) * q + 70] = e_N[70];
-      derivs[derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[210];
-      derivs[(derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[211];
-      derivs[(derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[212];
       sfvals[sfvals.size(1) * q + 71] = e_N[71];
-      derivs[derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[213];
-      derivs[(derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[214];
-      derivs[(derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[215];
       sfvals[sfvals.size(1) * q + 72] = e_N[72];
-      derivs[derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[216];
-      derivs[(derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[217];
-      derivs[(derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[218];
       sfvals[sfvals.size(1) * q + 73] = e_N[73];
-      derivs[derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[219];
-      derivs[(derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[220];
-      derivs[(derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[221];
       sfvals[sfvals.size(1) * q + 74] = e_N[74];
-      derivs[derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q] =
           e_deriv[222];
-      derivs[(derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           e_deriv[223];
-      derivs[(derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           e_deriv[224];
     }
   } break;
@@ -7341,882 +7342,882 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
       ::sfe_sfuncs::prism_126_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                     cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
       sfvals[sfvals.size(1) * q] = N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
       sfvals[sfvals.size(1) * q + 1] = N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[5];
       sfvals[sfvals.size(1) * q + 2] = N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[8];
       sfvals[sfvals.size(1) * q + 3] = N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[11];
       sfvals[sfvals.size(1) * q + 4] = N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[14];
       sfvals[sfvals.size(1) * q + 5] = N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[17];
       sfvals[sfvals.size(1) * q + 6] = N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[20];
       sfvals[sfvals.size(1) * q + 7] = N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[23];
       sfvals[sfvals.size(1) * q + 8] = N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[26];
       sfvals[sfvals.size(1) * q + 9] = N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[29];
       sfvals[sfvals.size(1) * q + 10] = N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[32];
       sfvals[sfvals.size(1) * q + 11] = N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[35];
       sfvals[sfvals.size(1) * q + 12] = N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[38];
       sfvals[sfvals.size(1) * q + 13] = N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[41];
       sfvals[sfvals.size(1) * q + 14] = N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[44];
       sfvals[sfvals.size(1) * q + 15] = N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[47];
       sfvals[sfvals.size(1) * q + 16] = N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[50];
       sfvals[sfvals.size(1) * q + 17] = N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[53];
       sfvals[sfvals.size(1) * q + 18] = N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[56];
       sfvals[sfvals.size(1) * q + 19] = N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[59];
       sfvals[sfvals.size(1) * q + 20] = N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[62];
       sfvals[sfvals.size(1) * q + 21] = N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[65];
       sfvals[sfvals.size(1) * q + 22] = N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[68];
       sfvals[sfvals.size(1) * q + 23] = N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[71];
       sfvals[sfvals.size(1) * q + 24] = N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[74];
       sfvals[sfvals.size(1) * q + 25] = N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[77];
       sfvals[sfvals.size(1) * q + 26] = N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[80];
       sfvals[sfvals.size(1) * q + 27] = N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[83];
       sfvals[sfvals.size(1) * q + 28] = N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[86];
       sfvals[sfvals.size(1) * q + 29] = N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[89];
       sfvals[sfvals.size(1) * q + 30] = N[30];
-      derivs[derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[90];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[91];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[92];
       sfvals[sfvals.size(1) * q + 31] = N[31];
-      derivs[derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[93];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[94];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[95];
       sfvals[sfvals.size(1) * q + 32] = N[32];
-      derivs[derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[96];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[97];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[98];
       sfvals[sfvals.size(1) * q + 33] = N[33];
-      derivs[derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[99];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[100];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[101];
       sfvals[sfvals.size(1) * q + 34] = N[34];
-      derivs[derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[102];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[103];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[104];
       sfvals[sfvals.size(1) * q + 35] = N[35];
-      derivs[derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[105];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[106];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[107];
       sfvals[sfvals.size(1) * q + 36] = N[36];
-      derivs[derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[108];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[109];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[110];
       sfvals[sfvals.size(1) * q + 37] = N[37];
-      derivs[derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[111];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[112];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[113];
       sfvals[sfvals.size(1) * q + 38] = N[38];
-      derivs[derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[114];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[115];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[116];
       sfvals[sfvals.size(1) * q + 39] = N[39];
-      derivs[derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[117];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[118];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[119];
       sfvals[sfvals.size(1) * q + 40] = N[40];
-      derivs[derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[120];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[121];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[122];
       sfvals[sfvals.size(1) * q + 41] = N[41];
-      derivs[derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[123];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[124];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[125];
       sfvals[sfvals.size(1) * q + 42] = N[42];
-      derivs[derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[126];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[127];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[128];
       sfvals[sfvals.size(1) * q + 43] = N[43];
-      derivs[derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[129];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[130];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[131];
       sfvals[sfvals.size(1) * q + 44] = N[44];
-      derivs[derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[132];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[133];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[134];
       sfvals[sfvals.size(1) * q + 45] = N[45];
-      derivs[derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[135];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[136];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[137];
       sfvals[sfvals.size(1) * q + 46] = N[46];
-      derivs[derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[138];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[139];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[140];
       sfvals[sfvals.size(1) * q + 47] = N[47];
-      derivs[derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[141];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[142];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[143];
       sfvals[sfvals.size(1) * q + 48] = N[48];
-      derivs[derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[144];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[145];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[146];
       sfvals[sfvals.size(1) * q + 49] = N[49];
-      derivs[derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[147];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[148];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[149];
       sfvals[sfvals.size(1) * q + 50] = N[50];
-      derivs[derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[150];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[151];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[152];
       sfvals[sfvals.size(1) * q + 51] = N[51];
-      derivs[derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[153];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[154];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[155];
       sfvals[sfvals.size(1) * q + 52] = N[52];
-      derivs[derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[156];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[157];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[158];
       sfvals[sfvals.size(1) * q + 53] = N[53];
-      derivs[derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[159];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[160];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[161];
       sfvals[sfvals.size(1) * q + 54] = N[54];
-      derivs[derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[162];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[163];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[164];
       sfvals[sfvals.size(1) * q + 55] = N[55];
-      derivs[derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[165];
-      derivs[(derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[166];
-      derivs[(derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[167];
       sfvals[sfvals.size(1) * q + 56] = N[56];
-      derivs[derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[168];
-      derivs[(derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[169];
-      derivs[(derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[170];
       sfvals[sfvals.size(1) * q + 57] = N[57];
-      derivs[derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[171];
-      derivs[(derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[172];
-      derivs[(derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[173];
       sfvals[sfvals.size(1) * q + 58] = N[58];
-      derivs[derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[174];
-      derivs[(derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[175];
-      derivs[(derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[176];
       sfvals[sfvals.size(1) * q + 59] = N[59];
-      derivs[derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[177];
-      derivs[(derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[178];
-      derivs[(derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[179];
       sfvals[sfvals.size(1) * q + 60] = N[60];
-      derivs[derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[180];
-      derivs[(derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[181];
-      derivs[(derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[182];
       sfvals[sfvals.size(1) * q + 61] = N[61];
-      derivs[derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[183];
-      derivs[(derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[184];
-      derivs[(derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[185];
       sfvals[sfvals.size(1) * q + 62] = N[62];
-      derivs[derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[186];
-      derivs[(derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[187];
-      derivs[(derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[188];
       sfvals[sfvals.size(1) * q + 63] = N[63];
-      derivs[derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[189];
-      derivs[(derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[190];
-      derivs[(derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[191];
       sfvals[sfvals.size(1) * q + 64] = N[64];
-      derivs[derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[192];
-      derivs[(derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[193];
-      derivs[(derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[194];
       sfvals[sfvals.size(1) * q + 65] = N[65];
-      derivs[derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[195];
-      derivs[(derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[196];
-      derivs[(derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[197];
       sfvals[sfvals.size(1) * q + 66] = N[66];
-      derivs[derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[198];
-      derivs[(derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[199];
-      derivs[(derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[200];
       sfvals[sfvals.size(1) * q + 67] = N[67];
-      derivs[derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[201];
-      derivs[(derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[202];
-      derivs[(derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[203];
       sfvals[sfvals.size(1) * q + 68] = N[68];
-      derivs[derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[204];
-      derivs[(derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[205];
-      derivs[(derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[206];
       sfvals[sfvals.size(1) * q + 69] = N[69];
-      derivs[derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[207];
-      derivs[(derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[208];
-      derivs[(derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[209];
       sfvals[sfvals.size(1) * q + 70] = N[70];
-      derivs[derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[210];
-      derivs[(derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[211];
-      derivs[(derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[212];
       sfvals[sfvals.size(1) * q + 71] = N[71];
-      derivs[derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[213];
-      derivs[(derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[214];
-      derivs[(derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[215];
       sfvals[sfvals.size(1) * q + 72] = N[72];
-      derivs[derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[216];
-      derivs[(derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[217];
-      derivs[(derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[218];
       sfvals[sfvals.size(1) * q + 73] = N[73];
-      derivs[derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[219];
-      derivs[(derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[220];
-      derivs[(derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[221];
       sfvals[sfvals.size(1) * q + 74] = N[74];
-      derivs[derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[222];
-      derivs[(derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[223];
-      derivs[(derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[224];
       sfvals[sfvals.size(1) * q + 75] = N[75];
-      derivs[derivs.size(2) * 75 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[225];
-      derivs[(derivs.size(2) * 75 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[226];
-      derivs[(derivs.size(2) * 75 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[227];
       sfvals[sfvals.size(1) * q + 76] = N[76];
-      derivs[derivs.size(2) * 76 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[228];
-      derivs[(derivs.size(2) * 76 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[229];
-      derivs[(derivs.size(2) * 76 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[230];
       sfvals[sfvals.size(1) * q + 77] = N[77];
-      derivs[derivs.size(2) * 77 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[231];
-      derivs[(derivs.size(2) * 77 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[232];
-      derivs[(derivs.size(2) * 77 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[233];
       sfvals[sfvals.size(1) * q + 78] = N[78];
-      derivs[derivs.size(2) * 78 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[234];
-      derivs[(derivs.size(2) * 78 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[235];
-      derivs[(derivs.size(2) * 78 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[236];
       sfvals[sfvals.size(1) * q + 79] = N[79];
-      derivs[derivs.size(2) * 79 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[237];
-      derivs[(derivs.size(2) * 79 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[238];
-      derivs[(derivs.size(2) * 79 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[239];
       sfvals[sfvals.size(1) * q + 80] = N[80];
-      derivs[derivs.size(2) * 80 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[240];
-      derivs[(derivs.size(2) * 80 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[241];
-      derivs[(derivs.size(2) * 80 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[242];
       sfvals[sfvals.size(1) * q + 81] = N[81];
-      derivs[derivs.size(2) * 81 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[243];
-      derivs[(derivs.size(2) * 81 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[244];
-      derivs[(derivs.size(2) * 81 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[245];
       sfvals[sfvals.size(1) * q + 82] = N[82];
-      derivs[derivs.size(2) * 82 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[246];
-      derivs[(derivs.size(2) * 82 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[247];
-      derivs[(derivs.size(2) * 82 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[248];
       sfvals[sfvals.size(1) * q + 83] = N[83];
-      derivs[derivs.size(2) * 83 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[249];
-      derivs[(derivs.size(2) * 83 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[250];
-      derivs[(derivs.size(2) * 83 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[251];
       sfvals[sfvals.size(1) * q + 84] = N[84];
-      derivs[derivs.size(2) * 84 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[252];
-      derivs[(derivs.size(2) * 84 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[253];
-      derivs[(derivs.size(2) * 84 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[254];
       sfvals[sfvals.size(1) * q + 85] = N[85];
-      derivs[derivs.size(2) * 85 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[255];
-      derivs[(derivs.size(2) * 85 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[256];
-      derivs[(derivs.size(2) * 85 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[257];
       sfvals[sfvals.size(1) * q + 86] = N[86];
-      derivs[derivs.size(2) * 86 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[258];
-      derivs[(derivs.size(2) * 86 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[259];
-      derivs[(derivs.size(2) * 86 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[260];
       sfvals[sfvals.size(1) * q + 87] = N[87];
-      derivs[derivs.size(2) * 87 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[261];
-      derivs[(derivs.size(2) * 87 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[262];
-      derivs[(derivs.size(2) * 87 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[263];
       sfvals[sfvals.size(1) * q + 88] = N[88];
-      derivs[derivs.size(2) * 88 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[264];
-      derivs[(derivs.size(2) * 88 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[265];
-      derivs[(derivs.size(2) * 88 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[266];
       sfvals[sfvals.size(1) * q + 89] = N[89];
-      derivs[derivs.size(2) * 89 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[267];
-      derivs[(derivs.size(2) * 89 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[268];
-      derivs[(derivs.size(2) * 89 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[269];
       sfvals[sfvals.size(1) * q + 90] = N[90];
-      derivs[derivs.size(2) * 90 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[270];
-      derivs[(derivs.size(2) * 90 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[271];
-      derivs[(derivs.size(2) * 90 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[272];
       sfvals[sfvals.size(1) * q + 91] = N[91];
-      derivs[derivs.size(2) * 91 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[273];
-      derivs[(derivs.size(2) * 91 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[274];
-      derivs[(derivs.size(2) * 91 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[275];
       sfvals[sfvals.size(1) * q + 92] = N[92];
-      derivs[derivs.size(2) * 92 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[276];
-      derivs[(derivs.size(2) * 92 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[277];
-      derivs[(derivs.size(2) * 92 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[278];
       sfvals[sfvals.size(1) * q + 93] = N[93];
-      derivs[derivs.size(2) * 93 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[279];
-      derivs[(derivs.size(2) * 93 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[280];
-      derivs[(derivs.size(2) * 93 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[281];
       sfvals[sfvals.size(1) * q + 94] = N[94];
-      derivs[derivs.size(2) * 94 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[282];
-      derivs[(derivs.size(2) * 94 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[283];
-      derivs[(derivs.size(2) * 94 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[284];
       sfvals[sfvals.size(1) * q + 95] = N[95];
-      derivs[derivs.size(2) * 95 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[285];
-      derivs[(derivs.size(2) * 95 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[286];
-      derivs[(derivs.size(2) * 95 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[287];
       sfvals[sfvals.size(1) * q + 96] = N[96];
-      derivs[derivs.size(2) * 96 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[288];
-      derivs[(derivs.size(2) * 96 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[289];
-      derivs[(derivs.size(2) * 96 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[290];
       sfvals[sfvals.size(1) * q + 97] = N[97];
-      derivs[derivs.size(2) * 97 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[291];
-      derivs[(derivs.size(2) * 97 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[292];
-      derivs[(derivs.size(2) * 97 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[293];
       sfvals[sfvals.size(1) * q + 98] = N[98];
-      derivs[derivs.size(2) * 98 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[294];
-      derivs[(derivs.size(2) * 98 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[295];
-      derivs[(derivs.size(2) * 98 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[296];
       sfvals[sfvals.size(1) * q + 99] = N[99];
-      derivs[derivs.size(2) * 99 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[297];
-      derivs[(derivs.size(2) * 99 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[298];
-      derivs[(derivs.size(2) * 99 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[299];
       sfvals[sfvals.size(1) * q + 100] = N[100];
-      derivs[derivs.size(2) * 100 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[300];
-      derivs[(derivs.size(2) * 100 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[301];
-      derivs[(derivs.size(2) * 100 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[302];
       sfvals[sfvals.size(1) * q + 101] = N[101];
-      derivs[derivs.size(2) * 101 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[303];
-      derivs[(derivs.size(2) * 101 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[304];
-      derivs[(derivs.size(2) * 101 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[305];
       sfvals[sfvals.size(1) * q + 102] = N[102];
-      derivs[derivs.size(2) * 102 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[306];
-      derivs[(derivs.size(2) * 102 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[307];
-      derivs[(derivs.size(2) * 102 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[308];
       sfvals[sfvals.size(1) * q + 103] = N[103];
-      derivs[derivs.size(2) * 103 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[309];
-      derivs[(derivs.size(2) * 103 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[310];
-      derivs[(derivs.size(2) * 103 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[311];
       sfvals[sfvals.size(1) * q + 104] = N[104];
-      derivs[derivs.size(2) * 104 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[312];
-      derivs[(derivs.size(2) * 104 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[313];
-      derivs[(derivs.size(2) * 104 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[314];
       sfvals[sfvals.size(1) * q + 105] = N[105];
-      derivs[derivs.size(2) * 105 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[315];
-      derivs[(derivs.size(2) * 105 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[316];
-      derivs[(derivs.size(2) * 105 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[317];
       sfvals[sfvals.size(1) * q + 106] = N[106];
-      derivs[derivs.size(2) * 106 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[318];
-      derivs[(derivs.size(2) * 106 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[319];
-      derivs[(derivs.size(2) * 106 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[320];
       sfvals[sfvals.size(1) * q + 107] = N[107];
-      derivs[derivs.size(2) * 107 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[321];
-      derivs[(derivs.size(2) * 107 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[322];
-      derivs[(derivs.size(2) * 107 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[323];
       sfvals[sfvals.size(1) * q + 108] = N[108];
-      derivs[derivs.size(2) * 108 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[324];
-      derivs[(derivs.size(2) * 108 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[325];
-      derivs[(derivs.size(2) * 108 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[326];
       sfvals[sfvals.size(1) * q + 109] = N[109];
-      derivs[derivs.size(2) * 109 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[327];
-      derivs[(derivs.size(2) * 109 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[328];
-      derivs[(derivs.size(2) * 109 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[329];
       sfvals[sfvals.size(1) * q + 110] = N[110];
-      derivs[derivs.size(2) * 110 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[330];
-      derivs[(derivs.size(2) * 110 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[331];
-      derivs[(derivs.size(2) * 110 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[332];
       sfvals[sfvals.size(1) * q + 111] = N[111];
-      derivs[derivs.size(2) * 111 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[333];
-      derivs[(derivs.size(2) * 111 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[334];
-      derivs[(derivs.size(2) * 111 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[335];
       sfvals[sfvals.size(1) * q + 112] = N[112];
-      derivs[derivs.size(2) * 112 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[336];
-      derivs[(derivs.size(2) * 112 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[337];
-      derivs[(derivs.size(2) * 112 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[338];
       sfvals[sfvals.size(1) * q + 113] = N[113];
-      derivs[derivs.size(2) * 113 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[339];
-      derivs[(derivs.size(2) * 113 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[340];
-      derivs[(derivs.size(2) * 113 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[341];
       sfvals[sfvals.size(1) * q + 114] = N[114];
-      derivs[derivs.size(2) * 114 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[342];
-      derivs[(derivs.size(2) * 114 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[343];
-      derivs[(derivs.size(2) * 114 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[344];
       sfvals[sfvals.size(1) * q + 115] = N[115];
-      derivs[derivs.size(2) * 115 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[345];
-      derivs[(derivs.size(2) * 115 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[346];
-      derivs[(derivs.size(2) * 115 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[347];
       sfvals[sfvals.size(1) * q + 116] = N[116];
-      derivs[derivs.size(2) * 116 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[348];
-      derivs[(derivs.size(2) * 116 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[349];
-      derivs[(derivs.size(2) * 116 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[350];
       sfvals[sfvals.size(1) * q + 117] = N[117];
-      derivs[derivs.size(2) * 117 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[351];
-      derivs[(derivs.size(2) * 117 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[352];
-      derivs[(derivs.size(2) * 117 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[353];
       sfvals[sfvals.size(1) * q + 118] = N[118];
-      derivs[derivs.size(2) * 118 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[354];
-      derivs[(derivs.size(2) * 118 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[355];
-      derivs[(derivs.size(2) * 118 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[356];
       sfvals[sfvals.size(1) * q + 119] = N[119];
-      derivs[derivs.size(2) * 119 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[357];
-      derivs[(derivs.size(2) * 119 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[358];
-      derivs[(derivs.size(2) * 119 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[359];
       sfvals[sfvals.size(1) * q + 120] = N[120];
-      derivs[derivs.size(2) * 120 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[360];
-      derivs[(derivs.size(2) * 120 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[361];
-      derivs[(derivs.size(2) * 120 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[362];
       sfvals[sfvals.size(1) * q + 121] = N[121];
-      derivs[derivs.size(2) * 121 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[363];
-      derivs[(derivs.size(2) * 121 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[364];
-      derivs[(derivs.size(2) * 121 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[365];
       sfvals[sfvals.size(1) * q + 122] = N[122];
-      derivs[derivs.size(2) * 122 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[366];
-      derivs[(derivs.size(2) * 122 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[367];
-      derivs[(derivs.size(2) * 122 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[368];
       sfvals[sfvals.size(1) * q + 123] = N[123];
-      derivs[derivs.size(2) * 123 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[369];
-      derivs[(derivs.size(2) * 123 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[370];
-      derivs[(derivs.size(2) * 123 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[371];
       sfvals[sfvals.size(1) * q + 124] = N[124];
-      derivs[derivs.size(2) * 124 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[372];
-      derivs[(derivs.size(2) * 124 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[373];
-      derivs[(derivs.size(2) * 124 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[374];
       sfvals[sfvals.size(1) * q + 125] = N[125];
-      derivs[derivs.size(2) * 125 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[375];
-      derivs[(derivs.size(2) * 125 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[376];
-      derivs[(derivs.size(2) * 125 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[377];
     }
   } break;
@@ -8226,7 +8227,7 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
 static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
                                     const ::coder::array<double, 2U> &cs,
                                     ::coder::array<double, 2U> &sfvals,
-                                    ::coder::array<double, 3U> &derivs)
+                                    ::coder::array<double, 3U> &sdvals)
 {
   coder::SizeType i;
   coder::SizeType nqp;
@@ -8234,7 +8235,7 @@ static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
   sfvals.set_size(cs.size(0), i);
-  derivs.set_size(cs.size(0), i, cs.size(1));
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   switch (etype) {
   case 164: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -8243,35 +8244,35 @@ static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
       ::sfe_sfuncs::pyra_5_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                  cs[cs.size(1) * q + 2], &b_N[0], &b_deriv[0]);
       sfvals[sfvals.size(1) * q] = b_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = b_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = b_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = b_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = b_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[14];
     }
   } break;
@@ -8282,98 +8283,98 @@ static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
       ::sfe_sfuncs::pyra_14_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                   cs[cs.size(1) * q + 2], &c_N[0], &c_deriv[0]);
       sfvals[sfvals.size(1) * q] = c_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = c_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = c_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = c_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = c_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = c_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = c_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = c_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = c_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = c_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = c_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = c_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[17];
       sfvals[sfvals.size(1) * q + 6] = c_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[20];
       sfvals[sfvals.size(1) * q + 7] = c_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[23];
       sfvals[sfvals.size(1) * q + 8] = c_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[26];
       sfvals[sfvals.size(1) * q + 9] = c_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[29];
       sfvals[sfvals.size(1) * q + 10] = c_N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[32];
       sfvals[sfvals.size(1) * q + 11] = c_N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[35];
       sfvals[sfvals.size(1) * q + 12] = c_N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[38];
       sfvals[sfvals.size(1) * q + 13] = c_N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[41];
     }
   } break;
@@ -8384,210 +8385,210 @@ static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
       ::sfe_sfuncs::pyra_30_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                   cs[cs.size(1) * q + 2], &d_N[0], &d_deriv[0]);
       sfvals[sfvals.size(1) * q] = d_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = d_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = d_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = d_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = d_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = d_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = d_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = d_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = d_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = d_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = d_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = d_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = d_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[17];
       sfvals[sfvals.size(1) * q + 6] = d_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[20];
       sfvals[sfvals.size(1) * q + 7] = d_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[23];
       sfvals[sfvals.size(1) * q + 8] = d_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[26];
       sfvals[sfvals.size(1) * q + 9] = d_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[29];
       sfvals[sfvals.size(1) * q + 10] = d_N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[32];
       sfvals[sfvals.size(1) * q + 11] = d_N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[35];
       sfvals[sfvals.size(1) * q + 12] = d_N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[38];
       sfvals[sfvals.size(1) * q + 13] = d_N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[41];
       sfvals[sfvals.size(1) * q + 14] = d_N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[44];
       sfvals[sfvals.size(1) * q + 15] = d_N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[47];
       sfvals[sfvals.size(1) * q + 16] = d_N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[50];
       sfvals[sfvals.size(1) * q + 17] = d_N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[53];
       sfvals[sfvals.size(1) * q + 18] = d_N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[56];
       sfvals[sfvals.size(1) * q + 19] = d_N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[59];
       sfvals[sfvals.size(1) * q + 20] = d_N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[62];
       sfvals[sfvals.size(1) * q + 21] = d_N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[65];
       sfvals[sfvals.size(1) * q + 22] = d_N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[68];
       sfvals[sfvals.size(1) * q + 23] = d_N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[71];
       sfvals[sfvals.size(1) * q + 24] = d_N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[74];
       sfvals[sfvals.size(1) * q + 25] = d_N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[77];
       sfvals[sfvals.size(1) * q + 26] = d_N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[80];
       sfvals[sfvals.size(1) * q + 27] = d_N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[83];
       sfvals[sfvals.size(1) * q + 28] = d_N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[86];
       sfvals[sfvals.size(1) * q + 29] = d_N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           d_deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           d_deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           d_deriv[89];
     }
   } break;
@@ -8598,385 +8599,385 @@ static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
       ::sfe_sfuncs::pyra_55_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                   cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
       sfvals[sfvals.size(1) * q] = N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
       sfvals[sfvals.size(1) * q + 1] = N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[5];
       sfvals[sfvals.size(1) * q + 2] = N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[8];
       sfvals[sfvals.size(1) * q + 3] = N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[11];
       sfvals[sfvals.size(1) * q + 4] = N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[14];
       sfvals[sfvals.size(1) * q + 5] = N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[17];
       sfvals[sfvals.size(1) * q + 6] = N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[20];
       sfvals[sfvals.size(1) * q + 7] = N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[23];
       sfvals[sfvals.size(1) * q + 8] = N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[26];
       sfvals[sfvals.size(1) * q + 9] = N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[29];
       sfvals[sfvals.size(1) * q + 10] = N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[32];
       sfvals[sfvals.size(1) * q + 11] = N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[35];
       sfvals[sfvals.size(1) * q + 12] = N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[38];
       sfvals[sfvals.size(1) * q + 13] = N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[41];
       sfvals[sfvals.size(1) * q + 14] = N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[44];
       sfvals[sfvals.size(1) * q + 15] = N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[47];
       sfvals[sfvals.size(1) * q + 16] = N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[50];
       sfvals[sfvals.size(1) * q + 17] = N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[53];
       sfvals[sfvals.size(1) * q + 18] = N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[56];
       sfvals[sfvals.size(1) * q + 19] = N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[59];
       sfvals[sfvals.size(1) * q + 20] = N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[62];
       sfvals[sfvals.size(1) * q + 21] = N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[65];
       sfvals[sfvals.size(1) * q + 22] = N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[68];
       sfvals[sfvals.size(1) * q + 23] = N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[71];
       sfvals[sfvals.size(1) * q + 24] = N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[74];
       sfvals[sfvals.size(1) * q + 25] = N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[77];
       sfvals[sfvals.size(1) * q + 26] = N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[80];
       sfvals[sfvals.size(1) * q + 27] = N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[83];
       sfvals[sfvals.size(1) * q + 28] = N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[86];
       sfvals[sfvals.size(1) * q + 29] = N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[89];
       sfvals[sfvals.size(1) * q + 30] = N[30];
-      derivs[derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[90];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[91];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[92];
       sfvals[sfvals.size(1) * q + 31] = N[31];
-      derivs[derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[93];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[94];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[95];
       sfvals[sfvals.size(1) * q + 32] = N[32];
-      derivs[derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[96];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[97];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[98];
       sfvals[sfvals.size(1) * q + 33] = N[33];
-      derivs[derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[99];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[100];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[101];
       sfvals[sfvals.size(1) * q + 34] = N[34];
-      derivs[derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[102];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[103];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[104];
       sfvals[sfvals.size(1) * q + 35] = N[35];
-      derivs[derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[105];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[106];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[107];
       sfvals[sfvals.size(1) * q + 36] = N[36];
-      derivs[derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[108];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[109];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[110];
       sfvals[sfvals.size(1) * q + 37] = N[37];
-      derivs[derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[111];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[112];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[113];
       sfvals[sfvals.size(1) * q + 38] = N[38];
-      derivs[derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[114];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[115];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[116];
       sfvals[sfvals.size(1) * q + 39] = N[39];
-      derivs[derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[117];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[118];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[119];
       sfvals[sfvals.size(1) * q + 40] = N[40];
-      derivs[derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[120];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[121];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[122];
       sfvals[sfvals.size(1) * q + 41] = N[41];
-      derivs[derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[123];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[124];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[125];
       sfvals[sfvals.size(1) * q + 42] = N[42];
-      derivs[derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[126];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[127];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[128];
       sfvals[sfvals.size(1) * q + 43] = N[43];
-      derivs[derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[129];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[130];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[131];
       sfvals[sfvals.size(1) * q + 44] = N[44];
-      derivs[derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[132];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[133];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[134];
       sfvals[sfvals.size(1) * q + 45] = N[45];
-      derivs[derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[135];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[136];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[137];
       sfvals[sfvals.size(1) * q + 46] = N[46];
-      derivs[derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[138];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[139];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[140];
       sfvals[sfvals.size(1) * q + 47] = N[47];
-      derivs[derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[141];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[142];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[143];
       sfvals[sfvals.size(1) * q + 48] = N[48];
-      derivs[derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[144];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[145];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[146];
       sfvals[sfvals.size(1) * q + 49] = N[49];
-      derivs[derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[147];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[148];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[149];
       sfvals[sfvals.size(1) * q + 50] = N[50];
-      derivs[derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[150];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[151];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[152];
       sfvals[sfvals.size(1) * q + 51] = N[51];
-      derivs[derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[153];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[154];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[155];
       sfvals[sfvals.size(1) * q + 52] = N[52];
-      derivs[derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[156];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[157];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[158];
       sfvals[sfvals.size(1) * q + 53] = N[53];
-      derivs[derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[159];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[160];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[161];
       sfvals[sfvals.size(1) * q + 54] = N[54];
-      derivs[derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[162];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[163];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[164];
     }
   } break;
@@ -8986,7 +8987,7 @@ static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
 static void sfe3_tabulate_equi_tet(coder::SizeType etype,
                                    const ::coder::array<double, 2U> &cs,
                                    ::coder::array<double, 2U> &sfvals,
-                                   ::coder::array<double, 3U> &derivs)
+                                   ::coder::array<double, 3U> &sdvals)
 {
   coder::SizeType i;
   coder::SizeType nqp;
@@ -8994,7 +8995,7 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
   sfvals.set_size(cs.size(0), i);
-  derivs.set_size(cs.size(0), i, cs.size(1));
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   switch (etype) {
   case 132: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -9003,28 +9004,28 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
       ::sfe_sfuncs::tet_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                 cs[cs.size(1) * q + 2], &b_N[0], &b_deriv[0]);
       sfvals[sfvals.size(1) * q] = b_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = b_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = b_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = b_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = b_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[11];
     }
   } break;
@@ -9035,70 +9036,70 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
       ::sfe_sfuncs::tet_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                  cs[cs.size(1) * q + 2], &c_N[0], &c_deriv[0]);
       sfvals[sfvals.size(1) * q] = c_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = c_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = c_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = c_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = c_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = c_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = c_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = c_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = c_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = c_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = c_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = c_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[17];
       sfvals[sfvals.size(1) * q + 6] = c_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[20];
       sfvals[sfvals.size(1) * q + 7] = c_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[23];
       sfvals[sfvals.size(1) * q + 8] = c_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[26];
       sfvals[sfvals.size(1) * q + 9] = c_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           c_deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           c_deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           c_deriv[29];
     }
   } break;
@@ -9110,11 +9111,11 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
                                  cs[cs.size(1) * q + 2], &d_N[0], &d_deriv[0]);
       for (coder::SizeType b_i{0}; b_i < 20; b_i++) {
         sfvals[b_i + sfvals.size(1) * q] = d_N[b_i];
-        derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
             d_deriv[3 * b_i];
-        derivs[(derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q) +
+        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
                1] = d_deriv[3 * b_i + 1];
-        derivs[(derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q) +
+        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
                2] = d_deriv[3 * b_i + 2];
       }
     }
@@ -9127,11 +9128,11 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
                                  cs[cs.size(1) * q + 2], &e_N[0], &e_deriv[0]);
       for (coder::SizeType b_i{0}; b_i < 35; b_i++) {
         sfvals[b_i + sfvals.size(1) * q] = e_N[b_i];
-        derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
             e_deriv[3 * b_i];
-        derivs[(derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q) +
+        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
                1] = e_deriv[3 * b_i + 1];
-        derivs[(derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q) +
+        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
                2] = e_deriv[3 * b_i + 2];
       }
     }
@@ -9144,11 +9145,11 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
                                  cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
       for (coder::SizeType b_i{0}; b_i < 56; b_i++) {
         sfvals[b_i + sfvals.size(1) * q] = N[b_i];
-        derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+        sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
             deriv[3 * b_i];
-        derivs[(derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q) +
+        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
                1] = deriv[3 * b_i + 1];
-        derivs[(derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q) +
+        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
                2] = deriv[3 * b_i + 2];
       }
     }
@@ -9159,7 +9160,7 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
 static void sfe3_tabulate_gl_prism(coder::SizeType etype,
                                    const ::coder::array<double, 2U> &cs,
                                    ::coder::array<double, 2U> &sfvals,
-                                   ::coder::array<double, 3U> &derivs)
+                                   ::coder::array<double, 3U> &sdvals)
 {
   coder::SizeType i;
   coder::SizeType nqp;
@@ -9167,7 +9168,7 @@ static void sfe3_tabulate_gl_prism(coder::SizeType etype,
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
   sfvals.set_size(cs.size(0), i);
-  derivs.set_size(cs.size(0), i, cs.size(1));
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   if (etype == 205) {
     for (coder::SizeType q{0}; q <= nqp; q++) {
       double b_deriv[120];
@@ -9176,280 +9177,280 @@ static void sfe3_tabulate_gl_prism(coder::SizeType etype,
           cs[cs.size(1) * q], cs[cs.size(1) * q + 1], cs[cs.size(1) * q + 2],
           &b_N[0], &b_deriv[0]);
       sfvals[sfvals.size(1) * q] = b_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = b_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = b_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = b_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = b_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[17];
       sfvals[sfvals.size(1) * q + 6] = b_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[20];
       sfvals[sfvals.size(1) * q + 7] = b_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[23];
       sfvals[sfvals.size(1) * q + 8] = b_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[26];
       sfvals[sfvals.size(1) * q + 9] = b_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[29];
       sfvals[sfvals.size(1) * q + 10] = b_N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[32];
       sfvals[sfvals.size(1) * q + 11] = b_N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[35];
       sfvals[sfvals.size(1) * q + 12] = b_N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[38];
       sfvals[sfvals.size(1) * q + 13] = b_N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[41];
       sfvals[sfvals.size(1) * q + 14] = b_N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[44];
       sfvals[sfvals.size(1) * q + 15] = b_N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[47];
       sfvals[sfvals.size(1) * q + 16] = b_N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[50];
       sfvals[sfvals.size(1) * q + 17] = b_N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[53];
       sfvals[sfvals.size(1) * q + 18] = b_N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[56];
       sfvals[sfvals.size(1) * q + 19] = b_N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[59];
       sfvals[sfvals.size(1) * q + 20] = b_N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[62];
       sfvals[sfvals.size(1) * q + 21] = b_N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[65];
       sfvals[sfvals.size(1) * q + 22] = b_N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[68];
       sfvals[sfvals.size(1) * q + 23] = b_N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[71];
       sfvals[sfvals.size(1) * q + 24] = b_N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[74];
       sfvals[sfvals.size(1) * q + 25] = b_N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[77];
       sfvals[sfvals.size(1) * q + 26] = b_N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[80];
       sfvals[sfvals.size(1) * q + 27] = b_N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[83];
       sfvals[sfvals.size(1) * q + 28] = b_N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[86];
       sfvals[sfvals.size(1) * q + 29] = b_N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[89];
       sfvals[sfvals.size(1) * q + 30] = b_N[30];
-      derivs[derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[90];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[91];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[92];
       sfvals[sfvals.size(1) * q + 31] = b_N[31];
-      derivs[derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[93];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[94];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[95];
       sfvals[sfvals.size(1) * q + 32] = b_N[32];
-      derivs[derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[96];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[97];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[98];
       sfvals[sfvals.size(1) * q + 33] = b_N[33];
-      derivs[derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[99];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[100];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[101];
       sfvals[sfvals.size(1) * q + 34] = b_N[34];
-      derivs[derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[102];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[103];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[104];
       sfvals[sfvals.size(1) * q + 35] = b_N[35];
-      derivs[derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[105];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[106];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[107];
       sfvals[sfvals.size(1) * q + 36] = b_N[36];
-      derivs[derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[108];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[109];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[110];
       sfvals[sfvals.size(1) * q + 37] = b_N[37];
-      derivs[derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[111];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[112];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[113];
       sfvals[sfvals.size(1) * q + 38] = b_N[38];
-      derivs[derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[114];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[115];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[116];
       sfvals[sfvals.size(1) * q + 39] = b_N[39];
-      derivs[derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[117];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[118];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[119];
     }
   } else {
@@ -9460,525 +9461,525 @@ static void sfe3_tabulate_gl_prism(coder::SizeType etype,
                                       cs[cs.size(1) * q + 1],
                                       cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
       sfvals[sfvals.size(1) * q] = N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
       sfvals[sfvals.size(1) * q + 1] = N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[5];
       sfvals[sfvals.size(1) * q + 2] = N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[8];
       sfvals[sfvals.size(1) * q + 3] = N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[11];
       sfvals[sfvals.size(1) * q + 4] = N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[14];
       sfvals[sfvals.size(1) * q + 5] = N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[17];
       sfvals[sfvals.size(1) * q + 6] = N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[20];
       sfvals[sfvals.size(1) * q + 7] = N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[23];
       sfvals[sfvals.size(1) * q + 8] = N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[26];
       sfvals[sfvals.size(1) * q + 9] = N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[29];
       sfvals[sfvals.size(1) * q + 10] = N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[32];
       sfvals[sfvals.size(1) * q + 11] = N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[35];
       sfvals[sfvals.size(1) * q + 12] = N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[38];
       sfvals[sfvals.size(1) * q + 13] = N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[41];
       sfvals[sfvals.size(1) * q + 14] = N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[44];
       sfvals[sfvals.size(1) * q + 15] = N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[47];
       sfvals[sfvals.size(1) * q + 16] = N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[50];
       sfvals[sfvals.size(1) * q + 17] = N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[53];
       sfvals[sfvals.size(1) * q + 18] = N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[56];
       sfvals[sfvals.size(1) * q + 19] = N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[59];
       sfvals[sfvals.size(1) * q + 20] = N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[62];
       sfvals[sfvals.size(1) * q + 21] = N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[65];
       sfvals[sfvals.size(1) * q + 22] = N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[68];
       sfvals[sfvals.size(1) * q + 23] = N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[71];
       sfvals[sfvals.size(1) * q + 24] = N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[74];
       sfvals[sfvals.size(1) * q + 25] = N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[77];
       sfvals[sfvals.size(1) * q + 26] = N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[80];
       sfvals[sfvals.size(1) * q + 27] = N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[83];
       sfvals[sfvals.size(1) * q + 28] = N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[86];
       sfvals[sfvals.size(1) * q + 29] = N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[89];
       sfvals[sfvals.size(1) * q + 30] = N[30];
-      derivs[derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[90];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[91];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[92];
       sfvals[sfvals.size(1) * q + 31] = N[31];
-      derivs[derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[93];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[94];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[95];
       sfvals[sfvals.size(1) * q + 32] = N[32];
-      derivs[derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[96];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[97];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[98];
       sfvals[sfvals.size(1) * q + 33] = N[33];
-      derivs[derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[99];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[100];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[101];
       sfvals[sfvals.size(1) * q + 34] = N[34];
-      derivs[derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[102];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[103];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[104];
       sfvals[sfvals.size(1) * q + 35] = N[35];
-      derivs[derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[105];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[106];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[107];
       sfvals[sfvals.size(1) * q + 36] = N[36];
-      derivs[derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[108];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[109];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[110];
       sfvals[sfvals.size(1) * q + 37] = N[37];
-      derivs[derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[111];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[112];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[113];
       sfvals[sfvals.size(1) * q + 38] = N[38];
-      derivs[derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[114];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[115];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[116];
       sfvals[sfvals.size(1) * q + 39] = N[39];
-      derivs[derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[117];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[118];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[119];
       sfvals[sfvals.size(1) * q + 40] = N[40];
-      derivs[derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[120];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[121];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[122];
       sfvals[sfvals.size(1) * q + 41] = N[41];
-      derivs[derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[123];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[124];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[125];
       sfvals[sfvals.size(1) * q + 42] = N[42];
-      derivs[derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[126];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[127];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[128];
       sfvals[sfvals.size(1) * q + 43] = N[43];
-      derivs[derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[129];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[130];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[131];
       sfvals[sfvals.size(1) * q + 44] = N[44];
-      derivs[derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[132];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[133];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[134];
       sfvals[sfvals.size(1) * q + 45] = N[45];
-      derivs[derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[135];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[136];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[137];
       sfvals[sfvals.size(1) * q + 46] = N[46];
-      derivs[derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[138];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[139];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[140];
       sfvals[sfvals.size(1) * q + 47] = N[47];
-      derivs[derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[141];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[142];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[143];
       sfvals[sfvals.size(1) * q + 48] = N[48];
-      derivs[derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[144];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[145];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[146];
       sfvals[sfvals.size(1) * q + 49] = N[49];
-      derivs[derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[147];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[148];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[149];
       sfvals[sfvals.size(1) * q + 50] = N[50];
-      derivs[derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[150];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[151];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[152];
       sfvals[sfvals.size(1) * q + 51] = N[51];
-      derivs[derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[153];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[154];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[155];
       sfvals[sfvals.size(1) * q + 52] = N[52];
-      derivs[derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[156];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[157];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[158];
       sfvals[sfvals.size(1) * q + 53] = N[53];
-      derivs[derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[159];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[160];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[161];
       sfvals[sfvals.size(1) * q + 54] = N[54];
-      derivs[derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[162];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[163];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[164];
       sfvals[sfvals.size(1) * q + 55] = N[55];
-      derivs[derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[165];
-      derivs[(derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[166];
-      derivs[(derivs.size(2) * 55 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[167];
       sfvals[sfvals.size(1) * q + 56] = N[56];
-      derivs[derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[168];
-      derivs[(derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[169];
-      derivs[(derivs.size(2) * 56 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[170];
       sfvals[sfvals.size(1) * q + 57] = N[57];
-      derivs[derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[171];
-      derivs[(derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[172];
-      derivs[(derivs.size(2) * 57 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[173];
       sfvals[sfvals.size(1) * q + 58] = N[58];
-      derivs[derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[174];
-      derivs[(derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[175];
-      derivs[(derivs.size(2) * 58 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[176];
       sfvals[sfvals.size(1) * q + 59] = N[59];
-      derivs[derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[177];
-      derivs[(derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[178];
-      derivs[(derivs.size(2) * 59 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[179];
       sfvals[sfvals.size(1) * q + 60] = N[60];
-      derivs[derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[180];
-      derivs[(derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[181];
-      derivs[(derivs.size(2) * 60 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[182];
       sfvals[sfvals.size(1) * q + 61] = N[61];
-      derivs[derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[183];
-      derivs[(derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[184];
-      derivs[(derivs.size(2) * 61 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[185];
       sfvals[sfvals.size(1) * q + 62] = N[62];
-      derivs[derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[186];
-      derivs[(derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[187];
-      derivs[(derivs.size(2) * 62 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[188];
       sfvals[sfvals.size(1) * q + 63] = N[63];
-      derivs[derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[189];
-      derivs[(derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[190];
-      derivs[(derivs.size(2) * 63 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[191];
       sfvals[sfvals.size(1) * q + 64] = N[64];
-      derivs[derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[192];
-      derivs[(derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[193];
-      derivs[(derivs.size(2) * 64 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[194];
       sfvals[sfvals.size(1) * q + 65] = N[65];
-      derivs[derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[195];
-      derivs[(derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[196];
-      derivs[(derivs.size(2) * 65 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[197];
       sfvals[sfvals.size(1) * q + 66] = N[66];
-      derivs[derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[198];
-      derivs[(derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[199];
-      derivs[(derivs.size(2) * 66 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[200];
       sfvals[sfvals.size(1) * q + 67] = N[67];
-      derivs[derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[201];
-      derivs[(derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[202];
-      derivs[(derivs.size(2) * 67 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[203];
       sfvals[sfvals.size(1) * q + 68] = N[68];
-      derivs[derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[204];
-      derivs[(derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[205];
-      derivs[(derivs.size(2) * 68 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[206];
       sfvals[sfvals.size(1) * q + 69] = N[69];
-      derivs[derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[207];
-      derivs[(derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[208];
-      derivs[(derivs.size(2) * 69 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[209];
       sfvals[sfvals.size(1) * q + 70] = N[70];
-      derivs[derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[210];
-      derivs[(derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[211];
-      derivs[(derivs.size(2) * 70 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[212];
       sfvals[sfvals.size(1) * q + 71] = N[71];
-      derivs[derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[213];
-      derivs[(derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[214];
-      derivs[(derivs.size(2) * 71 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[215];
       sfvals[sfvals.size(1) * q + 72] = N[72];
-      derivs[derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[216];
-      derivs[(derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[217];
-      derivs[(derivs.size(2) * 72 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[218];
       sfvals[sfvals.size(1) * q + 73] = N[73];
-      derivs[derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[219];
-      derivs[(derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[220];
-      derivs[(derivs.size(2) * 73 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[221];
       sfvals[sfvals.size(1) * q + 74] = N[74];
-      derivs[derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[222];
-      derivs[(derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[223];
-      derivs[(derivs.size(2) * 74 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[224];
     }
   }
@@ -9987,7 +9988,7 @@ static void sfe3_tabulate_gl_prism(coder::SizeType etype,
 static void sfe3_tabulate_gl_pyra(coder::SizeType etype,
                                   const ::coder::array<double, 2U> &cs,
                                   ::coder::array<double, 2U> &sfvals,
-                                  ::coder::array<double, 3U> &derivs)
+                                  ::coder::array<double, 3U> &sdvals)
 {
   coder::SizeType i;
   coder::SizeType nqp;
@@ -9995,7 +9996,7 @@ static void sfe3_tabulate_gl_pyra(coder::SizeType etype,
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
   sfvals.set_size(cs.size(0), i);
-  derivs.set_size(cs.size(0), i, cs.size(1));
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   if (etype == 173) {
     for (coder::SizeType q{0}; q <= nqp; q++) {
       double b_deriv[90];
@@ -10004,210 +10005,210 @@ static void sfe3_tabulate_gl_pyra(coder::SizeType etype,
                                      cs[cs.size(1) * q + 2], &b_N[0],
                                      &b_deriv[0]);
       sfvals[sfvals.size(1) * q] = b_N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = b_deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = b_deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = b_deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
       sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = b_deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[5];
       sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[8];
       sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[11];
       sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[14];
       sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[17];
       sfvals[sfvals.size(1) * q + 6] = b_N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[20];
       sfvals[sfvals.size(1) * q + 7] = b_N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[23];
       sfvals[sfvals.size(1) * q + 8] = b_N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[26];
       sfvals[sfvals.size(1) * q + 9] = b_N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[29];
       sfvals[sfvals.size(1) * q + 10] = b_N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[32];
       sfvals[sfvals.size(1) * q + 11] = b_N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[35];
       sfvals[sfvals.size(1) * q + 12] = b_N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[38];
       sfvals[sfvals.size(1) * q + 13] = b_N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[41];
       sfvals[sfvals.size(1) * q + 14] = b_N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[44];
       sfvals[sfvals.size(1) * q + 15] = b_N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[47];
       sfvals[sfvals.size(1) * q + 16] = b_N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[50];
       sfvals[sfvals.size(1) * q + 17] = b_N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[53];
       sfvals[sfvals.size(1) * q + 18] = b_N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[56];
       sfvals[sfvals.size(1) * q + 19] = b_N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[59];
       sfvals[sfvals.size(1) * q + 20] = b_N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[62];
       sfvals[sfvals.size(1) * q + 21] = b_N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[65];
       sfvals[sfvals.size(1) * q + 22] = b_N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[68];
       sfvals[sfvals.size(1) * q + 23] = b_N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[71];
       sfvals[sfvals.size(1) * q + 24] = b_N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[74];
       sfvals[sfvals.size(1) * q + 25] = b_N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[77];
       sfvals[sfvals.size(1) * q + 26] = b_N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[80];
       sfvals[sfvals.size(1) * q + 27] = b_N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[83];
       sfvals[sfvals.size(1) * q + 28] = b_N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[86];
       sfvals[sfvals.size(1) * q + 29] = b_N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           b_deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           b_deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           b_deriv[89];
     }
   } else {
@@ -10217,412 +10218,412 @@ static void sfe3_tabulate_gl_pyra(coder::SizeType etype,
       ::sfe_sfuncs::pyra_gl_55_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
                                      cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
       sfvals[sfvals.size(1) * q] = N[0];
-      derivs[derivs.size(2) * derivs.size(1) * q] = deriv[0];
-      derivs[derivs.size(2) * derivs.size(1) * q + 1] = deriv[1];
-      derivs[derivs.size(2) * derivs.size(1) * q + 2] = deriv[2];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
       sfvals[sfvals.size(1) * q + 1] = N[1];
-      derivs[derivs.size(2) + derivs.size(2) * derivs.size(1) * q] = deriv[3];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[4];
-      derivs[(derivs.size(2) + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[5];
       sfvals[sfvals.size(1) * q + 2] = N[2];
-      derivs[derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[6];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[7];
-      derivs[(derivs.size(2) * 2 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[8];
       sfvals[sfvals.size(1) * q + 3] = N[3];
-      derivs[derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[9];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[10];
-      derivs[(derivs.size(2) * 3 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[11];
       sfvals[sfvals.size(1) * q + 4] = N[4];
-      derivs[derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[12];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[13];
-      derivs[(derivs.size(2) * 4 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[14];
       sfvals[sfvals.size(1) * q + 5] = N[5];
-      derivs[derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[15];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[16];
-      derivs[(derivs.size(2) * 5 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[17];
       sfvals[sfvals.size(1) * q + 6] = N[6];
-      derivs[derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[18];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[19];
-      derivs[(derivs.size(2) * 6 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[20];
       sfvals[sfvals.size(1) * q + 7] = N[7];
-      derivs[derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[21];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[22];
-      derivs[(derivs.size(2) * 7 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[23];
       sfvals[sfvals.size(1) * q + 8] = N[8];
-      derivs[derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[24];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[25];
-      derivs[(derivs.size(2) * 8 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[26];
       sfvals[sfvals.size(1) * q + 9] = N[9];
-      derivs[derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[27];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[28];
-      derivs[(derivs.size(2) * 9 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[29];
       sfvals[sfvals.size(1) * q + 10] = N[10];
-      derivs[derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[30];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[31];
-      derivs[(derivs.size(2) * 10 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[32];
       sfvals[sfvals.size(1) * q + 11] = N[11];
-      derivs[derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[33];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[34];
-      derivs[(derivs.size(2) * 11 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[35];
       sfvals[sfvals.size(1) * q + 12] = N[12];
-      derivs[derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[36];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[37];
-      derivs[(derivs.size(2) * 12 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[38];
       sfvals[sfvals.size(1) * q + 13] = N[13];
-      derivs[derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[39];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[40];
-      derivs[(derivs.size(2) * 13 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[41];
       sfvals[sfvals.size(1) * q + 14] = N[14];
-      derivs[derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[42];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[43];
-      derivs[(derivs.size(2) * 14 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[44];
       sfvals[sfvals.size(1) * q + 15] = N[15];
-      derivs[derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[45];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[46];
-      derivs[(derivs.size(2) * 15 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[47];
       sfvals[sfvals.size(1) * q + 16] = N[16];
-      derivs[derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[48];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[49];
-      derivs[(derivs.size(2) * 16 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[50];
       sfvals[sfvals.size(1) * q + 17] = N[17];
-      derivs[derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[51];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[52];
-      derivs[(derivs.size(2) * 17 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[53];
       sfvals[sfvals.size(1) * q + 18] = N[18];
-      derivs[derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[54];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[55];
-      derivs[(derivs.size(2) * 18 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[56];
       sfvals[sfvals.size(1) * q + 19] = N[19];
-      derivs[derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[57];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[58];
-      derivs[(derivs.size(2) * 19 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[59];
       sfvals[sfvals.size(1) * q + 20] = N[20];
-      derivs[derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[60];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[61];
-      derivs[(derivs.size(2) * 20 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[62];
       sfvals[sfvals.size(1) * q + 21] = N[21];
-      derivs[derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[63];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[64];
-      derivs[(derivs.size(2) * 21 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[65];
       sfvals[sfvals.size(1) * q + 22] = N[22];
-      derivs[derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[66];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[67];
-      derivs[(derivs.size(2) * 22 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[68];
       sfvals[sfvals.size(1) * q + 23] = N[23];
-      derivs[derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[69];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[70];
-      derivs[(derivs.size(2) * 23 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[71];
       sfvals[sfvals.size(1) * q + 24] = N[24];
-      derivs[derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[72];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[73];
-      derivs[(derivs.size(2) * 24 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[74];
       sfvals[sfvals.size(1) * q + 25] = N[25];
-      derivs[derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[75];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[76];
-      derivs[(derivs.size(2) * 25 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[77];
       sfvals[sfvals.size(1) * q + 26] = N[26];
-      derivs[derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[78];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[79];
-      derivs[(derivs.size(2) * 26 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[80];
       sfvals[sfvals.size(1) * q + 27] = N[27];
-      derivs[derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[81];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[82];
-      derivs[(derivs.size(2) * 27 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[83];
       sfvals[sfvals.size(1) * q + 28] = N[28];
-      derivs[derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[84];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[85];
-      derivs[(derivs.size(2) * 28 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[86];
       sfvals[sfvals.size(1) * q + 29] = N[29];
-      derivs[derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[87];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[88];
-      derivs[(derivs.size(2) * 29 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[89];
       sfvals[sfvals.size(1) * q + 30] = N[30];
-      derivs[derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[90];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[91];
-      derivs[(derivs.size(2) * 30 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[92];
       sfvals[sfvals.size(1) * q + 31] = N[31];
-      derivs[derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[93];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[94];
-      derivs[(derivs.size(2) * 31 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[95];
       sfvals[sfvals.size(1) * q + 32] = N[32];
-      derivs[derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[96];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[97];
-      derivs[(derivs.size(2) * 32 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[98];
       sfvals[sfvals.size(1) * q + 33] = N[33];
-      derivs[derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[99];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[100];
-      derivs[(derivs.size(2) * 33 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[101];
       sfvals[sfvals.size(1) * q + 34] = N[34];
-      derivs[derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[102];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[103];
-      derivs[(derivs.size(2) * 34 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[104];
       sfvals[sfvals.size(1) * q + 35] = N[35];
-      derivs[derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[105];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[106];
-      derivs[(derivs.size(2) * 35 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[107];
       sfvals[sfvals.size(1) * q + 36] = N[36];
-      derivs[derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[108];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[109];
-      derivs[(derivs.size(2) * 36 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[110];
       sfvals[sfvals.size(1) * q + 37] = N[37];
-      derivs[derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[111];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[112];
-      derivs[(derivs.size(2) * 37 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[113];
       sfvals[sfvals.size(1) * q + 38] = N[38];
-      derivs[derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[114];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[115];
-      derivs[(derivs.size(2) * 38 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[116];
       sfvals[sfvals.size(1) * q + 39] = N[39];
-      derivs[derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[117];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[118];
-      derivs[(derivs.size(2) * 39 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[119];
       sfvals[sfvals.size(1) * q + 40] = N[40];
-      derivs[derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[120];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[121];
-      derivs[(derivs.size(2) * 40 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[122];
       sfvals[sfvals.size(1) * q + 41] = N[41];
-      derivs[derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[123];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[124];
-      derivs[(derivs.size(2) * 41 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[125];
       sfvals[sfvals.size(1) * q + 42] = N[42];
-      derivs[derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[126];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[127];
-      derivs[(derivs.size(2) * 42 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[128];
       sfvals[sfvals.size(1) * q + 43] = N[43];
-      derivs[derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[129];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[130];
-      derivs[(derivs.size(2) * 43 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[131];
       sfvals[sfvals.size(1) * q + 44] = N[44];
-      derivs[derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[132];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[133];
-      derivs[(derivs.size(2) * 44 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[134];
       sfvals[sfvals.size(1) * q + 45] = N[45];
-      derivs[derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[135];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[136];
-      derivs[(derivs.size(2) * 45 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[137];
       sfvals[sfvals.size(1) * q + 46] = N[46];
-      derivs[derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[138];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[139];
-      derivs[(derivs.size(2) * 46 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[140];
       sfvals[sfvals.size(1) * q + 47] = N[47];
-      derivs[derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[141];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[142];
-      derivs[(derivs.size(2) * 47 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[143];
       sfvals[sfvals.size(1) * q + 48] = N[48];
-      derivs[derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[144];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[145];
-      derivs[(derivs.size(2) * 48 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[146];
       sfvals[sfvals.size(1) * q + 49] = N[49];
-      derivs[derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[147];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[148];
-      derivs[(derivs.size(2) * 49 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[149];
       sfvals[sfvals.size(1) * q + 50] = N[50];
-      derivs[derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[150];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[151];
-      derivs[(derivs.size(2) * 50 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[152];
       sfvals[sfvals.size(1) * q + 51] = N[51];
-      derivs[derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[153];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[154];
-      derivs[(derivs.size(2) * 51 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[155];
       sfvals[sfvals.size(1) * q + 52] = N[52];
-      derivs[derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[156];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[157];
-      derivs[(derivs.size(2) * 52 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[158];
       sfvals[sfvals.size(1) * q + 53] = N[53];
-      derivs[derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[159];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[160];
-      derivs[(derivs.size(2) * 53 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[161];
       sfvals[sfvals.size(1) * q + 54] = N[54];
-      derivs[derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q] =
+      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
           deriv[162];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 1] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
           deriv[163];
-      derivs[(derivs.size(2) * 54 + derivs.size(2) * derivs.size(1) * q) + 2] =
+      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
           deriv[164];
     }
   }
 }
 
-// sfe3_tabulate_shapefuncs - Tabulate shape functions and derivs at qpoints
+// sfe3_tabulate_shapefuncs - Tabulate shape functions and sdvals at qpoints
 static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
                                      const ::coder::array<double, 2U> &cs,
                                      ::coder::array<double, 2U> &sfvals,
-                                     ::coder::array<double, 3U> &derivs)
+                                     ::coder::array<double, 3U> &sdvals)
 {
   if ((etype & 3) == 0) {
     coder::SizeType i;
     i = etype >> 5 & 7;
     if (i == 4) {
-      sfe3_tabulate_equi_tet(etype, cs, sfvals, derivs);
+      sfe3_tabulate_equi_tet(etype, cs, sfvals, sdvals);
     } else if (i == 5) {
-      sfe3_tabulate_equi_pyra(etype, cs, sfvals, derivs);
+      sfe3_tabulate_equi_pyra(etype, cs, sfvals, sdvals);
     } else if (i == 6) {
-      sfe3_tabulate_equi_prism(etype, cs, sfvals, derivs);
+      sfe3_tabulate_equi_prism(etype, cs, sfvals, sdvals);
     } else {
       coder::SizeType nqp;
       //  hex
       nqp = cs.size(0) - 1;
       i = iv[etype - 1];
       sfvals.set_size(cs.size(0), i);
-      derivs.set_size(cs.size(0), i, cs.size(1));
+      sdvals.set_size(cs.size(0), i, cs.size(1));
       switch (etype) {
       case 228: {
         for (coder::SizeType q{0}; q <= nqp; q++) {
@@ -10633,13 +10634,13 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
                                      &c_deriv[0]);
           for (coder::SizeType b_i{0}; b_i < 8; b_i++) {
             sfvals[b_i + sfvals.size(1) * q] = c_N[b_i];
-            derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
                 c_deriv[3 * b_i];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    1] = c_deriv[3 * b_i + 1];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    2] = c_deriv[3 * b_i + 2];
           }
         }
@@ -10653,13 +10654,13 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
               cs[cs.size(1) * q + 2], &d_N[0], &d_deriv[0]);
           for (coder::SizeType b_i{0}; b_i < 27; b_i++) {
             sfvals[b_i + sfvals.size(1) * q] = d_N[b_i];
-            derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
                 d_deriv[3 * b_i];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    1] = d_deriv[3 * b_i + 1];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    2] = d_deriv[3 * b_i + 2];
           }
         }
@@ -10673,13 +10674,13 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
               cs[cs.size(1) * q + 2], &b_N[0], &b_deriv[0]);
           for (coder::SizeType b_i{0}; b_i < 64; b_i++) {
             sfvals[b_i + sfvals.size(1) * q] = b_N[b_i];
-            derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
                 b_deriv[3 * b_i];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    1] = b_deriv[3 * b_i + 1];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    2] = b_deriv[3 * b_i + 2];
           }
         }
@@ -10693,13 +10694,13 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
               cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
           for (coder::SizeType b_i{0}; b_i < 125; b_i++) {
             sfvals[b_i + sfvals.size(1) * q] = N[b_i];
-            derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
                 deriv[3 * b_i];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    1] = deriv[3 * b_i + 1];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    2] = deriv[3 * b_i + 2];
           }
         }
@@ -10715,7 +10716,7 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
       nqp = cs.size(0) - 1;
       i = iv[etype - 1];
       sfvals.set_size(cs.size(0), i);
-      derivs.set_size(cs.size(0), i, cs.size(1));
+      sdvals.set_size(cs.size(0), i, cs.size(1));
       if (etype == 141) {
         for (coder::SizeType q{0}; q <= nqp; q++) {
           double f_deriv[60];
@@ -10725,13 +10726,13 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
               cs[cs.size(1) * q + 2], &f_N[0], &f_deriv[0]);
           for (coder::SizeType b_i{0}; b_i < 20; b_i++) {
             sfvals[b_i + sfvals.size(1) * q] = f_N[b_i];
-            derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
                 f_deriv[3 * b_i];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    1] = f_deriv[3 * b_i + 1];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    2] = f_deriv[3 * b_i + 2];
           }
         }
@@ -10744,28 +10745,28 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
               cs[cs.size(1) * q + 2], &e_N[0], &e_deriv[0]);
           for (coder::SizeType b_i{0}; b_i < 35; b_i++) {
             sfvals[b_i + sfvals.size(1) * q] = e_N[b_i];
-            derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
                 e_deriv[3 * b_i];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    1] = e_deriv[3 * b_i + 1];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    2] = e_deriv[3 * b_i + 2];
           }
         }
       }
     } else if (i == 5) {
-      sfe3_tabulate_gl_pyra(etype, cs, sfvals, derivs);
+      sfe3_tabulate_gl_pyra(etype, cs, sfvals, sdvals);
     } else if (i == 6) {
-      sfe3_tabulate_gl_prism(etype, cs, sfvals, derivs);
+      sfe3_tabulate_gl_prism(etype, cs, sfvals, sdvals);
     } else {
       coder::SizeType nqp;
       //  hex
       nqp = cs.size(0) - 1;
       i = iv[etype - 1];
       sfvals.set_size(cs.size(0), i);
-      derivs.set_size(cs.size(0), i, cs.size(1));
+      sdvals.set_size(cs.size(0), i, cs.size(1));
       if (etype == 237) {
         for (coder::SizeType q{0}; q <= nqp; q++) {
           double b_deriv[192];
@@ -10775,13 +10776,13 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
               cs[cs.size(1) * q + 2], &b_N[0], &b_deriv[0]);
           for (coder::SizeType b_i{0}; b_i < 64; b_i++) {
             sfvals[b_i + sfvals.size(1) * q] = b_N[b_i];
-            derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
                 b_deriv[3 * b_i];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    1] = b_deriv[3 * b_i + 1];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    2] = b_deriv[3 * b_i + 2];
           }
         }
@@ -10794,13 +10795,13 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
               cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
           for (coder::SizeType b_i{0}; b_i < 125; b_i++) {
             sfvals[b_i + sfvals.size(1) * q] = N[b_i];
-            derivs[derivs.size(2) * b_i + derivs.size(2) * derivs.size(1) * q] =
+            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
                 deriv[3 * b_i];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    1] = deriv[3 * b_i + 1];
-            derivs[(derivs.size(2) * b_i +
-                    derivs.size(2) * derivs.size(1) * q) +
+            sdvals[(sdvals.size(2) * b_i +
+                    sdvals.size(2) * sdvals.size(1) * q) +
                    2] = deriv[3 * b_i + 2];
           }
         }
@@ -12122,19 +12123,19 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
 static void tabulate_shapefuncs(coder::SizeType etype,
                                 const ::coder::array<double, 2U> &cs,
                                 ::coder::array<double, 2U> &sfvals,
-                                ::coder::array<double, 3U> &derivs)
+                                ::coder::array<double, 3U> &sdvals)
 {
   coder::SizeType shape;
   shape = etype >> 5 & 7;
   switch (((shape > 0) + (shape > 1)) + (shape > 3)) {
   case 3:
-    sfe3_tabulate_shapefuncs(etype, cs, sfvals, derivs);
+    sfe3_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
     break;
   case 2:
-    sfe2_tabulate_shapefuncs(etype, cs, sfvals, derivs);
+    sfe2_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
     break;
   default:
-    sfe1_tabulate_shapefuncs(etype, cs, sfvals, derivs);
+    sfe1_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
     break;
   }
 }
