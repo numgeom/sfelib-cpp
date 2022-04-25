@@ -45,6 +45,10 @@ static const short iv[250]{
 
 // Function Declarations
 namespace sfe {
+static inline void bar_quadrules(coder::SizeType degree,
+                                 ::coder::array<double, 2U> &cs,
+                                 ::coder::array<double, 1U> &ws);
+
 static unsigned char obtain_facets(coder::SizeType etype);
 
 static inline void obtain_facets(coder::SizeType etype, signed char facetid,
@@ -53,7 +57,7 @@ static inline void obtain_facets(coder::SizeType etype, signed char facetid,
 
 static unsigned char obtain_facets(coder::SizeType etype, signed char facetid);
 
-static inline void quad_quadrules(coder::SizeType degree,
+static inline void pyra_quadrules(coder::SizeType degree,
                                   ::coder::array<double, 2U> &cs,
                                   ::coder::array<double, 1U> &ws);
 
@@ -149,227 +153,122 @@ static inline void tabulate_shapefuncs(coder::SizeType etype,
 
 // Function Definitions
 namespace sfe {
-// obtain_facets - Query facet information
-static unsigned char obtain_facets(coder::SizeType etype)
+//  bar_quadrules - Obtain quadrature points and weights of a bar element.
+static void bar_quadrules(coder::SizeType degree,
+                          ::coder::array<double, 2U> &cs,
+                          ::coder::array<double, 1U> &ws)
 {
-  const static std::vector<std::vector<uint8_T>> FACETS{
-      {1, 1},                         // SFE_BAR_2
-      {},                             // 37
-      {},                             // 38
-      {},                             // 39
-      {1, 1},                         // SFE_BAR_3
-      {},                             // 41
-      {},                             // 42
-      {},                             // 43
-      {1, 1},                         // SFE_BAR_4
-      {1, 1},                         // SFE_BAR_FEK_4
-      {},                             // 46
-      {},                             // 47
-      {1, 1},                         // SFE_BAR_5
-      {1, 1},                         // SFE_BAR_FEK_5
-      {},                             // 50
-      {},                             // 51
-      {1, 1},                         // SFE_BAR_6
-      {1, 1},                         // SFE_BAR_FEK_6
-      {},                             // 54
-      {},                             // 55
-      {1, 1},                         // SFE_BAR_7
-      {1, 1},                         // SFE_BAR_FEK_7
-      {},                             // 58
-      {},                             // 59
-      {},                             // 60
-      {},                             // 61
-      {},                             // 62
-      {},                             // 63
-      {},                             // 64
-      {},                             // 65
-      {},                             // 66
-      {},                             // 67
-      {36, 36, 36},                   // SFE_TRI_3
-      {},                             // 69
-      {},                             // 70
-      {},                             // 71
-      {40, 40, 40},                   // SFE_TRI_6
-      {},                             // 73
-      {},                             // 74
-      {},                             // 75
-      {44, 44, 44},                   // SFE_TRI_10
-      {45, 45, 45},                   // SFE_TRI_FEK_10
-      {},                             // 78
-      {},                             // 79
-      {48, 48, 48},                   // SFE_TRI_15
-      {49, 49, 49},                   // SFE_TRI_GL_15
-      {48, 48, 48},                   // SFE_TRI_FEK_15
-      {},                             // 83
-      {52, 52, 52},                   // SFE_TRI_21
-      {53, 53, 53},                   // SFE_TRI_GL_21
-      {52, 52, 52},                   // SFE_TRI_FEK_21
-      {},                             // 87
-      {56, 56, 56},                   // SFE_TRI_28
-      {57, 57, 57},                   // SFE_TRI_GL_28
-      {56, 56, 56},                   // SFE_TRI_FEK_28
-      {},                             // 91
-      {},                             // 92
-      {},                             // 93
-      {},                             // 94
-      {},                             // 95
-      {},                             // 96
-      {},                             // 97
-      {},                             // 98
-      {},                             // 99
-      {36, 36, 36, 36},               // SFE_QUAD_4
-      {},                             // 101
-      {},                             // 102
-      {},                             // 103
-      {40, 40, 40, 40},               // SFE_QUAD_9
-      {},                             // 105
-      {},                             // 106
-      {},                             // 107
-      {44, 44, 44, 44},               // SFE_QUAD_16
-      {45, 45, 45, 45},               // SFE_QUAD_FEK_16
-      {},                             // 110
-      {},                             // 111
-      {48, 48, 48, 48},               // SFE_QUAD_25
-      {49, 49, 49, 49},               // SFE_QUAD_FEK_25
-      {},                             // 114
-      {},                             // 115
-      {52, 52, 52, 52},               // SFE_QUAD_36
-      {53, 53, 53, 53},               // SFE_QUAD_FEK_36
-      {},                             // 118
-      {},                             // 119
-      {56, 56, 56, 56},               // SFE_QUAD_49
-      {57, 57, 57, 57},               // SFE_QUAD_FEK_49
-      {},                             // 122
-      {},                             // 123
-      {},                             // 124
-      {},                             // 125
-      {},                             // 126
-      {},                             // 127
-      {},                             // 128
-      {},                             // 129
-      {},                             // 130
-      {},                             // 131
-      {68, 68, 68, 68},               // SFE_TET_4
-      {},                             // 133
-      {},                             // 134
-      {},                             // 135
-      {72, 72, 72, 72},               // SFE_TET_10
-      {},                             // 137
-      {},                             // 138
-      {},                             // 139
-      {76, 76, 76, 76},               // SFE_TET_20
-      {77, 77, 77, 77},               // SFE_TET_FEK_20
-      {},                             // 142
-      {},                             // 143
-      {80, 80, 80, 80},               // SFE_TET_35
-      {81, 81, 81, 81},               // SFE_TET_GL_35
-      {82, 82, 82, 82},               // SFE_TET_FEK_35
-      {},                             // 147
-      {84, 84, 84, 84},               // SFE_TET_56
-      {85, 85, 85, 85},               // SFE_TET_GL_56
-      {86, 86, 86, 86},               // SFE_TET_FEK_56
-      {},                             // 151
-      {88, 88, 88, 88},               // SFE_TET_84
-      {89, 89, 89, 89},               // SFE_TET_GL_84
-      {90, 90, 90, 90},               // SFE_TET_FEK_84
-      {},                             // 155
-      {},                             // 156
-      {},                             // 157
-      {},                             // 158
-      {},                             // 159
-      {},                             // 160
-      {},                             // 161
-      {},                             // 162
-      {},                             // 163
-      {100, 68, 68, 68, 68},          // SFE_PYRA_5
-      {},                             // 165
-      {},                             // 166
-      {},                             // 167
-      {104, 72, 72, 72, 72},          // SFE_PYRA_14
-      {},                             // 169
-      {},                             // 170
-      {},                             // 171
-      {108, 76, 76, 76, 76},          // SFE_PYRA_30
-      {109, 77, 77, 77, 77},          // SFE_PYRA_FEK_30
-      {},                             // 174
-      {},                             // 175
-      {112, 80, 80, 80, 80},          // SFE_PYRA_55
-      {113, 81, 81, 81, 81},          // SFE_PYRA_GL_55
-      {112, 82, 82, 82, 82},          // SFE_PYRA_FEK_55
-      {},                             // 179
-      {116, 84, 84, 84, 84},          // SFE_PYRA_91
-      {},                             // 181
-      {},                             // 182
-      {},                             // 183
-      {},                             // 184
-      {},                             // 185
-      {},                             // 186
-      {},                             // 187
-      {},                             // 188
-      {},                             // 189
-      {},                             // 190
-      {},                             // 191
-      {},                             // 192
-      {},                             // 193
-      {},                             // 194
-      {},                             // 195
-      {100, 100, 100, 68, 68},        // SFE_PRISM_6
-      {},                             // 197
-      {},                             // 198
-      {},                             // 199
-      {104, 104, 104, 72, 72},        // SFE_PRISM_18
-      {},                             // 201
-      {},                             // 202
-      {},                             // 203
-      {108, 108, 108, 76, 76},        // SFE_PRISM_40
-      {109, 109, 109, 77, 77},        // SFE_PRISM_FEK_40
-      {},                             // 206
-      {},                             // 207
-      {112, 112, 112, 80, 80},        // SFE_PRISM_75
-      {113, 113, 113, 81, 81},        // SFE_PRISM_GL_75
-      {112, 112, 112, 82, 82},        // SFE_PRISM_FEK_75
-      {},                             // 211
-      {116, 116, 116, 84, 84},        // SFE_PRISM_126
-      {},                             // 213
-      {},                             // 214
-      {},                             // 215
-      {},                             // 216
-      {},                             // 217
-      {},                             // 218
-      {},                             // 219
-      {},                             // 220
-      {},                             // 221
-      {},                             // 222
-      {},                             // 223
-      {},                             // 224
-      {},                             // 225
-      {},                             // 226
-      {},                             // 227
-      {100, 100, 100, 100, 100, 100}, // SFE_HEXA_8
-      {},                             // 229
-      {},                             // 230
-      {},                             // 231
-      {104, 104, 104, 104, 104, 104}, // SFE_HEXA_27
-      {},                             // 233
-      {},                             // 234
-      {},                             // 235
-      {108, 108, 108, 108, 108, 108}, // SFE_HEXA_64
-      {109, 109, 109, 109, 109, 109}, // SFE_HEXA_FEK_64
-      {},                             // 238
-      {},                             // 239
-      {112, 112, 112, 112, 112, 112}, // SFE_HEXA_125
-      {113, 113, 113, 113, 113, 113}, // SFE_HEXA_FEK_125
-      {},                             // 242
-      {},                             // 243
-      {116, 116, 116, 116, 116, 116}, // SFE_HEXA_216
-      {117, 117, 117, 117, 117, 117}, // SFE_HEXA_FEK_216
-      {},                             // 246
-      {},                             // 247
-      {120, 120, 120, 120, 120, 120}, // SFE_HEXA_343
-      {121, 121, 121, 121, 121, 121}, // SFE_HEXA_FEK_343
-  };
-  //  get the number of facets
-  return [&](uint8_T et) { return FACETS[et - 36].size(); }(etype);
+  coder::SizeType nqp;
+  boolean_T guard1{false};
+  boolean_T guard2{false};
+  boolean_T guard3{false};
+  boolean_T guard4{false};
+  boolean_T guard5{false};
+  boolean_T guard6{false};
+  boolean_T guard7{false};
+  guard1 = false;
+  guard2 = false;
+  guard3 = false;
+  guard4 = false;
+  guard5 = false;
+  guard6 = false;
+  guard7 = false;
+  switch (degree) {
+  case 0:
+    guard1 = true;
+    break;
+  case 1:
+    guard1 = true;
+    break;
+  case 2:
+    guard2 = true;
+    break;
+  case 3:
+    guard2 = true;
+    break;
+  case 4:
+    guard3 = true;
+    break;
+  case 5:
+    guard3 = true;
+    break;
+  case 6:
+    guard4 = true;
+    break;
+  case 7:
+    guard4 = true;
+    break;
+  case 8:
+    guard5 = true;
+    break;
+  case 9:
+    guard5 = true;
+    break;
+  case 10:
+    guard6 = true;
+    break;
+  case 11:
+    guard6 = true;
+    break;
+  case 12:
+    guard7 = true;
+    break;
+  case 13:
+    guard7 = true;
+    break;
+  default:
+    if (degree > 15) {
+      m2cWarnMsgIdAndTxt("bar_quadrules:UnsupportedDegree",
+                         "Only support up to degree 15");
+    }
+    nqp = ::sfe_qrules::bar_deg15_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg15_qrule(&cs[0], &(ws.data())[0]);
+    break;
+  }
+  if (guard7) {
+    nqp = ::sfe_qrules::bar_deg13_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg13_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard6) {
+    nqp = ::sfe_qrules::bar_deg11_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg11_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard5) {
+    nqp = ::sfe_qrules::bar_deg9_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg9_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard4) {
+    nqp = ::sfe_qrules::bar_deg7_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg7_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard3) {
+    nqp = ::sfe_qrules::bar_deg5_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg5_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard2) {
+    nqp = ::sfe_qrules::bar_deg3_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg3_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard1) {
+    nqp = ::sfe_qrules::bar_deg1_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg1_qrule(&cs[0], &(ws.data())[0]);
+  }
 }
 
 // obtain_facets - Query facet information
@@ -1872,8 +1771,231 @@ static unsigned char obtain_facets(coder::SizeType etype, signed char facetid)
   }(etype, static_cast<signed char>(facetid - 1));
 }
 
-//  quad_quadrules - Obtain quadrature points and weights of a quadrilateral
-static void quad_quadrules(coder::SizeType degree,
+// obtain_facets - Query facet information
+static unsigned char obtain_facets(coder::SizeType etype)
+{
+  const static std::vector<std::vector<uint8_T>> FACETS{
+      {1, 1},                         // SFE_BAR_2
+      {},                             // 37
+      {},                             // 38
+      {},                             // 39
+      {1, 1},                         // SFE_BAR_3
+      {},                             // 41
+      {},                             // 42
+      {},                             // 43
+      {1, 1},                         // SFE_BAR_4
+      {1, 1},                         // SFE_BAR_FEK_4
+      {},                             // 46
+      {},                             // 47
+      {1, 1},                         // SFE_BAR_5
+      {1, 1},                         // SFE_BAR_FEK_5
+      {},                             // 50
+      {},                             // 51
+      {1, 1},                         // SFE_BAR_6
+      {1, 1},                         // SFE_BAR_FEK_6
+      {},                             // 54
+      {},                             // 55
+      {1, 1},                         // SFE_BAR_7
+      {1, 1},                         // SFE_BAR_FEK_7
+      {},                             // 58
+      {},                             // 59
+      {},                             // 60
+      {},                             // 61
+      {},                             // 62
+      {},                             // 63
+      {},                             // 64
+      {},                             // 65
+      {},                             // 66
+      {},                             // 67
+      {36, 36, 36},                   // SFE_TRI_3
+      {},                             // 69
+      {},                             // 70
+      {},                             // 71
+      {40, 40, 40},                   // SFE_TRI_6
+      {},                             // 73
+      {},                             // 74
+      {},                             // 75
+      {44, 44, 44},                   // SFE_TRI_10
+      {45, 45, 45},                   // SFE_TRI_FEK_10
+      {},                             // 78
+      {},                             // 79
+      {48, 48, 48},                   // SFE_TRI_15
+      {49, 49, 49},                   // SFE_TRI_GL_15
+      {48, 48, 48},                   // SFE_TRI_FEK_15
+      {},                             // 83
+      {52, 52, 52},                   // SFE_TRI_21
+      {53, 53, 53},                   // SFE_TRI_GL_21
+      {52, 52, 52},                   // SFE_TRI_FEK_21
+      {},                             // 87
+      {56, 56, 56},                   // SFE_TRI_28
+      {57, 57, 57},                   // SFE_TRI_GL_28
+      {56, 56, 56},                   // SFE_TRI_FEK_28
+      {},                             // 91
+      {},                             // 92
+      {},                             // 93
+      {},                             // 94
+      {},                             // 95
+      {},                             // 96
+      {},                             // 97
+      {},                             // 98
+      {},                             // 99
+      {36, 36, 36, 36},               // SFE_QUAD_4
+      {},                             // 101
+      {},                             // 102
+      {},                             // 103
+      {40, 40, 40, 40},               // SFE_QUAD_9
+      {},                             // 105
+      {},                             // 106
+      {},                             // 107
+      {44, 44, 44, 44},               // SFE_QUAD_16
+      {45, 45, 45, 45},               // SFE_QUAD_FEK_16
+      {},                             // 110
+      {},                             // 111
+      {48, 48, 48, 48},               // SFE_QUAD_25
+      {49, 49, 49, 49},               // SFE_QUAD_FEK_25
+      {},                             // 114
+      {},                             // 115
+      {52, 52, 52, 52},               // SFE_QUAD_36
+      {53, 53, 53, 53},               // SFE_QUAD_FEK_36
+      {},                             // 118
+      {},                             // 119
+      {56, 56, 56, 56},               // SFE_QUAD_49
+      {57, 57, 57, 57},               // SFE_QUAD_FEK_49
+      {},                             // 122
+      {},                             // 123
+      {},                             // 124
+      {},                             // 125
+      {},                             // 126
+      {},                             // 127
+      {},                             // 128
+      {},                             // 129
+      {},                             // 130
+      {},                             // 131
+      {68, 68, 68, 68},               // SFE_TET_4
+      {},                             // 133
+      {},                             // 134
+      {},                             // 135
+      {72, 72, 72, 72},               // SFE_TET_10
+      {},                             // 137
+      {},                             // 138
+      {},                             // 139
+      {76, 76, 76, 76},               // SFE_TET_20
+      {77, 77, 77, 77},               // SFE_TET_FEK_20
+      {},                             // 142
+      {},                             // 143
+      {80, 80, 80, 80},               // SFE_TET_35
+      {81, 81, 81, 81},               // SFE_TET_GL_35
+      {82, 82, 82, 82},               // SFE_TET_FEK_35
+      {},                             // 147
+      {84, 84, 84, 84},               // SFE_TET_56
+      {85, 85, 85, 85},               // SFE_TET_GL_56
+      {86, 86, 86, 86},               // SFE_TET_FEK_56
+      {},                             // 151
+      {88, 88, 88, 88},               // SFE_TET_84
+      {89, 89, 89, 89},               // SFE_TET_GL_84
+      {90, 90, 90, 90},               // SFE_TET_FEK_84
+      {},                             // 155
+      {},                             // 156
+      {},                             // 157
+      {},                             // 158
+      {},                             // 159
+      {},                             // 160
+      {},                             // 161
+      {},                             // 162
+      {},                             // 163
+      {100, 68, 68, 68, 68},          // SFE_PYRA_5
+      {},                             // 165
+      {},                             // 166
+      {},                             // 167
+      {104, 72, 72, 72, 72},          // SFE_PYRA_14
+      {},                             // 169
+      {},                             // 170
+      {},                             // 171
+      {108, 76, 76, 76, 76},          // SFE_PYRA_30
+      {109, 77, 77, 77, 77},          // SFE_PYRA_FEK_30
+      {},                             // 174
+      {},                             // 175
+      {112, 80, 80, 80, 80},          // SFE_PYRA_55
+      {113, 81, 81, 81, 81},          // SFE_PYRA_GL_55
+      {112, 82, 82, 82, 82},          // SFE_PYRA_FEK_55
+      {},                             // 179
+      {116, 84, 84, 84, 84},          // SFE_PYRA_91
+      {},                             // 181
+      {},                             // 182
+      {},                             // 183
+      {},                             // 184
+      {},                             // 185
+      {},                             // 186
+      {},                             // 187
+      {},                             // 188
+      {},                             // 189
+      {},                             // 190
+      {},                             // 191
+      {},                             // 192
+      {},                             // 193
+      {},                             // 194
+      {},                             // 195
+      {100, 100, 100, 68, 68},        // SFE_PRISM_6
+      {},                             // 197
+      {},                             // 198
+      {},                             // 199
+      {104, 104, 104, 72, 72},        // SFE_PRISM_18
+      {},                             // 201
+      {},                             // 202
+      {},                             // 203
+      {108, 108, 108, 76, 76},        // SFE_PRISM_40
+      {109, 109, 109, 77, 77},        // SFE_PRISM_FEK_40
+      {},                             // 206
+      {},                             // 207
+      {112, 112, 112, 80, 80},        // SFE_PRISM_75
+      {113, 113, 113, 81, 81},        // SFE_PRISM_GL_75
+      {112, 112, 112, 82, 82},        // SFE_PRISM_FEK_75
+      {},                             // 211
+      {116, 116, 116, 84, 84},        // SFE_PRISM_126
+      {},                             // 213
+      {},                             // 214
+      {},                             // 215
+      {},                             // 216
+      {},                             // 217
+      {},                             // 218
+      {},                             // 219
+      {},                             // 220
+      {},                             // 221
+      {},                             // 222
+      {},                             // 223
+      {},                             // 224
+      {},                             // 225
+      {},                             // 226
+      {},                             // 227
+      {100, 100, 100, 100, 100, 100}, // SFE_HEXA_8
+      {},                             // 229
+      {},                             // 230
+      {},                             // 231
+      {104, 104, 104, 104, 104, 104}, // SFE_HEXA_27
+      {},                             // 233
+      {},                             // 234
+      {},                             // 235
+      {108, 108, 108, 108, 108, 108}, // SFE_HEXA_64
+      {109, 109, 109, 109, 109, 109}, // SFE_HEXA_FEK_64
+      {},                             // 238
+      {},                             // 239
+      {112, 112, 112, 112, 112, 112}, // SFE_HEXA_125
+      {113, 113, 113, 113, 113, 113}, // SFE_HEXA_FEK_125
+      {},                             // 242
+      {},                             // 243
+      {116, 116, 116, 116, 116, 116}, // SFE_HEXA_216
+      {117, 117, 117, 117, 117, 117}, // SFE_HEXA_FEK_216
+      {},                             // 246
+      {},                             // 247
+      {120, 120, 120, 120, 120, 120}, // SFE_HEXA_343
+      {121, 121, 121, 121, 121, 121}, // SFE_HEXA_FEK_343
+  };
+  //  get the number of facets
+  return [&](uint8_T et) { return FACETS[et - 36].size(); }(etype);
+}
+
+//  pyra_quadrules - Obtain quadrature points and weights of a pyramidal
+static void pyra_quadrules(coder::SizeType degree,
                            ::coder::array<double, 2U> &cs,
                            ::coder::array<double, 1U> &ws)
 {
@@ -1882,14 +2004,10 @@ static void quad_quadrules(coder::SizeType degree,
   boolean_T guard2{false};
   boolean_T guard3{false};
   boolean_T guard4{false};
-  boolean_T guard5{false};
-  boolean_T guard6{false};
   guard1 = false;
   guard2 = false;
   guard3 = false;
   guard4 = false;
-  guard5 = false;
-  guard6 = false;
   switch (degree) {
   case 0:
     guard1 = true;
@@ -1898,81 +2016,83 @@ static void quad_quadrules(coder::SizeType degree,
     guard1 = true;
     break;
   case 2:
-    guard2 = true;
+    nqp = ::sfe_qrules::pyra_deg2_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg2_qrule(&cs[0], &(ws.data())[0]);
     break;
   case 3:
-    guard2 = true;
+    nqp = ::sfe_qrules::pyra_deg3_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg3_qrule(&cs[0], &(ws.data())[0]);
     break;
   case 4:
-    guard3 = true;
+    guard2 = true;
     break;
   case 5:
-    guard3 = true;
+    guard2 = true;
     break;
   case 6:
-    guard4 = true;
+    nqp = ::sfe_qrules::pyra_deg6_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg6_qrule(&cs[0], &(ws.data())[0]);
     break;
   case 7:
-    guard4 = true;
+    nqp = ::sfe_qrules::pyra_deg7_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg7_qrule(&cs[0], &(ws.data())[0]);
     break;
   case 8:
-    guard5 = true;
+    guard3 = true;
     break;
   case 9:
-    guard5 = true;
+    guard3 = true;
     break;
   case 10:
-    guard6 = true;
+    guard4 = true;
     break;
   case 11:
-    guard6 = true;
+    guard4 = true;
     break;
   default:
     if (degree > 13) {
-      m2cWarnMsgIdAndTxt("bar_quadrules:UnsupportedDegree",
+      m2cWarnMsgIdAndTxt("pyra_quadrules:UnsupportedDegree",
                          "Only support up to degree 13");
     }
-    nqp = ::sfe_qrules::quad_deg13_qrule();
-    cs.set_size(nqp, 1);
+    nqp = ::sfe_qrules::pyra_deg13_qrule();
+    cs.set_size(nqp, 3);
     ws.set_size(nqp);
-    ::sfe_qrules::quad_deg13_qrule(&cs[0], &(ws.data())[0]);
+    ::sfe_qrules::pyra_deg13_qrule(&cs[0], &(ws.data())[0]);
     break;
   }
-  if (guard6) {
-    nqp = ::sfe_qrules::quad_deg11_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard5) {
-    nqp = ::sfe_qrules::quad_deg9_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
   if (guard4) {
-    nqp = ::sfe_qrules::quad_deg7_qrule();
-    cs.set_size(nqp, 1);
+    nqp = ::sfe_qrules::pyra_deg11_qrule();
+    cs.set_size(nqp, 3);
     ws.set_size(nqp);
-    ::sfe_qrules::quad_deg7_qrule(&cs[0], &(ws.data())[0]);
+    ::sfe_qrules::pyra_deg11_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard3) {
-    nqp = ::sfe_qrules::quad_deg5_qrule();
-    cs.set_size(nqp, 1);
+    m2cAssert(degree <= 9, "Only support up to degree 9");
+    nqp = ::sfe_qrules::pyra_deg9_qrule();
+    cs.set_size(nqp, 3);
     ws.set_size(nqp);
-    ::sfe_qrules::quad_deg5_qrule(&cs[0], &(ws.data())[0]);
+    ::sfe_qrules::pyra_deg9_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard2) {
-    nqp = ::sfe_qrules::quad_deg3_qrule();
-    cs.set_size(nqp, 1);
+    m2cAssert(degree <= 5, "Only support up to degree 5");
+    nqp = ::sfe_qrules::pyra_deg5_qrule();
+    cs.set_size(nqp, 3);
     ws.set_size(nqp);
-    ::sfe_qrules::quad_deg3_qrule(&cs[0], &(ws.data())[0]);
+    ::sfe_qrules::pyra_deg5_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard1) {
-    nqp = ::sfe_qrules::quad_deg1_qrule();
-    cs.set_size(nqp, 1);
+    nqp = ::sfe_qrules::pyra_deg1_qrule();
+    cs.set_size(nqp, 3);
     ws.set_size(nqp);
-    ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
+    ::sfe_qrules::pyra_deg1_qrule(&cs[0], &(ws.data())[0]);
   }
 }
 
@@ -7519,233 +7639,6 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
 }
 
 // sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
-                     const ::coder::array<double, 2U> &xs,
-                     coder::SizeType qd_or_natcoords,
-                     const ::coder::array<double, 2U> &userquad)
-{
-  double dv[9];
-  double v;
-  coder::SizeType i;
-  coder::SizeType i1;
-  coder::SizeType loop_ub;
-  coder::SizeType topo_dim;
-  unsigned char c;
-  unsigned char geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (static_cast<coder::SizeType>(static_cast<unsigned int>(etypes[0]) >>
-                                         5) ==
-            static_cast<coder::SizeType>(
-                static_cast<unsigned int>(geom_etype) >> 5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<unsigned char>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  Set up quadrature
-  if (qd_or_natcoords != -1) {
-    if (qd_or_natcoords == 0) {
-      //  trial+test+nonlinear_geom?1:0
-      qd_or_natcoords =
-          (((etypes[0] >> 2 & 7) << 1) + ((geom_etype >> 2 & 7) > 1)) +
-          (xs.size(1) > topo_dim);
-    }
-    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
-    b_sfe->nqp = b_sfe->ws.size(0);
-  } else {
-    if ((userquad.size(0) == 0) || (userquad.size(1) == 0)) {
-      m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
-                        "missing user quadrature data");
-    }
-    if (userquad.size(1) != topo_dim + 1) {
-      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                        "bad user quadrature data size");
-    }
-    b_sfe->nqp = userquad.size(0);
-    b_sfe->ws.set_size(b_sfe->nqp);
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      b_sfe->ws[q] = userquad[userquad.size(1) * q];
-      for (coder::SizeType k{0}; k < topo_dim; k++) {
-        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-            userquad[(k + userquad.size(1) * q) + 1];
-      }
-    }
-  }
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-            b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  b_sfe->cs_phy.set_size(b_sfe->nqp, xs.size(1));
-  i = b_sfe->nqp;
-  for (coder::SizeType q{0}; q < i; q++) {
-    i1 = xs.size(1);
-    for (coder::SizeType k{0}; k < i1; k++) {
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-    double d;
-    coder::SizeType geom_dim;
-    coder::SizeType n;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(double));
-    n = xs.size(0);
-    for (coder::SizeType k{0}; k < n; k++) {
-      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    //  Super-parametric
-    loop_ub = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(loop_ub, 3);
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      coder::SizeType geom_dim;
-      coder::SizeType n;
-      coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(double));
-      n = xs.size(0);
-      for (coder::SizeType k{0}; k < n; k++) {
-        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (coder::SizeType j{0}; j < geom_dim; j++) {
-            i1 = j + 3 * b_i;
-            dv[i1] +=
-                xs[j + xs.size(1) * k] *
-                b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                   b_sfe->derivs_geom.size(2) *
-                                       b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i1 = 0; i1 < 3; i1++) {
-        loop_ub = i1 + y;
-        b_sfe->jacTs[3 * loop_ub] = dv[3 * i1];
-        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i1 + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
 static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
                      coder::SizeType etypes_size,
                      const ::coder::array<double, 2U> &xs,
@@ -7975,6 +7868,113 @@ static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
     }
   }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
+                     coder::SizeType etypes_size,
+                     const ::coder::array<double, 2U> &xs,
+                     const ::coder::array<double, 2U> &qd_or_natcoords)
+{
+  coder::SizeType geom_etype;
+  coder::SizeType i;
+  coder::SizeType sfe_idx_0;
+  boolean_T flag;
+  if ((etypes_size < 2) || (etypes_data[1] == 0)) {
+    geom_etype = etypes_data[0];
+  } else {
+    geom_etype = etypes_data[1];
+  }
+  flag = etypes_data[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (etypes_data[0] >> 5 & 7) == (geom_etype >> 5 & 7);
+  }
+  m2cAssert(flag, "invalid element combinations");
+  if (etypes_data[0] != -1) {
+    coder::SizeType shape;
+    coder::SizeType topo_dim;
+    shape = etypes_data[0] >> 5 & 7;
+    topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
+    //  Geometric dimension
+    if (xs.size(1) < topo_dim) {
+      m2cErrMsgIdAndTxt("sfe_init:badDim",
+                        "geometric dim cannot be smaller than topo dim");
+    }
+    b_sfe->geom_dim = xs.size(1);
+    //  assign geom dimension
+    b_sfe->topo_dim = topo_dim;
+    //  assign topo dimension
+    m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+    b_sfe->etypes[0] = etypes_data[0];
+    b_sfe->etypes[1] = geom_etype;
+    //  Get number of nodes per element
+    b_sfe->nnodes[0] = iv[etypes_data[0] - 1];
+    b_sfe->nnodes[1] = iv[geom_etype - 1];
+    //  User-input natural coordinates
+    b_sfe->nqp = qd_or_natcoords.size(0);
+    sfe_idx_0 = b_sfe->nqp;
+    b_sfe->ws.set_size(sfe_idx_0);
+    for (i = 0; i < sfe_idx_0; i++) {
+      b_sfe->ws[i] = 1.0;
+    }
+    //  user ones for dummy quad weights
+    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
+    i = b_sfe->nqp;
+    for (coder::SizeType q{0}; q < i; q++) {
+      for (coder::SizeType k{0}; k < topo_dim; k++) {
+        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+            qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
+      }
+    }
+    //  Solution space shape functions & derivs
+    tabulate_shapefuncs(etypes_data[0], b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+    sfe_idx_0 = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+    b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                               b_sfe->shapes_geom.size(1));
+    for (i = 0; i < sfe_idx_0; i++) {
+      b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+    }
+    sfe_idx_0 = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+                b_sfe->derivs_geom.size(0);
+    b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                               b_sfe->derivs_geom.size(1),
+                               b_sfe->derivs_geom.size(2));
+    for (i = 0; i < sfe_idx_0; i++) {
+      b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+    }
+    //  Geometry space shape functions & derivs
+    if (etypes_data[0] != geom_etype) {
+      tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                          b_sfe->derivs_geom);
+    }
+  } else {
+    if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
+      flag = true;
+    } else {
+      flag = false;
+    }
+    m2cAssert(flag, "");
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0 = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0, xs.size(1));
+  for (coder::SizeType q{0}; q < sfe_idx_0; q++) {
+    i = xs.size(1);
+    for (coder::SizeType k{0}; k < i; k++) {
+      double v;
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
 }
 
 // sfe_init - Initialize/reinitialize an sfe object for non-boundary element
@@ -8383,6 +8383,233 @@ static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
 // sfe_init - Initialize/reinitialize an sfe object for non-boundary element
 static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
                      const ::coder::array<double, 2U> &xs,
+                     coder::SizeType qd_or_natcoords,
+                     const ::coder::array<double, 2U> &userquad)
+{
+  double dv[9];
+  double v;
+  coder::SizeType i;
+  coder::SizeType i1;
+  coder::SizeType loop_ub;
+  coder::SizeType topo_dim;
+  unsigned char c;
+  unsigned char geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (static_cast<coder::SizeType>(static_cast<unsigned int>(etypes[0]) >>
+                                         5) ==
+            static_cast<coder::SizeType>(
+                static_cast<unsigned int>(geom_etype) >> 5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<unsigned char>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  Set up quadrature
+  if (qd_or_natcoords != -1) {
+    if (qd_or_natcoords == 0) {
+      //  trial+test+nonlinear_geom?1:0
+      qd_or_natcoords =
+          (((etypes[0] >> 2 & 7) << 1) + ((geom_etype >> 2 & 7) > 1)) +
+          (xs.size(1) > topo_dim);
+    }
+    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+    b_sfe->nqp = b_sfe->ws.size(0);
+  } else {
+    if ((userquad.size(0) == 0) || (userquad.size(1) == 0)) {
+      m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
+                        "missing user quadrature data");
+    }
+    if (userquad.size(1) != topo_dim + 1) {
+      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                        "bad user quadrature data size");
+    }
+    b_sfe->nqp = userquad.size(0);
+    b_sfe->ws.set_size(b_sfe->nqp);
+    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
+    i = b_sfe->nqp;
+    for (coder::SizeType q{0}; q < i; q++) {
+      b_sfe->ws[q] = userquad[userquad.size(1) * q];
+      for (coder::SizeType k{0}; k < topo_dim; k++) {
+        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+            userquad[(k + userquad.size(1) * q) + 1];
+      }
+    }
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  b_sfe->cs_phy.set_size(b_sfe->nqp, xs.size(1));
+  i = b_sfe->nqp;
+  for (coder::SizeType q{0}; q < i; q++) {
+    i1 = xs.size(1);
+    for (coder::SizeType k{0}; k < i1; k++) {
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    double d;
+    coder::SizeType geom_dim;
+    coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(double));
+    n = xs.size(0);
+    for (coder::SizeType k{0}; k < n; k++) {
+      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    i = b_sfe->nqp;
+    for (coder::SizeType q{0}; q < i; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    //  Super-parametric
+    loop_ub = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(loop_ub, 3);
+    i = b_sfe->nqp;
+    for (coder::SizeType q{0}; q < i; q++) {
+      coder::SizeType geom_dim;
+      coder::SizeType n;
+      coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(double));
+      n = xs.size(0);
+      for (coder::SizeType k{0}; k < n; k++) {
+        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (coder::SizeType j{0}; j < geom_dim; j++) {
+            i1 = j + 3 * b_i;
+            dv[i1] +=
+                xs[j + xs.size(1) * k] *
+                b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                   b_sfe->derivs_geom.size(2) *
+                                       b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i1 = 0; i1 < 3; i1++) {
+        loop_ub = i1 + y;
+        b_sfe->jacTs[3 * loop_ub] = dv[3 * i1];
+        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i1 + 1];
+        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i1 + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
+                     const ::coder::array<double, 2U> &xs,
                      const ::coder::array<double, 2U> &qd_or_natcoords)
 {
   coder::SizeType i;
@@ -8463,113 +8690,6 @@ static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
   //  potentially skip re-tabulating
   b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
   for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
-      double v;
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
-                     coder::SizeType etypes_size,
-                     const ::coder::array<double, 2U> &xs,
-                     const ::coder::array<double, 2U> &qd_or_natcoords)
-{
-  coder::SizeType geom_etype;
-  coder::SizeType i;
-  coder::SizeType sfe_idx_0;
-  boolean_T flag;
-  if ((etypes_size < 2) || (etypes_data[1] == 0)) {
-    geom_etype = etypes_data[0];
-  } else {
-    geom_etype = etypes_data[1];
-  }
-  flag = etypes_data[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (etypes_data[0] >> 5 & 7) == (geom_etype >> 5 & 7);
-  }
-  m2cAssert(flag, "invalid element combinations");
-  if (etypes_data[0] != -1) {
-    coder::SizeType shape;
-    coder::SizeType topo_dim;
-    shape = etypes_data[0] >> 5 & 7;
-    topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
-    //  Geometric dimension
-    if (xs.size(1) < topo_dim) {
-      m2cErrMsgIdAndTxt("sfe_init:badDim",
-                        "geometric dim cannot be smaller than topo dim");
-    }
-    b_sfe->geom_dim = xs.size(1);
-    //  assign geom dimension
-    b_sfe->topo_dim = topo_dim;
-    //  assign topo dimension
-    m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-    b_sfe->etypes[0] = etypes_data[0];
-    b_sfe->etypes[1] = geom_etype;
-    //  Get number of nodes per element
-    b_sfe->nnodes[0] = iv[etypes_data[0] - 1];
-    b_sfe->nnodes[1] = iv[geom_etype - 1];
-    //  User-input natural coordinates
-    b_sfe->nqp = qd_or_natcoords.size(0);
-    sfe_idx_0 = b_sfe->nqp;
-    b_sfe->ws.set_size(sfe_idx_0);
-    for (i = 0; i < sfe_idx_0; i++) {
-      b_sfe->ws[i] = 1.0;
-    }
-    //  user ones for dummy quad weights
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      for (coder::SizeType k{0}; k < topo_dim; k++) {
-        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-            qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
-      }
-    }
-    //  Solution space shape functions & derivs
-    tabulate_shapefuncs(etypes_data[0], b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-    sfe_idx_0 = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-    b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                               b_sfe->shapes_geom.size(1));
-    for (i = 0; i < sfe_idx_0; i++) {
-      b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-    }
-    sfe_idx_0 = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-                b_sfe->derivs_geom.size(0);
-    b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                               b_sfe->derivs_geom.size(1),
-                               b_sfe->derivs_geom.size(2));
-    for (i = 0; i < sfe_idx_0; i++) {
-      b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-    }
-    //  Geometry space shape functions & derivs
-    if (etypes_data[0] != geom_etype) {
-      tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                          b_sfe->derivs_geom);
-    }
-  } else {
-    if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
-      flag = true;
-    } else {
-      flag = false;
-    }
-    m2cAssert(flag, "");
-  }
-  //  potentially skip re-tabulating
-  sfe_idx_0 = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0; q++) {
     i = xs.size(1);
     for (coder::SizeType k{0}; k < i; k++) {
       double v;
@@ -8833,6 +8953,8 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
   boolean_T guard21{false};
   boolean_T guard22{false};
   boolean_T guard23{false};
+  boolean_T guard24{false};
+  boolean_T guard25{false};
   boolean_T guard3{false};
   boolean_T guard4{false};
   boolean_T guard5{false};
@@ -8864,64 +8986,19 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
   guard21 = false;
   guard22 = false;
   guard23 = false;
+  guard24 = false;
+  guard25 = false;
   switch (shape) {
   case 1:
-    switch (qd) {
-    case 0:
-      guard4 = true;
-      break;
-    case 1:
-      guard4 = true;
-      break;
-    case 2:
-      guard5 = true;
-      break;
-    case 3:
-      guard5 = true;
-      break;
-    case 4:
-      guard6 = true;
-      break;
-    case 5:
-      guard6 = true;
-      break;
-    case 6:
-      guard7 = true;
-      break;
-    case 7:
-      guard7 = true;
-      break;
-    case 8:
-      guard8 = true;
-      break;
-    case 9:
-      guard8 = true;
-      break;
-    case 10:
-      guard9 = true;
-      break;
-    case 11:
-      guard9 = true;
-      break;
-    default:
-      if (qd > 13) {
-        m2cWarnMsgIdAndTxt("bar_quadrules:UnsupportedDegree",
-                           "Only support up to degree 13");
-      }
-      nqp = ::sfe_qrules::bar_deg13_qrule();
-      cs.set_size(nqp, 1);
-      ws.set_size(nqp);
-      ::sfe_qrules::bar_deg13_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    }
+    bar_quadrules(qd, cs, ws);
     break;
   case 2:
     switch (qd) {
     case 0:
-      guard10 = true;
+      guard1 = true;
       break;
     case 1:
-      guard10 = true;
+      guard1 = true;
       break;
     case 2:
       nqp = ::sfe_qrules::tri_deg2_qrule();
@@ -8930,10 +9007,10 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       ::sfe_qrules::tri_deg2_qrule(&cs[0], &(ws.data())[0]);
       break;
     case 3:
-      guard11 = true;
+      guard2 = true;
       break;
     case 4:
-      guard11 = true;
+      guard2 = true;
       break;
     case 5:
       nqp = ::sfe_qrules::tri_deg5_qrule();
@@ -8942,10 +9019,10 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       ::sfe_qrules::tri_deg5_qrule(&cs[0], &(ws.data())[0]);
       break;
     case 6:
-      guard12 = true;
+      guard3 = true;
       break;
     case 7:
-      guard12 = true;
+      guard3 = true;
       break;
     case 8:
       nqp = ::sfe_qrules::tri_deg8_qrule();
@@ -8953,28 +9030,87 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       ws.set_size(nqp);
       ::sfe_qrules::tri_deg8_qrule(&cs[0], &(ws.data())[0]);
       break;
-    default:
-      if (qd > 9) {
-        m2cWarnMsgIdAndTxt("tri_quadrules:UnsupportedDegree",
-                           "Only support up to degree 9");
-      }
+    case 9:
       nqp = ::sfe_qrules::tri_deg9_qrule();
       cs.set_size(nqp, 2);
       ws.set_size(nqp);
       ::sfe_qrules::tri_deg9_qrule(&cs[0], &(ws.data())[0]);
       break;
+    case 10:
+      guard4 = true;
+      break;
+    case 11:
+      guard4 = true;
+      break;
+    default:
+      if (qd > 13) {
+        m2cWarnMsgIdAndTxt("tri_quadrules:UnsupportedDegree",
+                           "Only support up to degree 13");
+      }
+      nqp = ::sfe_qrules::tri_deg13_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::tri_deg13_qrule(&cs[0], &(ws.data())[0]);
+      break;
     }
     break;
   case 3:
-    quad_quadrules(qd, cs, ws);
+    switch (qd) {
+    case 0:
+      guard5 = true;
+      break;
+    case 1:
+      guard5 = true;
+      break;
+    case 2:
+      guard6 = true;
+      break;
+    case 3:
+      guard6 = true;
+      break;
+    case 4:
+      guard7 = true;
+      break;
+    case 5:
+      guard7 = true;
+      break;
+    case 6:
+      guard8 = true;
+      break;
+    case 7:
+      guard8 = true;
+      break;
+    case 8:
+      guard9 = true;
+      break;
+    case 9:
+      guard9 = true;
+      break;
+    case 10:
+      guard10 = true;
+      break;
+    case 11:
+      guard10 = true;
+      break;
+    default:
+      if (qd > 13) {
+        m2cWarnMsgIdAndTxt("bar_quadrules:UnsupportedDegree",
+                           "Only support up to degree 13");
+      }
+      nqp = ::sfe_qrules::quad_deg13_qrule();
+      cs.set_size(nqp, 1);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg13_qrule(&cs[0], &(ws.data())[0]);
+      break;
+    }
     break;
   case 4:
     switch (qd) {
     case 0:
-      guard13 = true;
+      guard11 = true;
       break;
     case 1:
-      guard13 = true;
+      guard11 = true;
       break;
     case 2:
       nqp = ::sfe_qrules::tet_deg2_qrule();
@@ -8989,10 +9125,10 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       ::sfe_qrules::tet_deg3_qrule(&cs[0], &(ws.data())[0]);
       break;
     case 4:
-      guard14 = true;
+      guard12 = true;
       break;
     case 5:
-      guard14 = true;
+      guard12 = true;
       break;
     case 6:
       nqp = ::sfe_qrules::tet_deg6_qrule();
@@ -9006,16 +9142,27 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       ws.set_size(nqp);
       ::sfe_qrules::tet_deg7_qrule(&cs[0], &(ws.data())[0]);
       break;
+    case 8:
+      guard13 = true;
+      break;
+    case 9:
+      guard13 = true;
+      break;
+    case 10:
+      guard14 = true;
+      break;
+    case 11:
+      guard14 = true;
+      break;
     default:
-      if (qd > 8) {
+      if (qd > 13) {
         m2cWarnMsgIdAndTxt("tet_quadrules:UnsupportedDegree",
-                           "Only support up to degree 8");
+                           "Only support up to degree 13");
       }
-      nqp = ::sfe_qrules::tet_deg8_qrule();
+      nqp = ::sfe_qrules::tet_deg13_qrule();
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
-      ::sfe_qrules::tet_deg8_qrule(&cs[0], &(ws.data())[0]);
-      // TODO: Tabulate degree-9 quadrature rule.
+      ::sfe_qrules::tet_deg13_qrule(&cs[0], &(ws.data())[0]);
       break;
     }
     break;
@@ -9084,7 +9231,10 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       ::sfe_qrules::prism_deg2_qrule(&cs[0], &(ws.data())[0]);
       break;
     case 3:
-      guard22 = true;
+      nqp = ::sfe_qrules::prism_deg3_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg3_qrule(&cs[0], &(ws.data())[0]);
       break;
     case 4:
       guard22 = true;
@@ -9098,75 +9248,46 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
     case 7:
       guard23 = true;
       break;
+    case 8:
+      guard24 = true;
+      break;
+    case 9:
+      guard24 = true;
+      break;
+    case 10:
+      guard25 = true;
+      break;
+    case 11:
+      guard25 = true;
+      break;
     default:
-      if (qd > 9) {
+      if (qd > 13) {
         m2cWarnMsgIdAndTxt("prism_quadrules:UnsupportedDegree",
-                           "Only support up to degree 9");
+                           "Only support up to degree 13");
       }
-      nqp = ::sfe_qrules::prism_deg9_qrule();
+      nqp = ::sfe_qrules::prism_deg13_qrule();
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
-      ::sfe_qrules::prism_deg9_qrule(&cs[0], &(ws.data())[0]);
+      ::sfe_qrules::prism_deg13_qrule(&cs[0], &(ws.data())[0]);
       break;
     }
     break;
   default:
     m2cAssert(shape == 5, "Unsupported element type");
-    switch (qd) {
-    case 0:
-      guard1 = true;
-      break;
-    case 1:
-      guard1 = true;
-      break;
-    case 2:
-      nqp = ::sfe_qrules::pyra_deg2_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::pyra_deg2_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 3:
-      nqp = ::sfe_qrules::pyra_deg3_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::pyra_deg3_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 4:
-      guard2 = true;
-      break;
-    case 5:
-      guard2 = true;
-      break;
-    case 6:
-      nqp = ::sfe_qrules::pyra_deg6_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::pyra_deg6_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 7:
-      nqp = ::sfe_qrules::pyra_deg7_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::pyra_deg7_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 8:
-      guard3 = true;
-      break;
-    case 9:
-      guard3 = true;
-      break;
-    default:
-      if (qd > 11) {
-        m2cWarnMsgIdAndTxt("pyra_quadrules:UnsupportedDegree",
-                           "Only support up to degree 11");
-      }
-      nqp = ::sfe_qrules::pyra_deg11_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::pyra_deg11_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    }
+    pyra_quadrules(qd, cs, ws);
     break;
+  }
+  if (guard25) {
+    nqp = ::sfe_qrules::prism_deg11_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::prism_deg11_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard24) {
+    nqp = ::sfe_qrules::prism_deg9_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::prism_deg9_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard23) {
     nqp = ::sfe_qrules::prism_deg7_qrule();
@@ -9223,90 +9344,89 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
     ::sfe_qrules::hexa_deg1_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard14) {
+    nqp = ::sfe_qrules::tet_deg11_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::tet_deg11_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard13) {
+    //  The degree-8 quadrature rule KEAST9 has negative weights, so we do
+    nqp = ::sfe_qrules::tet_deg9_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::tet_deg9_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard12) {
     nqp = ::sfe_qrules::tet_deg5_qrule();
     cs.set_size(nqp, 3);
     ws.set_size(nqp);
     ::sfe_qrules::tet_deg5_qrule(&cs[0], &(ws.data())[0]);
   }
-  if (guard13) {
+  if (guard11) {
     nqp = ::sfe_qrules::tet_deg1_qrule();
     cs.set_size(nqp, 3);
     ws.set_size(nqp);
     ::sfe_qrules::tet_deg1_qrule(&cs[0], &(ws.data())[0]);
   }
-  if (guard12) {
+  if (guard10) {
+    nqp = ::sfe_qrules::quad_deg11_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::quad_deg11_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard9) {
+    nqp = ::sfe_qrules::quad_deg9_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::quad_deg9_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard8) {
+    nqp = ::sfe_qrules::quad_deg7_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::quad_deg7_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard7) {
+    nqp = ::sfe_qrules::quad_deg5_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::quad_deg5_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard6) {
+    nqp = ::sfe_qrules::quad_deg3_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::quad_deg3_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard5) {
+    nqp = ::sfe_qrules::quad_deg1_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard4) {
+    nqp = ::sfe_qrules::tri_deg11_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg11_qrule(&cs[0], &(ws.data())[0]);
+  }
+  if (guard3) {
     nqp = ::sfe_qrules::tri_deg7_qrule();
     cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::tri_deg7_qrule(&cs[0], &(ws.data())[0]);
   }
-  if (guard11) {
+  if (guard2) {
     nqp = ::sfe_qrules::tri_deg4_qrule();
     cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::tri_deg4_qrule(&cs[0], &(ws.data())[0]);
   }
-  if (guard10) {
+  if (guard1) {
     nqp = ::sfe_qrules::tri_deg1_qrule();
     cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::tri_deg1_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard9) {
-    nqp = ::sfe_qrules::bar_deg11_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard8) {
-    nqp = ::sfe_qrules::bar_deg9_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard7) {
-    nqp = ::sfe_qrules::bar_deg7_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg7_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard6) {
-    nqp = ::sfe_qrules::bar_deg5_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg5_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard5) {
-    nqp = ::sfe_qrules::bar_deg3_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg3_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard4) {
-    nqp = ::sfe_qrules::bar_deg1_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg1_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard3) {
-    m2cAssert(qd <= 9, "Only support up to degree 9");
-    nqp = ::sfe_qrules::pyra_deg9_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard2) {
-    m2cAssert(qd <= 5, "Only support up to degree 5");
-    nqp = ::sfe_qrules::pyra_deg5_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg5_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard1) {
-    nqp = ::sfe_qrules::pyra_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg1_qrule(&cs[0], &(ws.data())[0]);
   }
 }
 
