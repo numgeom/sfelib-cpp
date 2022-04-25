@@ -24,6 +24,10 @@ static inline int bar_deg13_qrule();
 
 static inline void bar_deg13_qrule(double cs[7], double ws[7]);
 
+static inline int bar_deg15_qrule();
+
+static inline void bar_deg15_qrule(double cs[8], double ws[8]);
+
 static inline int bar_deg1_qrule();
 
 static inline void bar_deg1_qrule(double *cs, double *ws);
@@ -72,6 +76,14 @@ static inline int hexa_deg9_qrule();
 
 static inline void hexa_deg9_qrule(double cs[375], double ws[125]);
 
+static inline int prism_deg11_qrule();
+
+static inline void prism_deg11_qrule(double cs[504], double ws[168]);
+
+static inline int prism_deg13_qrule();
+
+static inline void prism_deg13_qrule(double cs[777], double ws[259]);
+
 static inline int prism_deg1_qrule();
 
 static inline void prism_deg1_qrule(double cs[3], double *ws);
@@ -79,6 +91,10 @@ static inline void prism_deg1_qrule(double cs[3], double *ws);
 static inline int prism_deg2_qrule();
 
 static inline void prism_deg2_qrule(double cs[18], double ws[6]);
+
+static inline int prism_deg3_qrule();
+
+static inline void prism_deg3_qrule(double cs[36], double ws[12]);
 
 static inline int prism_deg5_qrule();
 
@@ -95,6 +111,10 @@ static inline void prism_deg9_qrule(double cs[285], double ws[95]);
 static inline int pyra_deg11_qrule();
 
 static inline void pyra_deg11_qrule(double cs[648], double ws[216]);
+
+static inline int pyra_deg13_qrule();
+
+static inline void pyra_deg13_qrule(double cs[1029], double ws[343]);
 
 static inline int pyra_deg1_qrule();
 
@@ -152,6 +172,14 @@ static inline int quad_deg9_qrule();
 
 static inline void quad_deg9_qrule(double cs[50], double ws[25]);
 
+static inline int tet_deg11_qrule();
+
+static inline void tet_deg11_qrule(double cs[588], double ws[196]);
+
+static inline int tet_deg13_qrule();
+
+static inline void tet_deg13_qrule(double cs[888], double ws[296]);
+
 static inline int tet_deg1_qrule();
 
 static inline void tet_deg1_qrule(double cs[3], double *ws);
@@ -179,6 +207,18 @@ static inline void tet_deg7_qrule(double cs[93], double ws[31]);
 static inline int tet_deg8_qrule();
 
 static inline void tet_deg8_qrule(double cs[135], double ws[45]);
+
+static inline int tet_deg9_qrule();
+
+static inline void tet_deg9_qrule(double cs[342], double ws[114]);
+
+static inline int tri_deg11_qrule();
+
+static inline void tri_deg11_qrule(double cs[56], double ws[28]);
+
+static inline int tri_deg13_qrule();
+
+static inline void tri_deg13_qrule(double cs[74], double ws[37]);
 
 static inline int tri_deg1_qrule();
 
