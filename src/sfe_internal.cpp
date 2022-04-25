@@ -2,6 +2,7 @@
 // Main developers:
 //     sfelib: Qiao Chen, Xiangmin Jiao, Jacob Jones
 //     momp2cpp: Xiangmin Jiao, Qiao Chen
+//     ahmesh: Qiao Chen, Xiangmin Jiao, Jacob Jones, Vladimir Dedov
 //
 // sfe_internal.cpp
 //
@@ -9098,7 +9099,7 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
                            "Only support up to degree 13");
       }
       nqp = ::sfe_qrules::quad_deg13_qrule();
-      cs.set_size(nqp, 1);
+      cs.set_size(nqp, 2);
       ws.set_size(nqp);
       ::sfe_qrules::quad_deg13_qrule(&cs[0], &(ws.data())[0]);
       break;
@@ -9370,37 +9371,37 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
   }
   if (guard10) {
     nqp = ::sfe_qrules::quad_deg11_qrule();
-    cs.set_size(nqp, 1);
+    cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::quad_deg11_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard9) {
     nqp = ::sfe_qrules::quad_deg9_qrule();
-    cs.set_size(nqp, 1);
+    cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::quad_deg9_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard8) {
     nqp = ::sfe_qrules::quad_deg7_qrule();
-    cs.set_size(nqp, 1);
+    cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::quad_deg7_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard7) {
     nqp = ::sfe_qrules::quad_deg5_qrule();
-    cs.set_size(nqp, 1);
+    cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::quad_deg5_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard6) {
     nqp = ::sfe_qrules::quad_deg3_qrule();
-    cs.set_size(nqp, 1);
+    cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::quad_deg3_qrule(&cs[0], &(ws.data())[0]);
   }
   if (guard5) {
     nqp = ::sfe_qrules::quad_deg1_qrule();
-    cs.set_size(nqp, 1);
+    cs.set_size(nqp, 2);
     ws.set_size(nqp);
     ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
   }
