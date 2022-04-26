@@ -144,13 +144,13 @@ static inline void hexa_gl_64_sfunc(double xi, double eta, double zeta,
 static inline void hexa_gl_64_sfunc(double xi, double eta, double zeta,
                                     double sfvals[64], double sdvals[192]);
 
-static inline void prism_126_sfunc(double sfvals[360]);
+static inline void prism_126_sfunc(double sfvals[378]);
 
 static inline void prism_126_sfunc(double xi, double eta, double zeta,
-                                   double sfvals[120]);
+                                   double sfvals[126]);
 
 static inline void prism_126_sfunc(double xi, double eta, double zeta,
-                                   double sfvals[120], double sdvals[360]);
+                                   double sfvals[126], double sdvals[378]);
 
 static inline void prism_18_sfunc(double sfvals[54]);
 

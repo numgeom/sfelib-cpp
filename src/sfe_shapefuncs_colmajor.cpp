@@ -95,29 +95,22 @@ static const signed char iv11[64]{
 static const signed char iv12[126]{
     1,  2,  3,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
     1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,  5,  6,  7,  8,  9,
-    10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 4,  5,  6,  7,  7,  7,
-    7,  6,  5,  4,  4,  4,  5,  6,  6,  5,  8,  9,  10, 11, 11, 11, 11, 10,
-    9,  8,  8,  8,  9,  10, 10, 9,  12, 13, 14, 15, 15, 15, 15, 14, 13, 12,
-    12, 12, 13, 14, 14, 13, 16, 17, 18, 19, 20, 21, 16, 17, 18, 19, 20, 21,
+    10, 11, 12, 13, 14, 15, 4,  5,  6,  7,  7,  7,  7,  6,  5,  4,  4,  4,
+    5,  6,  6,  5,  8,  9,  10, 11, 11, 11, 11, 10, 9,  8,  8,  8,  9,  10,
+    10, 9,  12, 13, 14, 15, 15, 15, 15, 14, 13, 12, 12, 12, 13, 14, 14, 13,
+    16, 17, 18, 19, 20, 21, 16, 17, 18, 19, 20, 21, 16, 17, 18, 19, 20, 21,
     16, 17, 18, 19, 20, 21, 16, 17, 18, 19, 20, 21, 16, 17, 18, 19, 20, 21};
 
-static const double dv[42]{
-    0.0, 1.0, 0.0, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.0, 0.0, 0.0,
-    0.0, 0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-    0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.2, 0.2, 0.2, 0.4, 0.6, 0.4};
-
-static const signed char iv13[120]{
-    1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4, 5, 6, 3, 4,
-    5, 6, 3, 4, 5, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-    3, 3, 3, 3, 4, 5, 6, 6, 6, 6, 5, 4, 4, 4, 5, 5, 3, 3, 3, 3, 4, 5, 6, 6,
-    6, 6, 5, 4, 4, 4, 5, 5, 3, 3, 3, 3, 4, 5, 6, 6, 6, 6, 5, 4, 4, 4, 5, 5,
-    2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5};
+static const signed char iv13[126]{
+    1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4, 5,
+    6, 3, 4, 5, 6, 3, 4, 5, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    3, 3, 3, 3, 4, 5, 6, 6, 6, 6, 5, 4, 4, 4, 5, 5, 3, 3, 3, 3, 4,
+    5, 6, 6, 6, 6, 5, 4, 4, 4, 5, 5, 3, 3, 3, 3, 4, 5, 6, 6, 6, 6,
+    5, 4, 4, 4, 5, 5, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3,
+    3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6};
 
 static const signed char iv14[18]{1, 2, 3, 1, 2, 3, 4, 5, 6,
                                   1, 2, 3, 4, 5, 6, 4, 5, 6};
-
-static const double dv1[12]{0.0, 1.0, 0.0, 0.5, 0.5, 0.0,
-                            0.0, 0.0, 1.0, 0.0, 0.5, 0.5};
 
 static const signed char iv15[18]{1, 1, 1, 2, 2, 2, 1, 1, 1,
                                   3, 3, 3, 2, 2, 2, 3, 3, 3};
@@ -125,27 +118,6 @@ static const signed char iv15[18]{1, 1, 1, 2, 2, 2, 1, 1, 1,
 static const signed char iv16[40]{1, 2, 3, 1, 2, 3, 4, 5, 6, 7,  8,  9, 1, 1,
                                   2, 2, 3, 3, 4, 5, 6, 7, 8, 9,  10, 4, 5, 5,
                                   4, 6, 7, 7, 6, 8, 9, 9, 8, 10, 10, 10};
-
-static const double dv2[20]{0.0,
-                            1.0,
-                            0.0,
-                            0.33333333333333331,
-                            0.66666666666666663,
-                            0.66666666666666663,
-                            0.33333333333333331,
-                            0.0,
-                            0.0,
-                            0.33333333333333331,
-                            0.0,
-                            0.0,
-                            1.0,
-                            0.0,
-                            0.0,
-                            0.33333333333333331,
-                            0.66666666666666663,
-                            0.66666666666666663,
-                            0.33333333333333331,
-                            0.33333333333333331};
 
 static const signed char iv17[40]{1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 3, 4,
                                   3, 4, 3, 4, 2, 2, 2, 2, 2, 2, 1, 3, 3, 4,
@@ -157,98 +129,10 @@ static const signed char iv18[75]{
     6,  6,  6,  5,  4,  4,  5,  7,  8,  9,  9,  9,  8,  7,  7,  8,  10, 11, 12,
     12, 12, 11, 10, 10, 11, 13, 14, 15, 13, 14, 15, 13, 14, 15, 13, 14, 15};
 
-static const double dv3[30]{0.0,  1.0, 0.0,  0.25, 0.5,  0.75, 0.75, 0.5,
-                            0.25, 0.0, 0.0,  0.0,  0.25, 0.5,  0.25, 0.0,
-                            0.0,  1.0, 0.0,  0.0,  0.0,  0.25, 0.5,  0.75,
-                            0.75, 0.5, 0.25, 0.25, 0.25, 0.5};
-
 static const signed char iv19[75]{
     1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4, 5, 3, 4, 5, 3, 4, 5, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 3, 3, 3, 4, 5, 5, 5, 4, 4, 3, 3, 3, 4, 5,
     5, 5, 4, 4, 3, 3, 3, 4, 5, 5, 5, 4, 4, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5};
-
-static const double dv4[30]{0.0,
-                            1.0,
-                            0.0,
-                            0.1726731580702271,
-                            0.5,
-                            0.82732683075390212,
-                            0.82732683820448272,
-                            0.5,
-                            0.17267316179551739,
-                            0.0,
-                            0.0,
-                            0.0,
-                            0.2165423575799505,
-                            0.56691527366422811,
-                            0.21654236503053109,
-                            0.0,
-                            0.0,
-                            1.0,
-                            0.0,
-                            0.0,
-                            0.0,
-                            0.17267316179551739,
-                            0.5,
-                            0.82732683820448272,
-                            0.82732683535970819,
-                            0.5,
-                            0.17267316552080769,
-                            0.21654236130524079,
-                            0.21654236503053109,
-                            0.56691527366422811};
-
-static const double dv5[20]{0.0,
-                            1.0,
-                            0.0,
-                            0.276393202250021,
-                            0.72360679774997894,
-                            0.72360679774997894,
-                            0.276393202250021,
-                            0.0,
-                            0.0,
-                            0.33333333333333331,
-                            0.0,
-                            0.0,
-                            1.0,
-                            0.0,
-                            0.0,
-                            0.276393202250021,
-                            0.72360679774997894,
-                            0.72360679774997894,
-                            0.276393202250021,
-                            0.33333333333333331};
-
-static const double dv6[30]{0.0,
-                            1.0,
-                            0.0,
-                            0.1726731646460114,
-                            0.5,
-                            0.82732683535398854,
-                            0.82732683535398854,
-                            0.5,
-                            0.1726731646460114,
-                            0.0,
-                            0.0,
-                            0.0,
-                            0.2073451756635909,
-                            0.58530964867281821,
-                            0.2073451756635909,
-                            0.0,
-                            0.0,
-                            1.0,
-                            0.0,
-                            0.0,
-                            0.0,
-                            0.1726731646460114,
-                            0.5,
-                            0.82732683535398854,
-                            0.82732683535398854,
-                            0.5,
-                            0.1726731646460114,
-                            0.2073451756635909,
-                            0.2073451756635909,
-                            0.58530964867281821};
 
 static const signed char iv20[16]{1, 2, 2, 1, 3, 4, 2, 2,
                                   4, 3, 1, 1, 3, 4, 4, 3};
@@ -402,9 +286,9 @@ void bar_4_sfunc(double xi, double sfvals[4], double sdvals[4])
 // bar_5_sfunc - Compute shape functions and their derivatives of bar_5
 void bar_5_sfunc(double sfvals[5])
 {
-  static const double b_dv[5]{0.0, 1.0, 0.25, 0.5, 0.75};
+  static const double dv[5]{0.0, 1.0, 0.25, 0.5, 0.75};
   for (int i{0}; i < 5; i++) {
-    sfvals[i] = b_dv[i];
+    sfvals[i] = dv[i];
   }
 }
 
@@ -468,9 +352,9 @@ void bar_5_sfunc(double xi, double sfvals[5], double sdvals[5])
 // bar_6_sfunc - Compute shape functions and their derivatives of bar_6
 void bar_6_sfunc(double sfvals[6])
 {
-  static const double b_dv[6]{0.0, 1.0, 0.2, 0.4, 0.6, 0.8};
+  static const double dv[6]{0.0, 1.0, 0.2, 0.4, 0.6, 0.8};
   for (int i{0}; i < 6; i++) {
-    sfvals[i] = b_dv[i];
+    sfvals[i] = dv[i];
   }
 }
 
@@ -583,15 +467,15 @@ void bar_6_sfunc(double xi, double sfvals[6], double sdvals[6])
 // bar_7_sfunc - Compute shape functions and their derivatives of bar_7
 void bar_7_sfunc(double sfvals[7])
 {
-  static const double b_dv[7]{0.0,
-                              1.0,
-                              0.16666666666666671,
-                              0.33333333333333331,
-                              0.5,
-                              0.66666666666666663,
-                              0.83333333333333337};
+  static const double dv[7]{0.0,
+                            1.0,
+                            0.16666666666666671,
+                            0.33333333333333331,
+                            0.5,
+                            0.66666666666666663,
+                            0.83333333333333337};
   for (int i{0}; i < 7; i++) {
-    sfvals[i] = b_dv[i];
+    sfvals[i] = dv[i];
   }
 }
 
@@ -753,10 +637,10 @@ void bar_gl_4_sfunc(double xi, double sfvals[4], double sdvals[4])
 // bar_gl_5_sfunc - Compute shape functions and their derivatives of bar_gl_5
 void bar_gl_5_sfunc(double sfvals[5])
 {
-  static const double b_dv[5]{0.0, 1.0, 0.1726731646460114, 0.5,
-                              0.82732683535398854};
+  static const double dv[5]{0.0, 1.0, 0.1726731646460114, 0.5,
+                            0.82732683535398854};
   for (int i{0}; i < 5; i++) {
-    sfvals[i] = b_dv[i];
+    sfvals[i] = dv[i];
   }
 }
 
@@ -824,14 +708,14 @@ void bar_gl_5_sfunc(double xi, double sfvals[5], double sdvals[5])
 // bar_gl_6_sfunc - Compute shape functions and their derivatives of bar_gl_6
 void bar_gl_6_sfunc(double sfvals[6])
 {
-  static const double b_dv[6]{0.0,
-                              1.0,
-                              0.1174723380352677,
-                              0.35738424175967748,
-                              0.64261575824032258,
-                              0.88252766196473231};
+  static const double dv[6]{0.0,
+                            1.0,
+                            0.1174723380352677,
+                            0.35738424175967748,
+                            0.64261575824032258,
+                            0.88252766196473231};
   for (int i{0}; i < 6; i++) {
-    sfvals[i] = b_dv[i];
+    sfvals[i] = dv[i];
   }
 }
 
@@ -934,15 +818,15 @@ void bar_gl_6_sfunc(double xi, double sfvals[6], double sdvals[6])
 // bar_gl_7_sfunc - Compute shape functions and their derivatives of bar_gl_7
 void bar_gl_7_sfunc(double sfvals[7])
 {
-  static const double b_dv[7]{0.0,
-                              1.0,
-                              0.084888051860716532,
-                              0.26557560326464291,
-                              0.5,
-                              0.73442439673535709,
-                              0.91511194813928343};
+  static const double dv[7]{0.0,
+                            1.0,
+                            0.084888051860716532,
+                            0.26557560326464291,
+                            0.5,
+                            0.73442439673535709,
+                            0.91511194813928343};
   for (int i{0}; i < 7; i++) {
-    sfvals[i] = b_dv[i];
+    sfvals[i] = dv[i];
   }
 }
 
@@ -1081,7 +965,7 @@ void bar_gl_7_sfunc(double xi, double sfvals[7], double sdvals[7])
 void hexa_125_sfunc(double sfvals[375])
 {
   double xis[5];
-  bar_5_sfunc(xis);
+  ::sfe_sfuncs::bar_5_sfunc(&xis[0]);
   for (int m{0}; m < 125; m++) {
     sfvals[m] = xis[iv[m] - 1];
     sfvals[m + 125] = xis[iv1[m] - 1];
@@ -1142,7 +1026,7 @@ void hexa_125_sfunc(double xi, double eta, double zeta, double sfvals[125],
 void hexa_216_sfunc(double sfvals[648])
 {
   double xis[6];
-  bar_6_sfunc(xis);
+  ::sfe_sfuncs::bar_6_sfunc(&xis[0]);
   for (int m{0}; m < 216; m++) {
     sfvals[m] = xis[iv3[m] - 1];
     sfvals[m + 216] = xis[iv4[m] - 1];
@@ -1203,7 +1087,7 @@ void hexa_216_sfunc(double xi, double eta, double zeta, double sfvals[216],
 void hexa_27_sfunc(double sfvals[81])
 {
   double xis[3];
-  bar_3_sfunc(xis);
+  ::sfe_sfuncs::bar_3_sfunc(&xis[0]);
   for (int m{0}; m < 27; m++) {
     sfvals[m] = xis[iv6[m] - 1];
     sfvals[m + 27] = xis[iv7[m] - 1];
@@ -1264,7 +1148,7 @@ void hexa_27_sfunc(double xi, double eta, double zeta, double sfvals[27],
 void hexa_64_sfunc(double sfvals[192])
 {
   double xis[4];
-  bar_4_sfunc(xis);
+  ::sfe_sfuncs::bar_4_sfunc(&xis[0]);
   for (int m{0}; m < 64; m++) {
     sfvals[m] = xis[iv9[m] - 1];
     sfvals[m + 64] = xis[iv10[m] - 1];
@@ -1328,7 +1212,7 @@ void hexa_8_sfunc(double sfvals[24])
   static const signed char b_iv1[8]{1, 1, 2, 2, 1, 1, 2, 2};
   static const signed char b_iv2[8]{1, 1, 1, 1, 2, 2, 2, 2};
   double xis[2];
-  bar_2_sfunc(xis);
+  ::sfe_sfuncs::bar_2_sfunc(&xis[0]);
   for (int m{0}; m < 8; m++) {
     sfvals[m] = xis[b_iv[m] - 1];
     sfvals[m + 8] = xis[b_iv1[m] - 1];
@@ -1395,7 +1279,7 @@ void hexa_8_sfunc(double xi, double eta, double zeta, double sfvals[8],
 void hexa_gl_125_sfunc(double sfvals[375])
 {
   double xis[5];
-  bar_gl_5_sfunc(xis);
+  ::sfe_sfuncs::bar_gl_5_sfunc(&xis[0]);
   for (int m{0}; m < 125; m++) {
     sfvals[m] = xis[iv[m] - 1];
     sfvals[m + 125] = xis[iv1[m] - 1];
@@ -1456,7 +1340,7 @@ void hexa_gl_125_sfunc(double xi, double eta, double zeta, double sfvals[125],
 void hexa_gl_216_sfunc(double sfvals[648])
 {
   double xis[6];
-  bar_gl_6_sfunc(xis);
+  ::sfe_sfuncs::bar_gl_6_sfunc(&xis[0]);
   for (int m{0}; m < 216; m++) {
     sfvals[m] = xis[iv3[m] - 1];
     sfvals[m + 216] = xis[iv4[m] - 1];
@@ -1517,7 +1401,7 @@ void hexa_gl_216_sfunc(double xi, double eta, double zeta, double sfvals[216],
 void hexa_gl_64_sfunc(double sfvals[192])
 {
   double xis[4];
-  bar_gl_4_sfunc(xis);
+  ::sfe_sfuncs::bar_gl_4_sfunc(&xis[0]);
   for (int m{0}; m < 64; m++) {
     sfvals[m] = xis[iv9[m] - 1];
     sfvals[m + 64] = xis[iv10[m] - 1];
@@ -1575,34 +1459,36 @@ void hexa_gl_64_sfunc(double xi, double eta, double zeta, double sfvals[64],
 }
 
 // prism_126_sfunc - Quintic prismatic element with equidistant nodes
-void prism_126_sfunc(double sfvals[360])
+void prism_126_sfunc(double sfvals[378])
 {
+  double xietas[42];
   double zetas[6];
-  bar_6_sfunc(zetas);
-  for (int m{0}; m < 120; m++) {
+  ::sfe_sfuncs::tri_21_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_6_sfunc(&zetas[0]);
+  for (int m{0}; m < 126; m++) {
     signed char i;
     i = iv12[m];
-    sfvals[m] = dv[i - 1];
-    sfvals[m + 120] = dv[i + 20];
-    sfvals[m + 240] = zetas[iv13[m] - 1];
+    sfvals[m] = xietas[i - 1];
+    sfvals[m + 126] = xietas[i + 20];
+    sfvals[m + 252] = zetas[iv13[m] - 1];
   }
 }
 
 // prism_126_sfunc - Quintic prismatic element with equidistant nodes
-void prism_126_sfunc(double xi, double eta, double zeta, double sfvals[120])
+void prism_126_sfunc(double xi, double eta, double zeta, double sfvals[126])
 {
   double N_xieta[21];
   double N_zeta[6];
   ::sfe_sfuncs::tri_21_sfunc(xi, eta, &N_xieta[0]);
   ::sfe_sfuncs::bar_6_sfunc(zeta, &N_zeta[0]);
-  for (int m{0}; m < 120; m++) {
+  for (int m{0}; m < 126; m++) {
     sfvals[m] = N_xieta[iv12[m] - 1] * N_zeta[iv13[m] - 1];
   }
 }
 
 // prism_126_sfunc - Quintic prismatic element with equidistant nodes
-void prism_126_sfunc(double xi, double eta, double zeta, double sfvals[120],
-                     double sdvals[360])
+void prism_126_sfunc(double xi, double eta, double zeta, double sfvals[126],
+                     double sdvals[378])
 {
   double sdvals_xieta[42];
   double N_xieta[21];
@@ -1610,7 +1496,7 @@ void prism_126_sfunc(double xi, double eta, double zeta, double sfvals[120],
   double sdvals_zeta[6];
   ::sfe_sfuncs::tri_21_sfunc(xi, eta, &N_xieta[0], &sdvals_xieta[0]);
   ::sfe_sfuncs::bar_6_sfunc(zeta, &N_zeta[0], &sdvals_zeta[0]);
-  for (int m{0}; m < 120; m++) {
+  for (int m{0}; m < 126; m++) {
     double b_sfvals_tmp;
     double c_sfvals_tmp;
     int sfvals_tmp;
@@ -1621,21 +1507,23 @@ void prism_126_sfunc(double xi, double eta, double zeta, double sfvals[120],
     c_sfvals_tmp = N_xieta[i - 1];
     sfvals[m] = c_sfvals_tmp * b_sfvals_tmp;
     sdvals[m] = sdvals_xieta[i - 1] * b_sfvals_tmp;
-    sdvals[m + 120] = sdvals_xieta[i + 20] * b_sfvals_tmp;
-    sdvals[m + 240] = c_sfvals_tmp * sdvals_zeta[sfvals_tmp];
+    sdvals[m + 126] = sdvals_xieta[i + 20] * b_sfvals_tmp;
+    sdvals[m + 252] = c_sfvals_tmp * sdvals_zeta[sfvals_tmp];
   }
 }
 
 // prism_18_sfunc - Quadratic prismatic element
 void prism_18_sfunc(double sfvals[54])
 {
+  double xietas[12];
   double zetas[3];
-  bar_3_sfunc(zetas);
+  ::sfe_sfuncs::tri_6_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_3_sfunc(&zetas[0]);
   for (int m{0}; m < 18; m++) {
     signed char i;
     i = iv14[m];
-    sfvals[m] = dv1[i - 1];
-    sfvals[m + 18] = dv1[i + 5];
+    sfvals[m] = xietas[i - 1];
+    sfvals[m + 18] = xietas[i + 5];
     sfvals[m + 36] = zetas[iv15[m] - 1];
   }
 }
@@ -1681,13 +1569,15 @@ void prism_18_sfunc(double xi, double eta, double zeta, double sfvals[18],
 // prism_40_sfunc - Cubic prismatic element
 void prism_40_sfunc(double sfvals[120])
 {
+  double xietas[20];
   double zetas[4];
-  bar_4_sfunc(zetas);
+  ::sfe_sfuncs::tri_10_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_4_sfunc(&zetas[0]);
   for (int m{0}; m < 40; m++) {
     signed char i;
     i = iv16[m];
-    sfvals[m] = dv2[i - 1];
-    sfvals[m + 40] = dv2[i + 9];
+    sfvals[m] = xietas[i - 1];
+    sfvals[m + 40] = xietas[i + 9];
     sfvals[m + 80] = zetas[iv17[m] - 1];
   }
 }
@@ -1735,9 +1625,10 @@ void prism_6_sfunc(double sfvals[18])
 {
   static const signed char b_iv[6]{1, 2, 3, 1, 2, 3};
   static const signed char b_iv1[6]{1, 1, 1, 2, 2, 2};
-  static const signed char xietas[6]{0, 1, 0, 0, 0, 1};
+  double xietas[6];
   double zetas[2];
-  bar_2_sfunc(zetas);
+  ::sfe_sfuncs::tri_3_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_2_sfunc(&zetas[0]);
   for (int m{0}; m < 6; m++) {
     signed char i;
     i = b_iv[m];
@@ -1792,13 +1683,15 @@ void prism_6_sfunc(double xi, double eta, double zeta, double sfvals[6],
 // prism_75_sfunc - Quartic prismatic element with equidistant nodes
 void prism_75_sfunc(double sfvals[225])
 {
+  double xietas[30];
   double zetas[5];
-  bar_5_sfunc(zetas);
+  ::sfe_sfuncs::tri_15_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_5_sfunc(&zetas[0]);
   for (int m{0}; m < 75; m++) {
     signed char i;
     i = iv18[m];
-    sfvals[m] = dv3[i - 1];
-    sfvals[m + 75] = dv3[i + 14];
+    sfvals[m] = xietas[i - 1];
+    sfvals[m + 75] = xietas[i + 14];
     sfvals[m + 150] = zetas[iv19[m] - 1];
   }
 }
@@ -1844,13 +1737,15 @@ void prism_75_sfunc(double xi, double eta, double zeta, double sfvals[75],
 // prism_fek_75_sfunc - Quartic prismatic element with Fekete points
 void prism_fek_75_sfunc(double sfvals[225])
 {
+  double xietas[30];
   double zetas[5];
-  bar_gl_5_sfunc(zetas);
+  ::sfe_sfuncs::tri_fek_15_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_gl_5_sfunc(&zetas[0]);
   for (int m{0}; m < 75; m++) {
     signed char i;
     i = iv18[m];
-    sfvals[m] = dv4[i - 1];
-    sfvals[m + 75] = dv4[i + 14];
+    sfvals[m] = xietas[i - 1];
+    sfvals[m + 75] = xietas[i + 14];
     sfvals[m + 150] = zetas[iv19[m] - 1];
   }
 }
@@ -1896,13 +1791,15 @@ void prism_fek_75_sfunc(double xi, double eta, double zeta, double sfvals[75],
 // prism_gl_40_sfunc - Quadratic prismatic element with Gauss-Lobatto nodes
 void prism_gl_40_sfunc(double sfvals[120])
 {
+  double xietas[20];
   double zetas[4];
-  bar_gl_4_sfunc(zetas);
+  ::sfe_sfuncs::tri_gl_10_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_gl_4_sfunc(&zetas[0]);
   for (int m{0}; m < 40; m++) {
     signed char i;
     i = iv16[m];
-    sfvals[m] = dv5[i - 1];
-    sfvals[m + 40] = dv5[i + 9];
+    sfvals[m] = xietas[i - 1];
+    sfvals[m + 40] = xietas[i + 9];
     sfvals[m + 80] = zetas[iv17[m] - 1];
   }
 }
@@ -1948,13 +1845,15 @@ void prism_gl_40_sfunc(double xi, double eta, double zeta, double sfvals[40],
 // prism_gl_75_sfunc - Quartic prismatic element with Gauss-Lobatto nodes
 void prism_gl_75_sfunc(double sfvals[225])
 {
+  double xietas[30];
   double zetas[5];
-  bar_gl_5_sfunc(zetas);
+  ::sfe_sfuncs::tri_gl_15_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_gl_5_sfunc(&zetas[0]);
   for (int m{0}; m < 75; m++) {
     signed char i;
     i = iv18[m];
-    sfvals[m] = dv6[i - 1];
-    sfvals[m + 75] = dv6[i + 14];
+    sfvals[m] = xietas[i - 1];
+    sfvals[m + 75] = xietas[i + 14];
     sfvals[m + 150] = zetas[iv19[m] - 1];
   }
 }
@@ -1999,12 +1898,12 @@ void prism_gl_75_sfunc(double xi, double eta, double zeta, double sfvals[75],
 
 void pyra_14_sfunc(double sfvals[42])
 {
-  static const double b_dv[42]{
-      -1.0, 1.0,  1.0,  -1.0, 0.0,  0.0, 1.0, 0.0, -1.0, -0.5, 0.5,
-      0.5,  -0.5, 0.0,  -1.0, -1.0, 1.0, 1.0, 0.0, -1.0, 0.0,  1.0,
-      0.0,  -0.5, -0.5, 0.5,  0.5,  0.0, 0.0, 0.0, 0.0,  0.0,  1.0,
-      0.0,  0.0,  0.0,  0.0,  0.5,  0.5, 0.5, 0.5, 0.0};
-  std::copy(&b_dv[0], &b_dv[42], &sfvals[0]);
+  static const double dv[42]{-1.0, 1.0,  1.0, -1.0, 0.0, 0.0,  1.0,  0.0, -1.0,
+                             -0.5, 0.5,  0.5, -0.5, 0.0, -1.0, -1.0, 1.0, 1.0,
+                             0.0,  -1.0, 0.0, 1.0,  0.0, -0.5, -0.5, 0.5, 0.5,
+                             0.0,  0.0,  0.0, 0.0,  0.0, 1.0,  0.0,  0.0, 0.0,
+                             0.0,  0.5,  0.5, 0.5,  0.5, 0.0};
+  std::copy(&dv[0], &dv[42], &sfvals[0]);
 }
 
 // pyra_14_sfunc - Compute shape functions and their derivatives of pyra_14
@@ -2260,97 +2159,97 @@ void pyra_14_sfunc(double xi, double eta, double zeta, double sfvals[14],
 
 void pyra_30_sfunc(double sfvals[90])
 {
-  static const double b_dv[90]{-1.0,
-                               1.0,
-                               1.0,
-                               -1.0,
-                               0.0,
-                               -0.33333333333333331,
-                               0.33333333333333331,
-                               1.0,
-                               1.0,
-                               0.33333333333333331,
-                               -0.33333333333333331,
-                               -1.0,
-                               -1.0,
-                               -0.66666666666666663,
-                               -0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               -0.66666666666666663,
-                               -0.33333333333333331,
-                               -0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               -0.33333333333333331,
-                               0.0,
-                               0.66666666666666663,
-                               0.0,
-                               -0.66666666666666663,
-                               0.0,
-                               -1.0,
-                               -1.0,
-                               1.0,
-                               1.0,
-                               0.0,
-                               -1.0,
-                               -1.0,
-                               -0.33333333333333331,
-                               0.33333333333333331,
-                               1.0,
-                               1.0,
-                               0.33333333333333331,
-                               -0.33333333333333331,
-                               -0.66666666666666663,
-                               -0.33333333333333331,
-                               -0.66666666666666663,
-                               -0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               -0.33333333333333331,
-                               -0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               -0.66666666666666663,
-                               0.0,
-                               0.66666666666666663,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331};
-  std::copy(&b_dv[0], &b_dv[90], &sfvals[0]);
+  static const double dv[90]{-1.0,
+                             1.0,
+                             1.0,
+                             -1.0,
+                             0.0,
+                             -0.33333333333333331,
+                             0.33333333333333331,
+                             1.0,
+                             1.0,
+                             0.33333333333333331,
+                             -0.33333333333333331,
+                             -1.0,
+                             -1.0,
+                             -0.66666666666666663,
+                             -0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             -0.66666666666666663,
+                             -0.33333333333333331,
+                             -0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             -0.33333333333333331,
+                             0.0,
+                             0.66666666666666663,
+                             0.0,
+                             -0.66666666666666663,
+                             0.0,
+                             -1.0,
+                             -1.0,
+                             1.0,
+                             1.0,
+                             0.0,
+                             -1.0,
+                             -1.0,
+                             -0.33333333333333331,
+                             0.33333333333333331,
+                             1.0,
+                             1.0,
+                             0.33333333333333331,
+                             -0.33333333333333331,
+                             -0.66666666666666663,
+                             -0.33333333333333331,
+                             -0.66666666666666663,
+                             -0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             -0.33333333333333331,
+                             -0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             -0.66666666666666663,
+                             0.0,
+                             0.66666666666666663,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331};
+  std::copy(&dv[0], &dv[90], &sfvals[0]);
 }
 
 // pyra_30_sfunc - Compute shape functions and their derivatives of pyra_30
@@ -3554,7 +3453,7 @@ void pyra_30_sfunc(double xi, double eta, double zeta, double sfvals[30],
 
 void pyra_55_sfunc(double sfvals[165])
 {
-  static const double b_dv[165]{
+  static const double dv[165]{
       -1.0,  1.0,   1.0,  -1.0,  0.0,   -0.5,  0.0,   0.5,   1.0,   1.0,   1.0,
       0.5,   0.0,   -0.5, -1.0,  -1.0,  -1.0,  -0.75, -0.5,  -0.25, 0.75,  0.5,
       0.25,  0.75,  0.5,  0.25,  -0.75, -0.5,  -0.25, -0.5,  0.0,   0.5,   0.5,
@@ -3570,7 +3469,7 @@ void pyra_55_sfunc(double sfvals[165])
       0.75,  0.25,  0.5,  0.75,  0.25,  0.5,   0.75,  0.0,   0.0,   0.0,   0.0,
       0.0,   0.0,   0.0,  0.0,   0.0,   0.25,  0.25,  0.5,   0.25,  0.25,  0.5,
       0.25,  0.25,  0.5,  0.25,  0.25,  0.5,   0.25,  0.25,  0.25,  0.25,  0.5};
-  std::copy(&b_dv[0], &b_dv[165], &sfvals[0]);
+  std::copy(&dv[0], &dv[165], &sfvals[0]);
 }
 
 // pyra_55_sfunc - Compute shape functions and their derivatives of pyra_55
@@ -7869,7 +7768,7 @@ void pyra_5_sfunc(double xi, double eta, double zeta, double sfvals[5],
 
 void pyra_91_sfunc(double sfvals[273])
 {
-  static const double b_dv[273]{
+  static const double dv[273]{
       -1.0, 1.0,  1.0,  -1.0, 0.0,  -0.6, -0.2, 0.2,  0.6,  1.0,  1.0,  1.0,
       1.0,  0.6,  0.2,  -0.2, -0.6, -1.0, -1.0, -1.0, -1.0, -0.8, -0.6, -0.4,
       -0.2, 0.8,  0.6,  0.4,  0.2,  0.8,  0.6,  0.4,  0.2,  -0.8, -0.6, -0.4,
@@ -7893,7 +7792,7 @@ void pyra_91_sfunc(double sfvals[273])
       0.4,  0.2,  0.2,  0.2,  0.4,  0.6,  0.4,  0.2,  0.2,  0.2,  0.4,  0.6,
       0.4,  0.2,  0.2,  0.2,  0.4,  0.6,  0.4,  0.2,  0.2,  0.2,  0.2,  0.2,
       0.2,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.6,  0.2};
-  std::copy(&b_dv[0], &b_dv[273], &sfvals[0]);
+  std::copy(&dv[0], &dv[273], &sfvals[0]);
 }
 
 // pyra_91_sfunc - Compute shape functions and their derivatives of pyra_91
@@ -24885,172 +24784,172 @@ void pyra_91_sfunc(double xi, double eta, double zeta, double sfvals[91],
 
 void pyra_fek_55_sfunc(double sfvals[165])
 {
-  static const double b_dv[165]{-1.0,
-                                1.0,
-                                1.0,
-                                -1.0,
-                                0.0,
-                                -0.6546536707079772,
-                                0.0,
-                                0.6546536707079772,
-                                1.0,
-                                1.0,
-                                1.0,
-                                0.6546536707079772,
-                                0.0,
-                                -0.6546536707079772,
-                                -1.0,
-                                -1.0,
-                                -1.0,
-                                -0.82732683535398854,
-                                -0.5,
-                                -0.1726731646460114,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                -0.82732683535398854,
-                                -0.5,
-                                -0.1726731646460114,
-                                -0.6546536707079772,
-                                0.0,
-                                0.6546536707079772,
-                                0.6546536707079772,
-                                0.6546536707079772,
-                                -0.6546536707079772,
-                                0.0,
-                                0.0,
-                                -0.6546536707079772,
-                                -0.35037291049634223,
-                                0.35037291049634223,
-                                0.0,
-                                0.78345763683211411,
-                                0.78345763683211411,
-                                0.43308472633577189,
-                                0.35037291049634223,
-                                -0.35037291049634223,
-                                0.0,
-                                -0.78345763683211411,
-                                -0.78345763683211411,
-                                -0.43308472633577189,
-                                -0.34353372214661287,
-                                0.34353372214661287,
-                                0.34353372214661287,
-                                -0.34353372214661287,
-                                0.0,
-                                -1.0,
-                                -1.0,
-                                1.0,
-                                1.0,
-                                0.0,
-                                -1.0,
-                                -1.0,
-                                -1.0,
-                                -0.6546536707079772,
-                                0.0,
-                                0.6546536707079772,
-                                1.0,
-                                1.0,
-                                1.0,
-                                0.6546536707079772,
-                                0.0,
-                                -0.6546536707079772,
-                                -0.82732683535398854,
-                                -0.5,
-                                -0.1726731646460114,
-                                -0.82732683535398854,
-                                -0.5,
-                                -0.1726731646460114,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                -0.6546536707079772,
-                                -0.6546536707079772,
-                                -0.6546536707079772,
-                                0.0,
-                                0.6546536707079772,
-                                0.6546536707079772,
-                                0.6546536707079772,
-                                0.0,
-                                0.0,
-                                -0.78345763683211411,
-                                -0.78345763683211411,
-                                -0.43308472633577189,
-                                -0.35037291049634223,
-                                0.35037291049634223,
-                                0.0,
-                                0.78345763683211411,
-                                0.78345763683211411,
-                                0.43308472633577189,
-                                0.35037291049634223,
-                                -0.35037291049634223,
-                                0.0,
-                                -0.34353372214661287,
-                                -0.34353372214661287,
-                                0.34353372214661287,
-                                0.34353372214661287,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.21654236316788589,
-                                0.21654236316788589,
-                                0.56691527366422811,
-                                0.21654236316788589,
-                                0.21654236316788589,
-                                0.56691527366422811,
-                                0.21654236316788589,
-                                0.21654236316788589,
-                                0.56691527366422811,
-                                0.21654236316788589,
-                                0.21654236316788589,
-                                0.56691527366422811,
-                                0.23183358740807039,
-                                0.23183358740807039,
-                                0.23183358740807039,
-                                0.23183358740807039,
-                                0.57266760543509443};
-  std::copy(&b_dv[0], &b_dv[165], &sfvals[0]);
+  static const double dv[165]{-1.0,
+                              1.0,
+                              1.0,
+                              -1.0,
+                              0.0,
+                              -0.6546536707079772,
+                              0.0,
+                              0.6546536707079772,
+                              1.0,
+                              1.0,
+                              1.0,
+                              0.6546536707079772,
+                              0.0,
+                              -0.6546536707079772,
+                              -1.0,
+                              -1.0,
+                              -1.0,
+                              -0.82732683535398854,
+                              -0.5,
+                              -0.1726731646460114,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              -0.82732683535398854,
+                              -0.5,
+                              -0.1726731646460114,
+                              -0.6546536707079772,
+                              0.0,
+                              0.6546536707079772,
+                              0.6546536707079772,
+                              0.6546536707079772,
+                              -0.6546536707079772,
+                              0.0,
+                              0.0,
+                              -0.6546536707079772,
+                              -0.35037291049634223,
+                              0.35037291049634223,
+                              0.0,
+                              0.78345763683211411,
+                              0.78345763683211411,
+                              0.43308472633577189,
+                              0.35037291049634223,
+                              -0.35037291049634223,
+                              0.0,
+                              -0.78345763683211411,
+                              -0.78345763683211411,
+                              -0.43308472633577189,
+                              -0.34353372214661287,
+                              0.34353372214661287,
+                              0.34353372214661287,
+                              -0.34353372214661287,
+                              0.0,
+                              -1.0,
+                              -1.0,
+                              1.0,
+                              1.0,
+                              0.0,
+                              -1.0,
+                              -1.0,
+                              -1.0,
+                              -0.6546536707079772,
+                              0.0,
+                              0.6546536707079772,
+                              1.0,
+                              1.0,
+                              1.0,
+                              0.6546536707079772,
+                              0.0,
+                              -0.6546536707079772,
+                              -0.82732683535398854,
+                              -0.5,
+                              -0.1726731646460114,
+                              -0.82732683535398854,
+                              -0.5,
+                              -0.1726731646460114,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              -0.6546536707079772,
+                              -0.6546536707079772,
+                              -0.6546536707079772,
+                              0.0,
+                              0.6546536707079772,
+                              0.6546536707079772,
+                              0.6546536707079772,
+                              0.0,
+                              0.0,
+                              -0.78345763683211411,
+                              -0.78345763683211411,
+                              -0.43308472633577189,
+                              -0.35037291049634223,
+                              0.35037291049634223,
+                              0.0,
+                              0.78345763683211411,
+                              0.78345763683211411,
+                              0.43308472633577189,
+                              0.35037291049634223,
+                              -0.35037291049634223,
+                              0.0,
+                              -0.34353372214661287,
+                              -0.34353372214661287,
+                              0.34353372214661287,
+                              0.34353372214661287,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              1.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.21654236316788589,
+                              0.21654236316788589,
+                              0.56691527366422811,
+                              0.21654236316788589,
+                              0.21654236316788589,
+                              0.56691527366422811,
+                              0.21654236316788589,
+                              0.21654236316788589,
+                              0.56691527366422811,
+                              0.21654236316788589,
+                              0.21654236316788589,
+                              0.56691527366422811,
+                              0.23183358740807039,
+                              0.23183358740807039,
+                              0.23183358740807039,
+                              0.23183358740807039,
+                              0.57266760543509443};
+  std::copy(&dv[0], &dv[165], &sfvals[0]);
 }
 
 // pyra_fek_55_sfunc - Compute shape functions and their derivatives of
@@ -30880,97 +30779,97 @@ void pyra_fek_55_sfunc(double xi, double eta, double zeta, double sfvals[55],
 
 void pyra_gl_30_sfunc(double sfvals[90])
 {
-  static const double b_dv[90]{-1.0,
-                               1.0,
-                               1.0,
-                               -1.0,
-                               0.0,
-                               -0.44721359549995793,
-                               0.44721359549995793,
-                               1.0,
-                               1.0,
-                               0.44721359549995793,
-                               -0.44721359549995793,
-                               -1.0,
-                               -1.0,
-                               -0.72360679774997894,
-                               -0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               -0.72360679774997894,
-                               -0.276393202250021,
-                               -0.44721359549995793,
-                               0.44721359549995793,
-                               0.44721359549995793,
-                               -0.44721359549995793,
-                               0.0,
-                               0.66666666666666663,
-                               0.0,
-                               -0.66666666666666663,
-                               0.0,
-                               -1.0,
-                               -1.0,
-                               1.0,
-                               1.0,
-                               0.0,
-                               -1.0,
-                               -1.0,
-                               -0.44721359549995793,
-                               0.44721359549995793,
-                               1.0,
-                               1.0,
-                               0.44721359549995793,
-                               -0.44721359549995793,
-                               -0.72360679774997894,
-                               -0.276393202250021,
-                               -0.72360679774997894,
-                               -0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               -0.44721359549995793,
-                               -0.44721359549995793,
-                               0.44721359549995793,
-                               0.44721359549995793,
-                               -0.66666666666666663,
-                               0.0,
-                               0.66666666666666663,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.39371980676328511};
-  std::copy(&b_dv[0], &b_dv[90], &sfvals[0]);
+  static const double dv[90]{-1.0,
+                             1.0,
+                             1.0,
+                             -1.0,
+                             0.0,
+                             -0.44721359549995793,
+                             0.44721359549995793,
+                             1.0,
+                             1.0,
+                             0.44721359549995793,
+                             -0.44721359549995793,
+                             -1.0,
+                             -1.0,
+                             -0.72360679774997894,
+                             -0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             -0.72360679774997894,
+                             -0.276393202250021,
+                             -0.44721359549995793,
+                             0.44721359549995793,
+                             0.44721359549995793,
+                             -0.44721359549995793,
+                             0.0,
+                             0.66666666666666663,
+                             0.0,
+                             -0.66666666666666663,
+                             0.0,
+                             -1.0,
+                             -1.0,
+                             1.0,
+                             1.0,
+                             0.0,
+                             -1.0,
+                             -1.0,
+                             -0.44721359549995793,
+                             0.44721359549995793,
+                             1.0,
+                             1.0,
+                             0.44721359549995793,
+                             -0.44721359549995793,
+                             -0.72360679774997894,
+                             -0.276393202250021,
+                             -0.72360679774997894,
+                             -0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             -0.44721359549995793,
+                             -0.44721359549995793,
+                             0.44721359549995793,
+                             0.44721359549995793,
+                             -0.66666666666666663,
+                             0.0,
+                             0.66666666666666663,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.39371980676328511};
+  std::copy(&dv[0], &dv[90], &sfvals[0]);
 }
 
 // pyra_gl_30_sfunc - Compute shape functions and their derivatives of
@@ -32518,172 +32417,172 @@ void pyra_gl_30_sfunc(double xi, double eta, double zeta, double sfvals[30],
 
 void pyra_gl_55_sfunc(double sfvals[165])
 {
-  static const double b_dv[165]{-1.0,
-                                1.0,
-                                1.0,
-                                -1.0,
-                                0.0,
-                                -0.6546536707079772,
-                                0.0,
-                                0.6546536707079772,
-                                1.0,
-                                1.0,
-                                1.0,
-                                0.6546536707079772,
-                                0.0,
-                                -0.6546536707079772,
-                                -1.0,
-                                -1.0,
-                                -1.0,
-                                -0.82732683535398854,
-                                -0.5,
-                                -0.1726731646460114,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                -0.82732683535398854,
-                                -0.5,
-                                -0.1726731646460114,
-                                -0.6546536707079772,
-                                0.0,
-                                0.6546536707079772,
-                                0.6546536707079772,
-                                0.6546536707079772,
-                                0.0,
-                                -0.6546536707079772,
-                                -0.6546536707079772,
-                                0.0,
-                                -0.37796447300922731,
-                                0.37796447300922731,
-                                0.0,
-                                0.7926548243364091,
-                                0.7926548243364091,
-                                0.41469035132718179,
-                                0.37796447300922731,
-                                -0.37796447300922731,
-                                0.0,
-                                -0.7926548243364091,
-                                -0.7926548243364091,
-                                -0.41469035132718179,
-                                -0.38473289347159478,
-                                0.38473289347159478,
-                                0.38473289347159478,
-                                -0.38473289347159478,
-                                0.0,
-                                -1.0,
-                                -1.0,
-                                1.0,
-                                1.0,
-                                0.0,
-                                -1.0,
-                                -1.0,
-                                -1.0,
-                                -0.6546536707079772,
-                                0.0,
-                                0.6546536707079772,
-                                1.0,
-                                1.0,
-                                1.0,
-                                0.6546536707079772,
-                                0.0,
-                                -0.6546536707079772,
-                                -0.82732683535398854,
-                                -0.5,
-                                -0.1726731646460114,
-                                -0.82732683535398854,
-                                -0.5,
-                                -0.1726731646460114,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                -0.6546536707079772,
-                                -0.6546536707079772,
-                                -0.6546536707079772,
-                                0.0,
-                                0.6546536707079772,
-                                0.6546536707079772,
-                                0.6546536707079772,
-                                0.0,
-                                0.0,
-                                -0.7926548243364091,
-                                -0.7926548243364091,
-                                -0.41469035132718179,
-                                -0.37796447300922731,
-                                0.37796447300922731,
-                                0.0,
-                                0.7926548243364091,
-                                0.7926548243364091,
-                                0.41469035132718179,
-                                0.37796447300922731,
-                                -0.37796447300922731,
-                                0.0,
-                                -0.38473289347159478,
-                                -0.38473289347159478,
-                                0.38473289347159478,
-                                0.38473289347159478,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.18503488185862371,
-                                0.18503488185862371,
-                                0.18503488185862371,
-                                0.18503488185862371,
-                                0.52557206442931081};
-  std::copy(&b_dv[0], &b_dv[165], &sfvals[0]);
+  static const double dv[165]{-1.0,
+                              1.0,
+                              1.0,
+                              -1.0,
+                              0.0,
+                              -0.6546536707079772,
+                              0.0,
+                              0.6546536707079772,
+                              1.0,
+                              1.0,
+                              1.0,
+                              0.6546536707079772,
+                              0.0,
+                              -0.6546536707079772,
+                              -1.0,
+                              -1.0,
+                              -1.0,
+                              -0.82732683535398854,
+                              -0.5,
+                              -0.1726731646460114,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              -0.82732683535398854,
+                              -0.5,
+                              -0.1726731646460114,
+                              -0.6546536707079772,
+                              0.0,
+                              0.6546536707079772,
+                              0.6546536707079772,
+                              0.6546536707079772,
+                              0.0,
+                              -0.6546536707079772,
+                              -0.6546536707079772,
+                              0.0,
+                              -0.37796447300922731,
+                              0.37796447300922731,
+                              0.0,
+                              0.7926548243364091,
+                              0.7926548243364091,
+                              0.41469035132718179,
+                              0.37796447300922731,
+                              -0.37796447300922731,
+                              0.0,
+                              -0.7926548243364091,
+                              -0.7926548243364091,
+                              -0.41469035132718179,
+                              -0.38473289347159478,
+                              0.38473289347159478,
+                              0.38473289347159478,
+                              -0.38473289347159478,
+                              0.0,
+                              -1.0,
+                              -1.0,
+                              1.0,
+                              1.0,
+                              0.0,
+                              -1.0,
+                              -1.0,
+                              -1.0,
+                              -0.6546536707079772,
+                              0.0,
+                              0.6546536707079772,
+                              1.0,
+                              1.0,
+                              1.0,
+                              0.6546536707079772,
+                              0.0,
+                              -0.6546536707079772,
+                              -0.82732683535398854,
+                              -0.5,
+                              -0.1726731646460114,
+                              -0.82732683535398854,
+                              -0.5,
+                              -0.1726731646460114,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              -0.6546536707079772,
+                              -0.6546536707079772,
+                              -0.6546536707079772,
+                              0.0,
+                              0.6546536707079772,
+                              0.6546536707079772,
+                              0.6546536707079772,
+                              0.0,
+                              0.0,
+                              -0.7926548243364091,
+                              -0.7926548243364091,
+                              -0.41469035132718179,
+                              -0.37796447300922731,
+                              0.37796447300922731,
+                              0.0,
+                              0.7926548243364091,
+                              0.7926548243364091,
+                              0.41469035132718179,
+                              0.37796447300922731,
+                              -0.37796447300922731,
+                              0.0,
+                              -0.38473289347159478,
+                              -0.38473289347159478,
+                              0.38473289347159478,
+                              0.38473289347159478,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              1.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.18503488185862371,
+                              0.18503488185862371,
+                              0.18503488185862371,
+                              0.18503488185862371,
+                              0.52557206442931081};
+  std::copy(&dv[0], &dv[165], &sfvals[0]);
 }
 
 // pyra_gl_55_sfunc - Compute shape functions and their derivatives of
@@ -38522,7 +38421,7 @@ void pyra_gl_55_sfunc(double xi, double eta, double zeta, double sfvals[55],
 void quad_16_sfunc(double sfvals[32])
 {
   double xis[4];
-  bar_4_sfunc(xis);
+  ::sfe_sfuncs::bar_4_sfunc(&xis[0]);
   for (int m{0}; m < 16; m++) {
     sfvals[m] = xis[iv20[m] - 1];
     sfvals[m + 16] = xis[iv21[m] - 1];
@@ -38569,7 +38468,7 @@ void quad_16_sfunc(double xi, double eta, double sfvals[16], double sdvals[32])
 void quad_25_sfunc(double sfvals[50])
 {
   double xis[5];
-  bar_5_sfunc(xis);
+  ::sfe_sfuncs::bar_5_sfunc(&xis[0]);
   for (int m{0}; m < 25; m++) {
     sfvals[m] = xis[iv22[m] - 1];
     sfvals[m + 25] = xis[iv23[m] - 1];
@@ -38616,7 +38515,7 @@ void quad_25_sfunc(double xi, double eta, double sfvals[25], double sdvals[50])
 void quad_36_sfunc(double sfvals[72])
 {
   double xis[6];
-  bar_6_sfunc(xis);
+  ::sfe_sfuncs::bar_6_sfunc(&xis[0]);
   for (int m{0}; m < 36; m++) {
     sfvals[m] = xis[iv24[m] - 1];
     sfvals[m + 36] = xis[iv25[m] - 1];
@@ -38663,7 +38562,7 @@ void quad_36_sfunc(double xi, double eta, double sfvals[36], double sdvals[72])
 void quad_49_sfunc(double sfvals[98])
 {
   double xis[7];
-  bar_7_sfunc(xis);
+  ::sfe_sfuncs::bar_7_sfunc(&xis[0]);
   for (int m{0}; m < 49; m++) {
     sfvals[m] = xis[iv26[m] - 1];
     sfvals[m + 49] = xis[iv27[m] - 1];
@@ -38710,7 +38609,7 @@ void quad_49_sfunc(double xi, double eta, double sfvals[49], double sdvals[98])
 void quad_4_sfunc(double sfvals[8])
 {
   double xis[2];
-  bar_2_sfunc(xis);
+  ::sfe_sfuncs::bar_2_sfunc(&xis[0]);
   sfvals[0] = xis[0];
   sfvals[4] = xis[0];
   sfvals[1] = xis[1];
@@ -38761,7 +38660,7 @@ void quad_4_sfunc(double xi, double eta, double sfvals[4], double sdvals[8])
 void quad_9_sfunc(double sfvals[18])
 {
   double xis[3];
-  bar_3_sfunc(xis);
+  ::sfe_sfuncs::bar_3_sfunc(&xis[0]);
   for (int m{0}; m < 9; m++) {
     sfvals[m] = xis[iv28[m] - 1];
     sfvals[m + 9] = xis[iv29[m] - 1];
@@ -38808,7 +38707,7 @@ void quad_9_sfunc(double xi, double eta, double sfvals[9], double sdvals[18])
 void quad_gl_16_sfunc(double sfvals[32])
 {
   double xis[4];
-  bar_gl_4_sfunc(xis);
+  ::sfe_sfuncs::bar_gl_4_sfunc(&xis[0]);
   for (int m{0}; m < 16; m++) {
     sfvals[m] = xis[iv20[m] - 1];
     sfvals[m + 16] = xis[iv21[m] - 1];
@@ -38856,7 +38755,7 @@ void quad_gl_16_sfunc(double xi, double eta, double sfvals[16],
 void quad_gl_25_sfunc(double sfvals[50])
 {
   double xis[5];
-  bar_gl_5_sfunc(xis);
+  ::sfe_sfuncs::bar_gl_5_sfunc(&xis[0]);
   for (int m{0}; m < 25; m++) {
     sfvals[m] = xis[iv22[m] - 1];
     sfvals[m + 25] = xis[iv23[m] - 1];
@@ -38904,7 +38803,7 @@ void quad_gl_25_sfunc(double xi, double eta, double sfvals[25],
 void quad_gl_36_sfunc(double sfvals[72])
 {
   double xis[6];
-  bar_gl_6_sfunc(xis);
+  ::sfe_sfuncs::bar_gl_6_sfunc(&xis[0]);
   for (int m{0}; m < 36; m++) {
     sfvals[m] = xis[iv24[m] - 1];
     sfvals[m + 36] = xis[iv25[m] - 1];
@@ -38952,7 +38851,7 @@ void quad_gl_36_sfunc(double xi, double eta, double sfvals[36],
 void quad_gl_49_sfunc(double sfvals[98])
 {
   double xis[7];
-  bar_gl_7_sfunc(xis);
+  ::sfe_sfuncs::bar_gl_7_sfunc(&xis[0]);
   for (int m{0}; m < 49; m++) {
     sfvals[m] = xis[iv26[m] - 1];
     sfvals[m + 49] = xis[iv27[m] - 1];
@@ -38999,11 +38898,10 @@ void quad_gl_49_sfunc(double xi, double eta, double sfvals[49],
 // tet_10_sfunc - Compute shape functions and their derivatives of tet_10
 void tet_10_sfunc(double sfvals[30])
 {
-  static const double b_dv[30]{0.0, 1.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0,
-                               0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5,
-                               0.5, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0,
-                               0.0, 0.0, 0.0, 0.5, 0.5, 0.5};
-  std::copy(&b_dv[0], &b_dv[30], &sfvals[0]);
+  static const double dv[30]{0.0, 1.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.5, 0.0,
+                             0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.5,
+                             0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5};
+  std::copy(&dv[0], &dv[30], &sfvals[0]);
 }
 
 // tet_10_sfunc - Compute shape functions and their derivatives of tet_10
@@ -39127,67 +39025,67 @@ void tet_10_sfunc(double xi, double eta, double zeta, double sfvals[10],
 // tet_20_sfunc - Compute shape functions and their derivatives of tet_20
 void tet_20_sfunc(double sfvals[60])
 {
-  static const double b_dv[60]{0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.0,
-                               0.0,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.0,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.0,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.0,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.33333333333333331,
-                               0.66666666666666663,
-                               0.0,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331};
-  std::copy(&b_dv[0], &b_dv[60], &sfvals[0]);
+  static const double dv[60]{0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.0,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.0,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331};
+  std::copy(&dv[0], &dv[60], &sfvals[0]);
 }
 
 // tet_20_sfunc - Compute shape functions and their derivatives of tet_20
@@ -39561,7 +39459,7 @@ void tet_20_sfunc(double xi, double eta, double zeta, double sfvals[20],
 // tet_35_sfunc - Compute shape functions and their derivatives of tet_35
 void tet_35_sfunc(double sfvals[105])
 {
-  static const double b_dv[105]{
+  static const double dv[105]{
       0.0,  1.0,  0.0,  0.0,  0.25, 0.5,  0.75, 0.75, 0.5,  0.25, 0.0,  0.0,
       0.0,  0.0,  0.0,  0.0,  0.75, 0.5,  0.25, 0.0,  0.0,  0.0,  0.25, 0.5,
       0.25, 0.25, 0.5,  0.25, 0.5,  0.25, 0.25, 0.0,  0.0,  0.0,  0.25, 0.0,
@@ -39571,7 +39469,7 @@ void tet_35_sfunc(double sfvals[105])
       0.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.25,
       0.5,  0.75, 0.25, 0.5,  0.75, 0.25, 0.5,  0.75, 0.0,  0.0,  0.0,  0.25,
       0.25, 0.5,  0.25, 0.25, 0.5,  0.25, 0.25, 0.5,  0.25};
-  std::copy(&b_dv[0], &b_dv[105], &sfvals[0]);
+  std::copy(&dv[0], &dv[105], &sfvals[0]);
 }
 
 // tet_35_sfunc - Compute shape functions and their derivatives of tet_35
@@ -40585,7 +40483,7 @@ void tet_4_sfunc(double xi, double eta, double zeta, double sfvals[4],
 // tet_56_sfunc - Compute shape functions and their derivatives of tet_56
 void tet_56_sfunc(double sfvals[168])
 {
-  static const double b_dv[168]{
+  static const double dv[168]{
       0.0, 1.0, 0.0, 0.0, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.0, 0.0,
       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8, 0.6, 0.4, 0.2, 0.0, 0.0, 0.0, 0.0,
       0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.6, 0.4,
@@ -40598,7 +40496,7 @@ void tet_56_sfunc(double sfvals[168])
       0.0, 0.0, 0.2, 0.4, 0.6, 0.8, 0.2, 0.4, 0.6, 0.8, 0.2, 0.4, 0.6, 0.8,
       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.2, 0.2, 0.4, 0.6, 0.4, 0.2, 0.2,
       0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.2, 0.4};
-  std::copy(&b_dv[0], &b_dv[168], &sfvals[0]);
+  std::copy(&dv[0], &dv[168], &sfvals[0]);
 }
 
 // tet_56_sfunc - Compute shape functions and their derivatives of tet_56
@@ -43168,112 +43066,112 @@ void tet_56_sfunc(double xi, double eta, double zeta, double sfvals[56],
 // tet_fek_35_sfunc - Compute shape functions and their derivatives of
 void tet_fek_35_sfunc(double sfvals[105])
 {
-  static const double b_dv[105]{0.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.2165423575799505,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.2165423575799505,
-                                0.2165423575799505,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.25,
-                                0.0,
-                                0.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.2165423575799505,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.2165423575799505,
-                                0.2165423575799505,
-                                0.25,
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.2165423575799505,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.2165423575799505,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.2165423575799505,
-                                0.2165423575799505,
-                                0.56691527366422811,
-                                0.25};
-  std::copy(&b_dv[0], &b_dv[105], &sfvals[0]);
+  static const double dv[105]{0.0,
+                              1.0,
+                              0.0,
+                              0.0,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.2165423575799505,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.2165423575799505,
+                              0.2165423575799505,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.25,
+                              0.0,
+                              0.0,
+                              1.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.2165423575799505,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.2165423575799505,
+                              0.2165423575799505,
+                              0.25,
+                              0.0,
+                              0.0,
+                              0.0,
+                              1.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.2165423575799505,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.2165423575799505,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.2165423575799505,
+                              0.2165423575799505,
+                              0.56691527366422811,
+                              0.25};
+  std::copy(&dv[0], &dv[105], &sfvals[0]);
 }
 
 // tet_fek_35_sfunc - Compute shape functions and their derivatives of
@@ -45223,67 +45121,67 @@ void tet_fek_35_sfunc(double xi, double eta, double zeta, double sfvals[35],
 // tet_gl_20_sfunc - Compute shape functions and their derivatives of
 void tet_gl_20_sfunc(double sfvals[60])
 {
-  static const double b_dv[60]{0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.0,
-                               0.0,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.0,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.33333333333333331,
-                               0.0,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.0,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.276393202250021,
-                               0.72360679774997894,
-                               0.0,
-                               0.33333333333333331,
-                               0.33333333333333331,
-                               0.33333333333333331};
-  std::copy(&b_dv[0], &b_dv[60], &sfvals[0]);
+  static const double dv[60]{0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.33333333333333331,
+                             0.0,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.0,
+                             0.33333333333333331,
+                             0.33333333333333331,
+                             0.33333333333333331};
+  std::copy(&dv[0], &dv[60], &sfvals[0]);
 }
 
 // tet_gl_20_sfunc - Compute shape functions and their derivatives of
@@ -45794,112 +45692,112 @@ void tet_gl_20_sfunc(double xi, double eta, double zeta, double sfvals[20],
 // tet_gl_35_sfunc - Compute shape functions and their derivatives of
 void tet_gl_35_sfunc(double sfvals[105])
 {
-  static const double b_dv[105]{0.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.25,
-                                0.0,
-                                0.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.82732683535398854,
-                                0.5,
-                                0.1726731646460114,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.25,
-                                0.0,
-                                0.0,
-                                0.0,
-                                1.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.1726731646460114,
-                                0.5,
-                                0.82732683535398854,
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.2073451756635909,
-                                0.2073451756635909,
-                                0.58530964867281821,
-                                0.25};
-  std::copy(&b_dv[0], &b_dv[105], &sfvals[0]);
+  static const double dv[105]{0.0,
+                              1.0,
+                              0.0,
+                              0.0,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.25,
+                              0.0,
+                              0.0,
+                              1.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.82732683535398854,
+                              0.5,
+                              0.1726731646460114,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.25,
+                              0.0,
+                              0.0,
+                              0.0,
+                              1.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.1726731646460114,
+                              0.5,
+                              0.82732683535398854,
+                              0.0,
+                              0.0,
+                              0.0,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.2073451756635909,
+                              0.2073451756635909,
+                              0.58530964867281821,
+                              0.25};
+  std::copy(&dv[0], &dv[105], &sfvals[0]);
 }
 
 // tet_gl_35_sfunc - Compute shape functions and their derivatives of
@@ -47786,9 +47684,29 @@ void tet_gl_35_sfunc(double xi, double eta, double zeta, double sfvals[35],
 }
 
 // tri_10_sfunc - Compute shape functions and their derivatives of tri_10
-static inline void tri_10_sfunc(double sfvals[20])
+void tri_10_sfunc(double sfvals[20])
 {
-  std::copy(&dv2[0], &dv2[20], &sfvals[0]);
+  static const double dv[20]{0.0,
+                             1.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.66666666666666663,
+                             0.66666666666666663,
+                             0.33333333333333331,
+                             0.33333333333333331};
+  std::copy(&dv[0], &dv[20], &sfvals[0]);
 }
 
 // tri_10_sfunc - Compute shape functions and their derivatives of tri_10
@@ -47938,9 +47856,13 @@ void tri_10_sfunc(double xi, double eta, double sfvals[10], double sdvals[20])
 }
 
 // tri_15_sfunc - Compute shape functions and their derivatives of tri_15
-static inline void tri_15_sfunc(double sfvals[30])
+void tri_15_sfunc(double sfvals[30])
 {
-  std::copy(&dv3[0], &dv3[30], &sfvals[0]);
+  static const double dv[30]{0.0,  1.0, 0.0,  0.25, 0.5,  0.75, 0.75, 0.5,
+                             0.25, 0.0, 0.0,  0.0,  0.25, 0.5,  0.25, 0.0,
+                             0.0,  1.0, 0.0,  0.0,  0.0,  0.25, 0.5,  0.75,
+                             0.75, 0.5, 0.25, 0.25, 0.25, 0.5};
+  std::copy(&dv[0], &dv[30], &sfvals[0]);
 }
 
 // tri_15_sfunc - Compute shape functions and their derivatives of tri_15
@@ -48240,8 +48162,12 @@ void tri_15_sfunc(double xi, double eta, double sfvals[15], double sdvals[30])
 }
 
 // tri_21_sfunc - Compute shape functions and their derivatives of tri_21
-static inline void tri_21_sfunc(double sfvals[42])
+void tri_21_sfunc(double sfvals[42])
 {
+  static const double dv[42]{
+      0.0, 1.0, 0.0, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.0, 0.0, 0.0,
+      0.0, 0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+      0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.2, 0.2, 0.2, 0.4, 0.6, 0.4};
   std::copy(&dv[0], &dv[42], &sfvals[0]);
 }
 
@@ -48871,63 +48797,63 @@ void tri_21_sfunc(double xi, double eta, double sfvals[21], double sdvals[42])
 // tri_28_sfunc - Compute shape functions and their derivatives of tri_28
 void tri_28_sfunc(double sfvals[56])
 {
-  static const double b_dv[56]{0.0,
-                               1.0,
-                               0.0,
-                               0.16666666666666671,
-                               0.33333333333333331,
-                               0.5,
-                               0.66666666666666663,
-                               0.83333333333333337,
-                               0.83333333333333337,
-                               0.66666666666666663,
-                               0.5,
-                               0.33333333333333331,
-                               0.16666666666666671,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.16666666666666671,
-                               0.33333333333333331,
-                               0.5,
-                               0.66666666666666663,
-                               0.5,
-                               0.33333333333333331,
-                               0.16666666666666671,
-                               0.16666666666666671,
-                               0.16666666666666671,
-                               0.33333333333333331,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.16666666666666671,
-                               0.33333333333333331,
-                               0.5,
-                               0.66666666666666663,
-                               0.83333333333333337,
-                               0.83333333333333337,
-                               0.66666666666666663,
-                               0.5,
-                               0.33333333333333331,
-                               0.16666666666666671,
-                               0.16666666666666671,
-                               0.16666666666666671,
-                               0.16666666666666671,
-                               0.16666666666666671,
-                               0.33333333333333331,
-                               0.5,
-                               0.66666666666666663,
-                               0.5,
-                               0.33333333333333331,
-                               0.33333333333333331};
-  std::copy(&b_dv[0], &b_dv[56], &sfvals[0]);
+  static const double dv[56]{0.0,
+                             1.0,
+                             0.0,
+                             0.16666666666666671,
+                             0.33333333333333331,
+                             0.5,
+                             0.66666666666666663,
+                             0.83333333333333337,
+                             0.83333333333333337,
+                             0.66666666666666663,
+                             0.5,
+                             0.33333333333333331,
+                             0.16666666666666671,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.16666666666666671,
+                             0.33333333333333331,
+                             0.5,
+                             0.66666666666666663,
+                             0.5,
+                             0.33333333333333331,
+                             0.16666666666666671,
+                             0.16666666666666671,
+                             0.16666666666666671,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.16666666666666671,
+                             0.33333333333333331,
+                             0.5,
+                             0.66666666666666663,
+                             0.83333333333333337,
+                             0.83333333333333337,
+                             0.66666666666666663,
+                             0.5,
+                             0.33333333333333331,
+                             0.16666666666666671,
+                             0.16666666666666671,
+                             0.16666666666666671,
+                             0.16666666666666671,
+                             0.16666666666666671,
+                             0.33333333333333331,
+                             0.5,
+                             0.66666666666666663,
+                             0.5,
+                             0.33333333333333331,
+                             0.33333333333333331};
+  std::copy(&dv[0], &dv[56], &sfvals[0]);
 }
 
 // tri_28_sfunc - Compute shape functions and their derivatives of tri_28
@@ -49938,9 +49864,11 @@ void tri_3_sfunc(double xi, double eta, double sfvals[3], double sdvals[6])
 }
 
 // tri_6_sfunc - Compute shape functions and their derivatives of tri_6
-static inline void tri_6_sfunc(double sfvals[12])
+void tri_6_sfunc(double sfvals[12])
 {
-  std::copy(&dv1[0], &dv1[12], &sfvals[0]);
+  static const double dv[12]{0.0, 1.0, 0.0, 0.5, 0.5, 0.0,
+                             0.0, 0.0, 1.0, 0.0, 0.5, 0.5};
+  std::copy(&dv[0], &dv[12], &sfvals[0]);
 }
 
 // tri_6_sfunc - Compute shape functions and their derivatives of tri_6
@@ -50005,9 +49933,39 @@ void tri_6_sfunc(double xi, double eta, double sfvals[6], double sdvals[12])
 }
 
 // tri_fek_15_sfunc - Compute shape functions and their derivatives of
-static inline void tri_fek_15_sfunc(double sfvals[30])
+void tri_fek_15_sfunc(double sfvals[30])
 {
-  std::copy(&dv4[0], &dv4[30], &sfvals[0]);
+  static const double dv[30]{0.0,
+                             1.0,
+                             0.0,
+                             0.1726731580702271,
+                             0.5,
+                             0.82732683075390212,
+                             0.82732683820448272,
+                             0.5,
+                             0.17267316179551739,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.2165423575799505,
+                             0.56691527366422811,
+                             0.21654236503053109,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.17267316179551739,
+                             0.5,
+                             0.82732683820448272,
+                             0.82732683535970819,
+                             0.5,
+                             0.17267316552080769,
+                             0.21654236130524079,
+                             0.21654236503053109,
+                             0.56691527366422811};
+  std::copy(&dv[0], &dv[30], &sfvals[0]);
 }
 
 // tri_fek_15_sfunc - Compute shape functions and their derivatives of
@@ -50401,49 +50359,49 @@ void tri_fek_15_sfunc(double xi, double eta, double sfvals[15],
 // tri_fek_21_sfunc - Compute shape functions and their derivatives of
 void tri_fek_21_sfunc(double sfvals[42])
 {
-  static const double b_dv[42]{0.0,
-                               1.0,
-                               0.0,
-                               0.1174723392341675,
-                               0.35738423767012,
-                               0.642615755810622,
-                               0.88252765424657453,
-                               0.88252766076583256,
-                               0.642615755810622,
-                               0.35738424478786052,
-                               0.1174723392341675,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.14801946903502289,
-                               0.42082552725652977,
-                               0.703961065410696,
-                               0.42082554725652971,
-                               0.14801946903502289,
-                               0.15834891548694061,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.1174723392341675,
-                               0.357384244189378,
-                               0.64261575521213943,
-                               0.88252766076583256,
-                               0.88252765424657453,
-                               0.642615755810622,
-                               0.35738423767012,
-                               0.1174723392341675,
-                               0.14801946903502289,
-                               0.15834891548694061,
-                               0.14801946903502289,
-                               0.42082552725652977,
-                               0.703961065410696,
-                               0.42082554725652971};
-  std::copy(&b_dv[0], &b_dv[42], &sfvals[0]);
+  static const double dv[42]{0.0,
+                             1.0,
+                             0.0,
+                             0.1174723392341675,
+                             0.35738423767012,
+                             0.642615755810622,
+                             0.88252765424657453,
+                             0.88252766076583256,
+                             0.642615755810622,
+                             0.35738424478786052,
+                             0.1174723392341675,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.14801946903502289,
+                             0.42082552725652977,
+                             0.703961065410696,
+                             0.42082554725652971,
+                             0.14801946903502289,
+                             0.15834891548694061,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.1174723392341675,
+                             0.357384244189378,
+                             0.64261575521213943,
+                             0.88252766076583256,
+                             0.88252765424657453,
+                             0.642615755810622,
+                             0.35738423767012,
+                             0.1174723392341675,
+                             0.14801946903502289,
+                             0.15834891548694061,
+                             0.14801946903502289,
+                             0.42082552725652977,
+                             0.703961065410696,
+                             0.42082554725652971};
+  std::copy(&dv[0], &dv[42], &sfvals[0]);
 }
 
 // tri_fek_21_sfunc - Compute shape functions and their derivatives of
@@ -51235,63 +51193,63 @@ void tri_fek_21_sfunc(double xi, double eta, double sfvals[21],
 // tri_fek_28_sfunc - Compute shape functions and their derivatives of
 void tri_fek_28_sfunc(double sfvals[56])
 {
-  static const double b_dv[56]{0.0,
-                               1.0,
-                               0.0,
-                               0.084888049683767369,
-                               0.26557559901065381,
-                               0.49999999813735491,
-                               0.73442439726405584,
-                               0.9151119465909423,
-                               0.91511195031623271,
-                               0.73442439726405584,
-                               0.4999999962747097,
-                               0.26557560273594411,
-                               0.084888049683767369,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.1063354596038695,
-                               0.31626978882180318,
-                               0.56654928788943937,
-                               0.7873290670669707,
-                               0.56654929788943942,
-                               0.31626979882180323,
-                               0.1063354596038695,
-                               0.11718090956346711,
-                               0.11718090956346711,
-                               0.33333332875823662,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.084888049683767369,
-                               0.26557560273594411,
-                               0.5000000037252903,
-                               0.73442439726405584,
-                               0.91511195031623271,
-                               0.9151119465909423,
-                               0.73442439726405584,
-                               0.49999999813735491,
-                               0.26557559901065381,
-                               0.084888049683767369,
-                               0.1063354633291599,
-                               0.1171809132887574,
-                               0.1171809132887574,
-                               0.1063354596038695,
-                               0.31626978882180318,
-                               0.56654928788943937,
-                               0.7873290670669707,
-                               0.56654929788943942,
-                               0.31626979882180323,
-                               0.33333332875823662};
-  std::copy(&b_dv[0], &b_dv[56], &sfvals[0]);
+  static const double dv[56]{0.0,
+                             1.0,
+                             0.0,
+                             0.084888049683767369,
+                             0.26557559901065381,
+                             0.49999999813735491,
+                             0.73442439726405584,
+                             0.9151119465909423,
+                             0.91511195031623271,
+                             0.73442439726405584,
+                             0.4999999962747097,
+                             0.26557560273594411,
+                             0.084888049683767369,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.1063354596038695,
+                             0.31626978882180318,
+                             0.56654928788943937,
+                             0.7873290670669707,
+                             0.56654929788943942,
+                             0.31626979882180323,
+                             0.1063354596038695,
+                             0.11718090956346711,
+                             0.11718090956346711,
+                             0.33333332875823662,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.084888049683767369,
+                             0.26557560273594411,
+                             0.5000000037252903,
+                             0.73442439726405584,
+                             0.91511195031623271,
+                             0.9151119465909423,
+                             0.73442439726405584,
+                             0.49999999813735491,
+                             0.26557559901065381,
+                             0.084888049683767369,
+                             0.1063354633291599,
+                             0.1171809132887574,
+                             0.1171809132887574,
+                             0.1063354596038695,
+                             0.31626978882180318,
+                             0.56654928788943937,
+                             0.7873290670669707,
+                             0.56654929788943942,
+                             0.31626979882180323,
+                             0.33333332875823662};
+  std::copy(&dv[0], &dv[56], &sfvals[0]);
 }
 
 // tri_fek_28_sfunc - Compute shape functions and their derivatives of
@@ -52834,9 +52792,29 @@ void tri_fek_28_sfunc(double xi, double eta, double sfvals[28],
 }
 
 // tri_gl_10_sfunc - Compute shape functions and their derivatives of
-static inline void tri_gl_10_sfunc(double sfvals[20])
+void tri_gl_10_sfunc(double sfvals[20])
 {
-  std::copy(&dv5[0], &dv5[20], &sfvals[0]);
+  static const double dv[20]{0.0,
+                             1.0,
+                             0.0,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.0,
+                             0.0,
+                             0.33333333333333331,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.276393202250021,
+                             0.72360679774997894,
+                             0.72360679774997894,
+                             0.276393202250021,
+                             0.33333333333333331};
+  std::copy(&dv[0], &dv[20], &sfvals[0]);
 }
 
 // tri_gl_10_sfunc - Compute shape functions and their derivatives of
@@ -53022,9 +53000,39 @@ void tri_gl_10_sfunc(double xi, double eta, double sfvals[10],
 }
 
 // tri_gl_15_sfunc - Compute shape functions and their derivatives of
-static inline void tri_gl_15_sfunc(double sfvals[30])
+void tri_gl_15_sfunc(double sfvals[30])
 {
-  std::copy(&dv6[0], &dv6[30], &sfvals[0]);
+  static const double dv[30]{0.0,
+                             1.0,
+                             0.0,
+                             0.1726731646460114,
+                             0.5,
+                             0.82732683535398854,
+                             0.82732683535398854,
+                             0.5,
+                             0.1726731646460114,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.2073451756635909,
+                             0.58530964867281821,
+                             0.2073451756635909,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.1726731646460114,
+                             0.5,
+                             0.82732683535398854,
+                             0.82732683535398854,
+                             0.5,
+                             0.1726731646460114,
+                             0.2073451756635909,
+                             0.2073451756635909,
+                             0.58530964867281821};
+  std::copy(&dv[0], &dv[30], &sfvals[0]);
 }
 
 // tri_gl_15_sfunc - Compute shape functions and their derivatives of
@@ -53458,49 +53466,49 @@ void tri_gl_15_sfunc(double xi, double eta, double sfvals[15],
 // tri_gl_21_sfunc - Compute shape functions and their derivatives of
 void tri_gl_21_sfunc(double sfvals[42])
 {
-  static const double b_dv[42]{0.0,
-                               1.0,
-                               0.0,
-                               0.1174723380352677,
-                               0.35738424175967748,
-                               0.64261575824032258,
-                               0.88252766196473231,
-                               0.88252766196473231,
-                               0.64261575824032258,
-                               0.35738424175967748,
-                               0.1174723380352677,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.140828627235979,
-                               0.42441597651968271,
-                               0.718342745528042,
-                               0.42441597651968271,
-                               0.140828627235979,
-                               0.15116804696063471,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.1174723380352677,
-                               0.35738424175967748,
-                               0.64261575824032258,
-                               0.88252766196473231,
-                               0.88252766196473231,
-                               0.64261575824032258,
-                               0.35738424175967748,
-                               0.1174723380352677,
-                               0.140828627235979,
-                               0.15116804696063471,
-                               0.140828627235979,
-                               0.42441597651968271,
-                               0.718342745528042,
-                               0.42441597651968271};
-  std::copy(&b_dv[0], &b_dv[42], &sfvals[0]);
+  static const double dv[42]{0.0,
+                             1.0,
+                             0.0,
+                             0.1174723380352677,
+                             0.35738424175967748,
+                             0.64261575824032258,
+                             0.88252766196473231,
+                             0.88252766196473231,
+                             0.64261575824032258,
+                             0.35738424175967748,
+                             0.1174723380352677,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.140828627235979,
+                             0.42441597651968271,
+                             0.718342745528042,
+                             0.42441597651968271,
+                             0.140828627235979,
+                             0.15116804696063471,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.1174723380352677,
+                             0.35738424175967748,
+                             0.64261575824032258,
+                             0.88252766196473231,
+                             0.88252766196473231,
+                             0.64261575824032258,
+                             0.35738424175967748,
+                             0.1174723380352677,
+                             0.140828627235979,
+                             0.15116804696063471,
+                             0.140828627235979,
+                             0.42441597651968271,
+                             0.718342745528042,
+                             0.42441597651968271};
+  std::copy(&dv[0], &dv[42], &sfvals[0]);
 }
 
 // tri_gl_21_sfunc - Compute shape functions and their derivatives of
@@ -54442,37 +54450,37 @@ void tri_gl_21_sfunc(double xi, double eta, double sfvals[21],
 // tri_leb_15_sfunc - Compute shape functions and their derivatives of
 void tri_leb_15_sfunc(double sfvals[30])
 {
-  static const double b_dv[30]{0.0,
-                               1.0,
-                               0.0,
-                               0.17267316464601151,
-                               0.5,
-                               0.82732683535398854,
-                               0.82732683535398854,
-                               0.5,
-                               0.17267316464601151,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.250646411460718,
-                               0.52713337628873258,
-                               0.22213227970507091,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.17267316464601151,
-                               0.5,
-                               0.82732683535398843,
-                               0.82732683535398854,
-                               0.5,
-                               0.17267316464601151,
-                               0.22206512551486521,
-                               0.250420352808094,
-                               0.527018976287263};
-  std::copy(&b_dv[0], &b_dv[30], &sfvals[0]);
+  static const double dv[30]{0.0,
+                             1.0,
+                             0.0,
+                             0.17267316464601151,
+                             0.5,
+                             0.82732683535398854,
+                             0.82732683535398854,
+                             0.5,
+                             0.17267316464601151,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.250646411460718,
+                             0.52713337628873258,
+                             0.22213227970507091,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.17267316464601151,
+                             0.5,
+                             0.82732683535398843,
+                             0.82732683535398854,
+                             0.5,
+                             0.17267316464601151,
+                             0.22206512551486521,
+                             0.250420352808094,
+                             0.527018976287263};
+  std::copy(&dv[0], &dv[30], &sfvals[0]);
 }
 
 // tri_leb_15_sfunc - Compute shape functions and their derivatives of
@@ -54871,49 +54879,49 @@ void tri_leb_15_sfunc(double xi, double eta, double sfvals[15],
 // tri_leb_21_sfunc - Compute shape functions and their derivatives of
 void tri_leb_21_sfunc(double sfvals[42])
 {
-  static const double b_dv[42]{0.0,
-                               1.0,
-                               0.0,
-                               0.1174723380352677,
-                               0.35738424175967748,
-                               0.64261575824032258,
-                               0.88252766196473242,
-                               0.88252766196473242,
-                               0.64261575824032258,
-                               0.35738424175967748,
-                               0.1174723380352677,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.17253420630624239,
-                               0.41208046019357558,
-                               0.65277296395854245,
-                               0.41216359270868008,
-                               0.17584125722114929,
-                               0.175965967109042,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.1174723380352676,
-                               0.35738424175967742,
-                               0.64261575824032247,
-                               0.88252766196473231,
-                               0.88252766196473242,
-                               0.64261575824032258,
-                               0.35738424175967748,
-                               0.1174723380352677,
-                               0.17579824177976619,
-                               0.17359751549075919,
-                               0.17390610719231461,
-                               0.41115982426654851,
-                               0.65072062351987736,
-                               0.41519137386566818};
-  std::copy(&b_dv[0], &b_dv[42], &sfvals[0]);
+  static const double dv[42]{0.0,
+                             1.0,
+                             0.0,
+                             0.1174723380352677,
+                             0.35738424175967748,
+                             0.64261575824032258,
+                             0.88252766196473242,
+                             0.88252766196473242,
+                             0.64261575824032258,
+                             0.35738424175967748,
+                             0.1174723380352677,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.17253420630624239,
+                             0.41208046019357558,
+                             0.65277296395854245,
+                             0.41216359270868008,
+                             0.17584125722114929,
+                             0.175965967109042,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.1174723380352676,
+                             0.35738424175967742,
+                             0.64261575824032247,
+                             0.88252766196473231,
+                             0.88252766196473242,
+                             0.64261575824032258,
+                             0.35738424175967748,
+                             0.1174723380352677,
+                             0.17579824177976619,
+                             0.17359751549075919,
+                             0.17390610719231461,
+                             0.41115982426654851,
+                             0.65072062351987736,
+                             0.41519137386566818};
+  std::copy(&dv[0], &dv[42], &sfvals[0]);
 }
 
 // tri_leb_21_sfunc - Compute shape functions and their derivatives of
@@ -55705,63 +55713,63 @@ void tri_leb_21_sfunc(double xi, double eta, double sfvals[21],
 // tri_leb_28_sfunc - Compute shape functions and their derivatives of
 void tri_leb_28_sfunc(double sfvals[56])
 {
-  static const double b_dv[56]{0.0,
-                               1.0,
-                               0.0,
-                               0.084888051860716462,
-                               0.2655756032646428,
-                               0.5,
-                               0.7344243967353572,
-                               0.91511194813928332,
-                               0.91511194813928332,
-                               0.7344243967353572,
-                               0.5,
-                               0.2655756032646428,
-                               0.084888051860716462,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.12722227928154689,
-                               0.3249850806922307,
-                               0.54646952078678912,
-                               0.75271127399216808,
-                               0.538673337271117,
-                               0.32619161439757732,
-                               0.1199689529318439,
-                               0.13629899825536371,
-                               0.12732523903869941,
-                               0.333335144726689,
-                               0.0,
-                               0.0,
-                               1.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.0,
-                               0.084888051860716685,
-                               0.2655756032646428,
-                               0.5,
-                               0.7344243967353572,
-                               0.91511194813928354,
-                               0.91511194813928332,
-                               0.7344243967353572,
-                               0.5,
-                               0.2655756032646428,
-                               0.084888051860716462,
-                               0.1200049166269066,
-                               0.13627277086369061,
-                               0.12732893408538551,
-                               0.1272611907264726,
-                               0.32504414231257972,
-                               0.54650094974932839,
-                               0.75279618524932379,
-                               0.53869622819612584,
-                               0.326198455394284,
-                               0.33335513526117649};
-  std::copy(&b_dv[0], &b_dv[56], &sfvals[0]);
+  static const double dv[56]{0.0,
+                             1.0,
+                             0.0,
+                             0.084888051860716462,
+                             0.2655756032646428,
+                             0.5,
+                             0.7344243967353572,
+                             0.91511194813928332,
+                             0.91511194813928332,
+                             0.7344243967353572,
+                             0.5,
+                             0.2655756032646428,
+                             0.084888051860716462,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.12722227928154689,
+                             0.3249850806922307,
+                             0.54646952078678912,
+                             0.75271127399216808,
+                             0.538673337271117,
+                             0.32619161439757732,
+                             0.1199689529318439,
+                             0.13629899825536371,
+                             0.12732523903869941,
+                             0.333335144726689,
+                             0.0,
+                             0.0,
+                             1.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.0,
+                             0.084888051860716685,
+                             0.2655756032646428,
+                             0.5,
+                             0.7344243967353572,
+                             0.91511194813928354,
+                             0.91511194813928332,
+                             0.7344243967353572,
+                             0.5,
+                             0.2655756032646428,
+                             0.084888051860716462,
+                             0.1200049166269066,
+                             0.13627277086369061,
+                             0.12732893408538551,
+                             0.1272611907264726,
+                             0.32504414231257972,
+                             0.54650094974932839,
+                             0.75279618524932379,
+                             0.53869622819612584,
+                             0.326198455394284,
+                             0.33335513526117649};
+  std::copy(&dv[0], &dv[56], &sfvals[0]);
 }
 
 // tri_leb_28_sfunc - Compute shape functions and their derivatives of
