@@ -8698,7 +8698,7 @@ static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
       if (qd_or_natcoords == 0) {
         //  trial+test+nonlinear_geom?1:0
         a = obtain_elemdegree(etypes_data[0]);
-        qd_or_natcoords = ((a << 1) + (obtain_elemdegree1(geom_etype) > 1)) +
+        qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
                           (xs.size(1) > topo_dim);
       }
       tabulate_quadratures(etypes_data[0], qd_or_natcoords, b_sfe->cs,
@@ -9034,7 +9034,7 @@ static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
   b_sfe->nnodes[1] = iv[geom_etype - 1];
   //  Set up quadrature
   a = obtain_elemdegree((etypes[0]));
-  qd_or_natcoords = ((a << 1) + (obtain_elemdegree1(geom_etype) > 1)) +
+  qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
                     (xs.size(1) > topo_dim);
   tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
   b_sfe->nqp = b_sfe->ws.size(0);
@@ -9231,7 +9231,7 @@ static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
     b_sfe->nnodes[1] = iv[geom_etype - 1];
     //  Set up quadrature
     a = obtain_elemdegree(etypes_data[0]);
-    qd_or_natcoords = ((a << 1) + (obtain_elemdegree1(geom_etype) > 1)) +
+    qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
                       (xs.size(1) > topo_dim);
     tabulate_quadratures(etypes_data[0], qd_or_natcoords, b_sfe->cs, b_sfe->ws);
     b_sfe->nqp = b_sfe->ws.size(0);
@@ -9441,7 +9441,7 @@ static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
     if (qd_or_natcoords == 0) {
       //  trial+test+nonlinear_geom?1:0
       a = obtain_elemdegree((etypes[0]));
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree1(geom_etype) > 1)) +
+      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
                         (xs.size(1) > topo_dim);
     }
     tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
@@ -11920,7 +11920,7 @@ void sfe_init(SfeObject *b_sfe, const int etypes_data[],
       if (qd_or_natcoords == 0) {
         //  trial+test+nonlinear_geom?1:0
         a = obtain_elemdegree(etypes_data[0]);
-        qd_or_natcoords = ((a << 1) + (obtain_elemdegree1(geom_etype) > 1)) +
+        qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
                           (xs.size(1) > topo_dim);
       }
       tabulate_quadratures(etypes_data[0], qd_or_natcoords, b_sfe->cs,
@@ -12154,7 +12154,7 @@ void sfe_init(SfeObject *b_sfe, const int etypes_data[],
       if (qd_or_natcoords == 0) {
         //  trial+test+nonlinear_geom?1:0
         a = obtain_elemdegree(etypes_data[0]);
-        qd_or_natcoords = ((a << 1) + (obtain_elemdegree1(geom_etype) > 1)) +
+        qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
                           (xs.size(1) > topo_dim);
       }
       tabulate_quadratures(etypes_data[0], qd_or_natcoords, b_sfe->cs,
@@ -12373,7 +12373,7 @@ void sfe_init(SfeObject *b_sfe, const int etypes_data[],
     b_sfe->nnodes[1] = iv[geom_etype - 1];
     //  Set up quadrature
     a = obtain_elemdegree(etypes_data[0]);
-    qd_or_natcoords = ((a << 1) + (obtain_elemdegree1(geom_etype) > 1)) +
+    qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
                       (xs.size(1) > topo_dim);
     tabulate_quadratures(etypes_data[0], qd_or_natcoords, b_sfe->cs, b_sfe->ws);
     b_sfe->nqp = b_sfe->ws.size(0);
