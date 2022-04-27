@@ -12,6 +12,7 @@
 #include "sfe_internal.h"
 #include "coder_array.h"
 #include "m2c_lib.h"
+#include "omp.h"
 #include "sfe_internal_types.h"
 #include "sfe_quadrules_rowmajor.h"
 #include "sfe_shapefuncs_rowmajor.h"
@@ -41,7 +42,7 @@ static const short iv[250]{
     0,  0,   0,   0,  0,  0,   8,   0,   0,   0,   27,  0,  0,  0,  64, 64, 0,
     0,  125, 125, 0,  0,  216, 216, 0,   0,   343, 343, -1};
 
-}
+} // namespace sfe
 
 // Function Declarations
 namespace sfe {
@@ -49,36 +50,122 @@ static inline void bar_quadrules(coder::SizeType degree,
                                  ::coder::array<double, 2U> &cs,
                                  ::coder::array<double, 1U> &ws);
 
-static inline unsigned char obtain_facets(coder::SizeType etype);
+static inline void hexa_125(double xi, double eta, double zeta,
+                            double sfvals[125], double sdvals[375]);
+
+static inline void hexa_216(double xi, double eta, double zeta,
+                            double sfvals[216], double sdvals[648]);
+
+static inline void hexa_64(double xi, double eta, double zeta,
+                           double sfvals[64], double sdvals[192]);
+
+static inline void hexa_gl_125(double xi, double eta, double zeta,
+                               double sfvals[125], double sdvals[375]);
+
+static inline void hexa_gl_216(double xi, double eta, double zeta,
+                               double sfvals[216], double sdvals[648]);
+
+static inline void hexa_gl_64(double xi, double eta, double zeta,
+                              double sfvals[64], double sdvals[192]);
 
 static inline void obtain_facets(coder::SizeType etype, signed char facetid,
                                  unsigned char *ret, short lids_data[],
                                  coder::SizeType *lids_size);
 
+static inline unsigned char obtain_facets(coder::SizeType etype);
+
 static inline unsigned char obtain_facets(coder::SizeType etype,
                                           signed char facetid);
+
+static inline void prism_126(double xi, double eta, double zeta,
+                             double sfvals[126], double sdvals[378]);
+
+static inline void prism_40(double xi, double eta, double zeta,
+                            double sfvals[40], double sdvals[120]);
+
+static inline void prism_75(double xi, double eta, double zeta,
+                            double sfvals[75], double sdvals[225]);
+
+static inline void prism_gl_126(double xi, double eta, double zeta,
+                                double sfvals[126], double sdvals[378]);
+
+static inline void prism_gl_40(double xi, double eta, double zeta,
+                               double sfvals[40], double sdvals[120]);
+
+static inline void prism_gl_75(double xi, double eta, double zeta,
+                               double sfvals[75], double sdvals[225]);
+
+static inline void pyra_30(double xi, double eta, double zeta,
+                           double sfvals[30], double sdvals[90]);
+
+static inline void pyra_55(double xi, double eta, double zeta,
+                           double sfvals[55], double sdvals[165]);
+
+static inline void pyra_gl_30(double xi, double eta, double zeta,
+                              double sfvals[30], double sdvals[90]);
+
+static inline void pyra_gl_55(double xi, double eta, double zeta,
+                              double sfvals[55], double sdvals[165]);
 
 static inline void pyra_quadrules(coder::SizeType degree,
                                   ::coder::array<double, 2U> &cs,
                                   ::coder::array<double, 1U> &ws);
 
+static inline void quad_25(double xi, double eta, double sfvals[25],
+                           double sdvals[50]);
+
+static inline void quad_36(double xi, double eta, double sfvals[36],
+                           double sdvals[72]);
+
+static inline void quad_49(double xi, double eta, double sfvals[49],
+                           double sdvals[98]);
+
+static inline void quad_gl_25(double xi, double eta, double sfvals[25],
+                              double sdvals[50]);
+
+static inline void quad_gl_36(double xi, double eta, double sfvals[36],
+                              double sdvals[72]);
+
+static inline void quad_gl_49(double xi, double eta, double sfvals[49],
+                              double sdvals[98]);
+
 static inline void sfe1_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
     ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals);
+
+static inline void sfe2_tabulate_equi_quad(coder::SizeType etype,
+                                           const ::coder::array<double, 2U> &cs,
+                                           ::coder::array<double, 2U> &sfvals,
+                                           ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe2_tabulate_equi_tri(coder::SizeType etype,
                                           const ::coder::array<double, 2U> &cs,
                                           ::coder::array<double, 2U> &sfvals,
                                           ::coder::array<double, 3U> &sdvals);
 
-static inline void sfe2_tabulate_gl(coder::SizeType etype,
-                                    const ::coder::array<double, 2U> &cs,
-                                    ::coder::array<double, 2U> &sfvals,
-                                    ::coder::array<double, 3U> &sdvals);
+static inline void sfe2_tabulate_fek_tri(coder::SizeType etype,
+                                         const ::coder::array<double, 2U> &cs,
+                                         ::coder::array<double, 2U> &sfvals,
+                                         ::coder::array<double, 3U> &sdvals);
+
+static inline void sfe2_tabulate_gl_quad(coder::SizeType etype,
+                                         const ::coder::array<double, 2U> &cs,
+                                         ::coder::array<double, 2U> &sfvals,
+                                         ::coder::array<double, 3U> &sdvals);
+
+static inline void sfe2_tabulate_gl_tri(coder::SizeType etype,
+                                        const ::coder::array<double, 2U> &cs,
+                                        ::coder::array<double, 2U> &sfvals,
+                                        ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe2_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
     ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals);
+
+static inline void sfe3_tabulate_equi_hexa(coder::SizeType etype,
+                                           const ::coder::array<double, 2U> &cs,
+                                           ::coder::array<double, 2U> &sfvals,
+                                           ::coder::array<double, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_prism(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
@@ -94,6 +181,11 @@ static inline void sfe3_tabulate_equi_tet(coder::SizeType etype,
                                           ::coder::array<double, 2U> &sfvals,
                                           ::coder::array<double, 3U> &sdvals);
 
+static inline void sfe3_tabulate_gl_hexa(coder::SizeType etype,
+                                         const ::coder::array<double, 2U> &cs,
+                                         ::coder::array<double, 2U> &sfvals,
+                                         ::coder::array<double, 3U> &sdvals);
+
 static inline void sfe3_tabulate_gl_prism(coder::SizeType etype,
                                           const ::coder::array<double, 2U> &cs,
                                           ::coder::array<double, 2U> &sfvals,
@@ -104,34 +196,39 @@ static inline void sfe3_tabulate_gl_pyra(coder::SizeType etype,
                                          ::coder::array<double, 2U> &sfvals,
                                          ::coder::array<double, 3U> &sdvals);
 
+static inline void sfe3_tabulate_gl_tet(coder::SizeType etype,
+                                        const ::coder::array<double, 2U> &cs,
+                                        ::coder::array<double, 2U> &sfvals,
+                                        ::coder::array<double, 3U> &sdvals);
+
 static inline void sfe3_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<double, 2U> &cs,
     ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals);
 
-static inline void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
-                            const ::coder::array<double, 2U> &xs,
-                            coder::SizeType qd_or_natcoords,
-                            const ::coder::array<double, 2U> &userquad);
-
 static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
                             coder::SizeType etypes_size,
-                            const ::coder::array<double, 2U> &xs,
-                            coder::SizeType qd_or_natcoords,
-                            const ::coder::array<double, 2U> &userquad);
-
-static inline void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
-                            const ::coder::array<double, 2U> &xs);
-
-static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
-                            coder::SizeType etypes_size,
-                            const ::coder::array<double, 2U> &xs);
-
-static inline void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
                             const ::coder::array<double, 2U> &xs,
                             const ::coder::array<double, 2U> &qd_or_natcoords);
 
+static inline void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
+                            const ::coder::array<double, 2U> &xs,
+                            coder::SizeType qd_or_natcoords,
+                            const ::coder::array<double, 2U> &userquad);
+
 static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
                             coder::SizeType etypes_size,
+                            const ::coder::array<double, 2U> &xs,
+                            coder::SizeType qd_or_natcoords,
+                            const ::coder::array<double, 2U> &userquad);
+
+static inline void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
+                            const ::coder::array<double, 2U> &xs);
+
+static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
+                            coder::SizeType etypes_size,
+                            const ::coder::array<double, 2U> &xs);
+
+static inline void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
                             const ::coder::array<double, 2U> &xs,
                             const ::coder::array<double, 2U> &qd_or_natcoords);
 
@@ -150,6 +247,43 @@ static inline void tabulate_shapefuncs(coder::SizeType etype,
                                        ::coder::array<double, 2U> &sfvals,
                                        ::coder::array<double, 3U> &sdvals);
 
+static inline void tet_20(double xi, double eta, double zeta, double sfvals[20],
+                          double sdvals[60]);
+
+static inline void tet_35(double xi, double eta, double zeta, double sfvals[35],
+                          double sdvals[105]);
+
+static inline void tet_56(double xi, double eta, double zeta, double sfvals[56],
+                          double sdvals[168]);
+
+static inline void tet_gl_20(double xi, double eta, double zeta,
+                             double sfvals[20], double sdvals[60]);
+
+static inline void tet_gl_35(double xi, double eta, double zeta,
+                             double sfvals[35], double sdvals[105]);
+
+static inline void tri_21(double xi, double eta, double sfvals[21],
+                          double sdvals[42]);
+
+static inline void tri_28(double xi, double eta, double sfvals[28],
+                          double sdvals[56]);
+
+static inline void tri_fek_15(double xi, double eta, double sfvals[15],
+                              double sdvals[30]);
+
+static inline void tri_fek_21(double xi, double eta, double sfvals[21],
+                              double sdvals[42]);
+
+static inline void tri_fek_28(double xi, double eta, double sfvals[28],
+                              double sdvals[56]);
+
+static inline void tri_gl_21(double xi, double eta, double sfvals[21],
+                             double sdvals[42]);
+
+static inline void tri_quadrules(coder::SizeType degree,
+                                 ::coder::array<double, 2U> &cs,
+                                 ::coder::array<double, 1U> &ws);
+
 } // namespace sfe
 
 // Function Definitions
@@ -159,65 +293,50 @@ static void bar_quadrules(coder::SizeType degree,
                           ::coder::array<double, 2U> &cs,
                           ::coder::array<double, 1U> &ws)
 {
-  coder::SizeType nqp;
-  boolean_T guard1{false};
-  boolean_T guard2{false};
-  boolean_T guard3{false};
-  boolean_T guard4{false};
-  boolean_T guard5{false};
-  boolean_T guard6{false};
-  boolean_T guard7{false};
-  guard1 = false;
-  guard2 = false;
-  guard3 = false;
-  guard4 = false;
-  guard5 = false;
-  guard6 = false;
-  guard7 = false;
-  switch (degree) {
-  case 0:
-    guard1 = true;
-    break;
-  case 1:
-    guard1 = true;
-    break;
-  case 2:
-    guard2 = true;
-    break;
-  case 3:
-    guard2 = true;
-    break;
-  case 4:
-    guard3 = true;
-    break;
-  case 5:
-    guard3 = true;
-    break;
-  case 6:
-    guard4 = true;
-    break;
-  case 7:
-    guard4 = true;
-    break;
-  case 8:
-    guard5 = true;
-    break;
-  case 9:
-    guard5 = true;
-    break;
-  case 10:
-    guard6 = true;
-    break;
-  case 11:
-    guard6 = true;
-    break;
-  case 12:
-    guard7 = true;
-    break;
-  case 13:
-    guard7 = true;
-    break;
-  default:
+  if (degree <= 1) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::bar_deg1_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 3) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::bar_deg3_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg3_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 5) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::bar_deg5_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg5_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 7) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::bar_deg7_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg7_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 9) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::bar_deg9_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg9_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 11) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::bar_deg11_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg11_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 13) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::bar_deg13_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg13_qrule(&cs[0], &(ws.data())[0]);
+  } else {
+    coder::SizeType nqp;
     if (degree > 15) {
       m2cWarnMsgIdAndTxt("bar_quadrules:UnsupportedDegree",
                          "Only support up to degree 15");
@@ -226,50 +345,49 @@ static void bar_quadrules(coder::SizeType degree,
     cs.set_size(nqp, 1);
     ws.set_size(nqp);
     ::sfe_qrules::bar_deg15_qrule(&cs[0], &(ws.data())[0]);
-    break;
   }
-  if (guard7) {
-    nqp = ::sfe_qrules::bar_deg13_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg13_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard6) {
-    nqp = ::sfe_qrules::bar_deg11_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard5) {
-    nqp = ::sfe_qrules::bar_deg9_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard4) {
-    nqp = ::sfe_qrules::bar_deg7_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg7_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard3) {
-    nqp = ::sfe_qrules::bar_deg5_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg5_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard2) {
-    nqp = ::sfe_qrules::bar_deg3_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg3_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard1) {
-    nqp = ::sfe_qrules::bar_deg1_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg1_qrule(&cs[0], &(ws.data())[0]);
-  }
+}
+
+// hexa_125 - Triquartic hexahedral element with equidistant points
+static inline void hexa_125(double xi, double eta, double zeta,
+                            double sfvals[125], double sdvals[375])
+{
+  ::sfe_sfuncs::hexa_125_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// hexa_216 - Triquintic hexahedral element with equidistant points
+static inline void hexa_216(double xi, double eta, double zeta,
+                            double sfvals[216], double sdvals[648])
+{
+  ::sfe_sfuncs::hexa_216_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// hexa_64 - Tricubic hexahedral element with equidistant nodes
+static inline void hexa_64(double xi, double eta, double zeta,
+                           double sfvals[64], double sdvals[192])
+{
+  ::sfe_sfuncs::hexa_64_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// hexa_gl_125 - Triquartic hexahedral element with Gauss-Lobatto points
+static inline void hexa_gl_125(double xi, double eta, double zeta,
+                               double sfvals[125], double sdvals[375])
+{
+  ::sfe_sfuncs::hexa_gl_125_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// hexa_gl_216 - Triquintic hexahedral element with equidistant points
+static inline void hexa_gl_216(double xi, double eta, double zeta,
+                               double sfvals[216], double sdvals[648])
+{
+  ::sfe_sfuncs::hexa_gl_216_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// hexa_gl_64 - Tricubic hexahedral element with Gauss-Lobatto nodes
+static inline void hexa_gl_64(double xi, double eta, double zeta,
+                              double sfvals[64], double sdvals[192])
+{
+  ::sfe_sfuncs::hexa_gl_64_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 // obtain_facets - Query facet information
@@ -1047,6 +1165,229 @@ static void obtain_facets(coder::SizeType etype, signed char facetid,
 }
 
 // obtain_facets - Query facet information
+static unsigned char obtain_facets(coder::SizeType etype)
+{
+  const static std::vector<std::vector<uint8_T>> FACETS{
+      {1, 1},                         // SFE_BAR_2
+      {},                             // 37
+      {},                             // 38
+      {},                             // 39
+      {1, 1},                         // SFE_BAR_3
+      {},                             // 41
+      {},                             // 42
+      {},                             // 43
+      {1, 1},                         // SFE_BAR_4
+      {1, 1},                         // SFE_BAR_FEK_4
+      {},                             // 46
+      {},                             // 47
+      {1, 1},                         // SFE_BAR_5
+      {1, 1},                         // SFE_BAR_FEK_5
+      {},                             // 50
+      {},                             // 51
+      {1, 1},                         // SFE_BAR_6
+      {1, 1},                         // SFE_BAR_FEK_6
+      {},                             // 54
+      {},                             // 55
+      {1, 1},                         // SFE_BAR_7
+      {1, 1},                         // SFE_BAR_FEK_7
+      {},                             // 58
+      {},                             // 59
+      {},                             // 60
+      {},                             // 61
+      {},                             // 62
+      {},                             // 63
+      {},                             // 64
+      {},                             // 65
+      {},                             // 66
+      {},                             // 67
+      {36, 36, 36},                   // SFE_TRI_3
+      {},                             // 69
+      {},                             // 70
+      {},                             // 71
+      {40, 40, 40},                   // SFE_TRI_6
+      {},                             // 73
+      {},                             // 74
+      {},                             // 75
+      {44, 44, 44},                   // SFE_TRI_10
+      {45, 45, 45},                   // SFE_TRI_FEK_10
+      {},                             // 78
+      {},                             // 79
+      {48, 48, 48},                   // SFE_TRI_15
+      {49, 49, 49},                   // SFE_TRI_GL_15
+      {48, 48, 48},                   // SFE_TRI_FEK_15
+      {},                             // 83
+      {52, 52, 52},                   // SFE_TRI_21
+      {53, 53, 53},                   // SFE_TRI_GL_21
+      {52, 52, 52},                   // SFE_TRI_FEK_21
+      {},                             // 87
+      {56, 56, 56},                   // SFE_TRI_28
+      {57, 57, 57},                   // SFE_TRI_GL_28
+      {56, 56, 56},                   // SFE_TRI_FEK_28
+      {},                             // 91
+      {},                             // 92
+      {},                             // 93
+      {},                             // 94
+      {},                             // 95
+      {},                             // 96
+      {},                             // 97
+      {},                             // 98
+      {},                             // 99
+      {36, 36, 36, 36},               // SFE_QUAD_4
+      {},                             // 101
+      {},                             // 102
+      {},                             // 103
+      {40, 40, 40, 40},               // SFE_QUAD_9
+      {},                             // 105
+      {},                             // 106
+      {},                             // 107
+      {44, 44, 44, 44},               // SFE_QUAD_16
+      {45, 45, 45, 45},               // SFE_QUAD_FEK_16
+      {},                             // 110
+      {},                             // 111
+      {48, 48, 48, 48},               // SFE_QUAD_25
+      {49, 49, 49, 49},               // SFE_QUAD_FEK_25
+      {},                             // 114
+      {},                             // 115
+      {52, 52, 52, 52},               // SFE_QUAD_36
+      {53, 53, 53, 53},               // SFE_QUAD_FEK_36
+      {},                             // 118
+      {},                             // 119
+      {56, 56, 56, 56},               // SFE_QUAD_49
+      {57, 57, 57, 57},               // SFE_QUAD_FEK_49
+      {},                             // 122
+      {},                             // 123
+      {},                             // 124
+      {},                             // 125
+      {},                             // 126
+      {},                             // 127
+      {},                             // 128
+      {},                             // 129
+      {},                             // 130
+      {},                             // 131
+      {68, 68, 68, 68},               // SFE_TET_4
+      {},                             // 133
+      {},                             // 134
+      {},                             // 135
+      {72, 72, 72, 72},               // SFE_TET_10
+      {},                             // 137
+      {},                             // 138
+      {},                             // 139
+      {76, 76, 76, 76},               // SFE_TET_20
+      {77, 77, 77, 77},               // SFE_TET_FEK_20
+      {},                             // 142
+      {},                             // 143
+      {80, 80, 80, 80},               // SFE_TET_35
+      {81, 81, 81, 81},               // SFE_TET_GL_35
+      {82, 82, 82, 82},               // SFE_TET_FEK_35
+      {},                             // 147
+      {84, 84, 84, 84},               // SFE_TET_56
+      {85, 85, 85, 85},               // SFE_TET_GL_56
+      {86, 86, 86, 86},               // SFE_TET_FEK_56
+      {},                             // 151
+      {88, 88, 88, 88},               // SFE_TET_84
+      {89, 89, 89, 89},               // SFE_TET_GL_84
+      {90, 90, 90, 90},               // SFE_TET_FEK_84
+      {},                             // 155
+      {},                             // 156
+      {},                             // 157
+      {},                             // 158
+      {},                             // 159
+      {},                             // 160
+      {},                             // 161
+      {},                             // 162
+      {},                             // 163
+      {100, 68, 68, 68, 68},          // SFE_PYRA_5
+      {},                             // 165
+      {},                             // 166
+      {},                             // 167
+      {104, 72, 72, 72, 72},          // SFE_PYRA_14
+      {},                             // 169
+      {},                             // 170
+      {},                             // 171
+      {108, 76, 76, 76, 76},          // SFE_PYRA_30
+      {109, 77, 77, 77, 77},          // SFE_PYRA_FEK_30
+      {},                             // 174
+      {},                             // 175
+      {112, 80, 80, 80, 80},          // SFE_PYRA_55
+      {113, 81, 81, 81, 81},          // SFE_PYRA_GL_55
+      {112, 82, 82, 82, 82},          // SFE_PYRA_FEK_55
+      {},                             // 179
+      {116, 84, 84, 84, 84},          // SFE_PYRA_91
+      {},                             // 181
+      {},                             // 182
+      {},                             // 183
+      {},                             // 184
+      {},                             // 185
+      {},                             // 186
+      {},                             // 187
+      {},                             // 188
+      {},                             // 189
+      {},                             // 190
+      {},                             // 191
+      {},                             // 192
+      {},                             // 193
+      {},                             // 194
+      {},                             // 195
+      {100, 100, 100, 68, 68},        // SFE_PRISM_6
+      {},                             // 197
+      {},                             // 198
+      {},                             // 199
+      {104, 104, 104, 72, 72},        // SFE_PRISM_18
+      {},                             // 201
+      {},                             // 202
+      {},                             // 203
+      {108, 108, 108, 76, 76},        // SFE_PRISM_40
+      {109, 109, 109, 77, 77},        // SFE_PRISM_FEK_40
+      {},                             // 206
+      {},                             // 207
+      {112, 112, 112, 80, 80},        // SFE_PRISM_75
+      {113, 113, 113, 81, 81},        // SFE_PRISM_GL_75
+      {112, 112, 112, 82, 82},        // SFE_PRISM_FEK_75
+      {},                             // 211
+      {116, 116, 116, 84, 84},        // SFE_PRISM_126
+      {117, 117, 117, 85, 85},        // SFE_PRISM_GL_126
+      {},                             // 214
+      {},                             // 215
+      {},                             // 216
+      {},                             // 217
+      {},                             // 218
+      {},                             // 219
+      {},                             // 220
+      {},                             // 221
+      {},                             // 222
+      {},                             // 223
+      {},                             // 224
+      {},                             // 225
+      {},                             // 226
+      {},                             // 227
+      {100, 100, 100, 100, 100, 100}, // SFE_HEXA_8
+      {},                             // 229
+      {},                             // 230
+      {},                             // 231
+      {104, 104, 104, 104, 104, 104}, // SFE_HEXA_27
+      {},                             // 233
+      {},                             // 234
+      {},                             // 235
+      {108, 108, 108, 108, 108, 108}, // SFE_HEXA_64
+      {109, 109, 109, 109, 109, 109}, // SFE_HEXA_FEK_64
+      {},                             // 238
+      {},                             // 239
+      {112, 112, 112, 112, 112, 112}, // SFE_HEXA_125
+      {113, 113, 113, 113, 113, 113}, // SFE_HEXA_FEK_125
+      {},                             // 242
+      {},                             // 243
+      {116, 116, 116, 116, 116, 116}, // SFE_HEXA_216
+      {117, 117, 117, 117, 117, 117}, // SFE_HEXA_FEK_216
+      {},                             // 246
+      {},                             // 247
+      {120, 120, 120, 120, 120, 120}, // SFE_HEXA_343
+      {121, 121, 121, 121, 121, 121}, // SFE_HEXA_FEK_343
+  };
+  //  get the number of facets
+  return [&](uint8_T et) { return FACETS[et - 36].size(); }(etype);
+}
+
+// obtain_facets - Query facet information
 static unsigned char obtain_facets(coder::SizeType etype, signed char facetid)
 {
   const static std::vector<std::vector<uint8_T>> FACETS{
@@ -1810,227 +2151,74 @@ static unsigned char obtain_facets(coder::SizeType etype, signed char facetid)
   }(etype, static_cast<signed char>(facetid - 1));
 }
 
-// obtain_facets - Query facet information
-static unsigned char obtain_facets(coder::SizeType etype)
+// prism_126 - Quintic prismatic element with equidistant nodes
+static inline void prism_126(double xi, double eta, double zeta,
+                             double sfvals[126], double sdvals[378])
 {
-  const static std::vector<std::vector<uint8_T>> FACETS{
-      {1, 1},                         // SFE_BAR_2
-      {},                             // 37
-      {},                             // 38
-      {},                             // 39
-      {1, 1},                         // SFE_BAR_3
-      {},                             // 41
-      {},                             // 42
-      {},                             // 43
-      {1, 1},                         // SFE_BAR_4
-      {1, 1},                         // SFE_BAR_FEK_4
-      {},                             // 46
-      {},                             // 47
-      {1, 1},                         // SFE_BAR_5
-      {1, 1},                         // SFE_BAR_FEK_5
-      {},                             // 50
-      {},                             // 51
-      {1, 1},                         // SFE_BAR_6
-      {1, 1},                         // SFE_BAR_FEK_6
-      {},                             // 54
-      {},                             // 55
-      {1, 1},                         // SFE_BAR_7
-      {1, 1},                         // SFE_BAR_FEK_7
-      {},                             // 58
-      {},                             // 59
-      {},                             // 60
-      {},                             // 61
-      {},                             // 62
-      {},                             // 63
-      {},                             // 64
-      {},                             // 65
-      {},                             // 66
-      {},                             // 67
-      {36, 36, 36},                   // SFE_TRI_3
-      {},                             // 69
-      {},                             // 70
-      {},                             // 71
-      {40, 40, 40},                   // SFE_TRI_6
-      {},                             // 73
-      {},                             // 74
-      {},                             // 75
-      {44, 44, 44},                   // SFE_TRI_10
-      {45, 45, 45},                   // SFE_TRI_FEK_10
-      {},                             // 78
-      {},                             // 79
-      {48, 48, 48},                   // SFE_TRI_15
-      {49, 49, 49},                   // SFE_TRI_GL_15
-      {48, 48, 48},                   // SFE_TRI_FEK_15
-      {},                             // 83
-      {52, 52, 52},                   // SFE_TRI_21
-      {53, 53, 53},                   // SFE_TRI_GL_21
-      {52, 52, 52},                   // SFE_TRI_FEK_21
-      {},                             // 87
-      {56, 56, 56},                   // SFE_TRI_28
-      {57, 57, 57},                   // SFE_TRI_GL_28
-      {56, 56, 56},                   // SFE_TRI_FEK_28
-      {},                             // 91
-      {},                             // 92
-      {},                             // 93
-      {},                             // 94
-      {},                             // 95
-      {},                             // 96
-      {},                             // 97
-      {},                             // 98
-      {},                             // 99
-      {36, 36, 36, 36},               // SFE_QUAD_4
-      {},                             // 101
-      {},                             // 102
-      {},                             // 103
-      {40, 40, 40, 40},               // SFE_QUAD_9
-      {},                             // 105
-      {},                             // 106
-      {},                             // 107
-      {44, 44, 44, 44},               // SFE_QUAD_16
-      {45, 45, 45, 45},               // SFE_QUAD_FEK_16
-      {},                             // 110
-      {},                             // 111
-      {48, 48, 48, 48},               // SFE_QUAD_25
-      {49, 49, 49, 49},               // SFE_QUAD_FEK_25
-      {},                             // 114
-      {},                             // 115
-      {52, 52, 52, 52},               // SFE_QUAD_36
-      {53, 53, 53, 53},               // SFE_QUAD_FEK_36
-      {},                             // 118
-      {},                             // 119
-      {56, 56, 56, 56},               // SFE_QUAD_49
-      {57, 57, 57, 57},               // SFE_QUAD_FEK_49
-      {},                             // 122
-      {},                             // 123
-      {},                             // 124
-      {},                             // 125
-      {},                             // 126
-      {},                             // 127
-      {},                             // 128
-      {},                             // 129
-      {},                             // 130
-      {},                             // 131
-      {68, 68, 68, 68},               // SFE_TET_4
-      {},                             // 133
-      {},                             // 134
-      {},                             // 135
-      {72, 72, 72, 72},               // SFE_TET_10
-      {},                             // 137
-      {},                             // 138
-      {},                             // 139
-      {76, 76, 76, 76},               // SFE_TET_20
-      {77, 77, 77, 77},               // SFE_TET_FEK_20
-      {},                             // 142
-      {},                             // 143
-      {80, 80, 80, 80},               // SFE_TET_35
-      {81, 81, 81, 81},               // SFE_TET_GL_35
-      {82, 82, 82, 82},               // SFE_TET_FEK_35
-      {},                             // 147
-      {84, 84, 84, 84},               // SFE_TET_56
-      {85, 85, 85, 85},               // SFE_TET_GL_56
-      {86, 86, 86, 86},               // SFE_TET_FEK_56
-      {},                             // 151
-      {88, 88, 88, 88},               // SFE_TET_84
-      {89, 89, 89, 89},               // SFE_TET_GL_84
-      {90, 90, 90, 90},               // SFE_TET_FEK_84
-      {},                             // 155
-      {},                             // 156
-      {},                             // 157
-      {},                             // 158
-      {},                             // 159
-      {},                             // 160
-      {},                             // 161
-      {},                             // 162
-      {},                             // 163
-      {100, 68, 68, 68, 68},          // SFE_PYRA_5
-      {},                             // 165
-      {},                             // 166
-      {},                             // 167
-      {104, 72, 72, 72, 72},          // SFE_PYRA_14
-      {},                             // 169
-      {},                             // 170
-      {},                             // 171
-      {108, 76, 76, 76, 76},          // SFE_PYRA_30
-      {109, 77, 77, 77, 77},          // SFE_PYRA_FEK_30
-      {},                             // 174
-      {},                             // 175
-      {112, 80, 80, 80, 80},          // SFE_PYRA_55
-      {113, 81, 81, 81, 81},          // SFE_PYRA_GL_55
-      {112, 82, 82, 82, 82},          // SFE_PYRA_FEK_55
-      {},                             // 179
-      {116, 84, 84, 84, 84},          // SFE_PYRA_91
-      {},                             // 181
-      {},                             // 182
-      {},                             // 183
-      {},                             // 184
-      {},                             // 185
-      {},                             // 186
-      {},                             // 187
-      {},                             // 188
-      {},                             // 189
-      {},                             // 190
-      {},                             // 191
-      {},                             // 192
-      {},                             // 193
-      {},                             // 194
-      {},                             // 195
-      {100, 100, 100, 68, 68},        // SFE_PRISM_6
-      {},                             // 197
-      {},                             // 198
-      {},                             // 199
-      {104, 104, 104, 72, 72},        // SFE_PRISM_18
-      {},                             // 201
-      {},                             // 202
-      {},                             // 203
-      {108, 108, 108, 76, 76},        // SFE_PRISM_40
-      {109, 109, 109, 77, 77},        // SFE_PRISM_FEK_40
-      {},                             // 206
-      {},                             // 207
-      {112, 112, 112, 80, 80},        // SFE_PRISM_75
-      {113, 113, 113, 81, 81},        // SFE_PRISM_GL_75
-      {112, 112, 112, 82, 82},        // SFE_PRISM_FEK_75
-      {},                             // 211
-      {116, 116, 116, 84, 84},        // SFE_PRISM_126
-      {117, 117, 117, 85, 85},        // SFE_PRISM_GL_126
-      {},                             // 214
-      {},                             // 215
-      {},                             // 216
-      {},                             // 217
-      {},                             // 218
-      {},                             // 219
-      {},                             // 220
-      {},                             // 221
-      {},                             // 222
-      {},                             // 223
-      {},                             // 224
-      {},                             // 225
-      {},                             // 226
-      {},                             // 227
-      {100, 100, 100, 100, 100, 100}, // SFE_HEXA_8
-      {},                             // 229
-      {},                             // 230
-      {},                             // 231
-      {104, 104, 104, 104, 104, 104}, // SFE_HEXA_27
-      {},                             // 233
-      {},                             // 234
-      {},                             // 235
-      {108, 108, 108, 108, 108, 108}, // SFE_HEXA_64
-      {109, 109, 109, 109, 109, 109}, // SFE_HEXA_FEK_64
-      {},                             // 238
-      {},                             // 239
-      {112, 112, 112, 112, 112, 112}, // SFE_HEXA_125
-      {113, 113, 113, 113, 113, 113}, // SFE_HEXA_FEK_125
-      {},                             // 242
-      {},                             // 243
-      {116, 116, 116, 116, 116, 116}, // SFE_HEXA_216
-      {117, 117, 117, 117, 117, 117}, // SFE_HEXA_FEK_216
-      {},                             // 246
-      {},                             // 247
-      {120, 120, 120, 120, 120, 120}, // SFE_HEXA_343
-      {121, 121, 121, 121, 121, 121}, // SFE_HEXA_FEK_343
-  };
-  //  get the number of facets
-  return [&](uint8_T et) { return FACETS[et - 36].size(); }(etype);
+  ::sfe_sfuncs::prism_126_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_40 - Cubic prismatic element
+static inline void prism_40(double xi, double eta, double zeta,
+                            double sfvals[40], double sdvals[120])
+{
+  ::sfe_sfuncs::prism_40_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_75 - Quartic prismatic element with equidistant nodes
+static inline void prism_75(double xi, double eta, double zeta,
+                            double sfvals[75], double sdvals[225])
+{
+  ::sfe_sfuncs::prism_75_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_gl_126 - Quintic prismatic element with equidistant nodes
+static inline void prism_gl_126(double xi, double eta, double zeta,
+                                double sfvals[126], double sdvals[378])
+{
+  ::sfe_sfuncs::prism_gl_126_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_gl_40 - Quadratic prismatic element with Gauss-Lobatto nodes
+static inline void prism_gl_40(double xi, double eta, double zeta,
+                               double sfvals[40], double sdvals[120])
+{
+  ::sfe_sfuncs::prism_gl_40_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_gl_75 - Quartic prismatic element with Gauss-Lobatto nodes
+static inline void prism_gl_75(double xi, double eta, double zeta,
+                               double sfvals[75], double sdvals[225])
+{
+  ::sfe_sfuncs::prism_gl_75_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// pyra_30 - Compute shape functions and their derivatives of pyra_30
+static inline void pyra_30(double xi, double eta, double zeta,
+                           double sfvals[30], double sdvals[90])
+{
+  ::sfe_sfuncs::pyra_30_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// pyra_55 - Compute shape functions and their derivatives of pyra_55
+static inline void pyra_55(double xi, double eta, double zeta,
+                           double sfvals[55], double sdvals[165])
+{
+  ::sfe_sfuncs::pyra_55_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// pyra_gl_30 - Compute shape functions and their derivatives of pyra_gl_30
+static inline void pyra_gl_30(double xi, double eta, double zeta,
+                              double sfvals[30], double sdvals[90])
+{
+  ::sfe_sfuncs::pyra_gl_30_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// pyra_gl_55 - Compute shape functions and their derivatives of pyra_gl_55
+static inline void pyra_gl_55(double xi, double eta, double zeta,
+                              double sfvals[55], double sdvals[165])
+{
+  ::sfe_sfuncs::pyra_gl_55_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
 }
 
 //  pyra_quadrules - Obtain quadrature points and weights of a pyramidal
@@ -2038,65 +2226,56 @@ static void pyra_quadrules(coder::SizeType degree,
                            ::coder::array<double, 2U> &cs,
                            ::coder::array<double, 1U> &ws)
 {
-  coder::SizeType nqp;
-  boolean_T guard1{false};
-  boolean_T guard2{false};
-  boolean_T guard3{false};
-  boolean_T guard4{false};
-  guard1 = false;
-  guard2 = false;
-  guard3 = false;
-  guard4 = false;
-  switch (degree) {
-  case 0:
-    guard1 = true;
-    break;
-  case 1:
-    guard1 = true;
-    break;
-  case 2:
+  if (degree <= 1) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg1_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 2) {
+    coder::SizeType nqp;
     nqp = ::sfe_qrules::pyra_deg2_qrule();
     cs.set_size(nqp, 3);
     ws.set_size(nqp);
     ::sfe_qrules::pyra_deg2_qrule(&cs[0], &(ws.data())[0]);
-    break;
-  case 3:
+  } else if (degree <= 3) {
+    coder::SizeType nqp;
     nqp = ::sfe_qrules::pyra_deg3_qrule();
     cs.set_size(nqp, 3);
     ws.set_size(nqp);
     ::sfe_qrules::pyra_deg3_qrule(&cs[0], &(ws.data())[0]);
-    break;
-  case 4:
-    guard2 = true;
-    break;
-  case 5:
-    guard2 = true;
-    break;
-  case 6:
+  } else if (degree <= 5) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg5_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg5_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 6) {
+    coder::SizeType nqp;
     nqp = ::sfe_qrules::pyra_deg6_qrule();
     cs.set_size(nqp, 3);
     ws.set_size(nqp);
     ::sfe_qrules::pyra_deg6_qrule(&cs[0], &(ws.data())[0]);
-    break;
-  case 7:
+  } else if (degree <= 7) {
+    coder::SizeType nqp;
     nqp = ::sfe_qrules::pyra_deg7_qrule();
     cs.set_size(nqp, 3);
     ws.set_size(nqp);
     ::sfe_qrules::pyra_deg7_qrule(&cs[0], &(ws.data())[0]);
-    break;
-  case 8:
-    guard3 = true;
-    break;
-  case 9:
-    guard3 = true;
-    break;
-  case 10:
-    guard4 = true;
-    break;
-  case 11:
-    guard4 = true;
-    break;
-  default:
+  } else if (degree <= 9) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg9_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg9_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 11) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg11_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg11_qrule(&cs[0], &(ws.data())[0]);
+  } else {
+    coder::SizeType nqp;
     if (degree > 13) {
       m2cWarnMsgIdAndTxt("pyra_quadrules:UnsupportedDegree",
                          "Only support up to degree 13");
@@ -2105,34 +2284,49 @@ static void pyra_quadrules(coder::SizeType degree,
     cs.set_size(nqp, 3);
     ws.set_size(nqp);
     ::sfe_qrules::pyra_deg13_qrule(&cs[0], &(ws.data())[0]);
-    break;
   }
-  if (guard4) {
-    nqp = ::sfe_qrules::pyra_deg11_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard3) {
-    m2cAssert(degree <= 9, "Only support up to degree 9");
-    nqp = ::sfe_qrules::pyra_deg9_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard2) {
-    m2cAssert(degree <= 5, "Only support up to degree 5");
-    nqp = ::sfe_qrules::pyra_deg5_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg5_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard1) {
-    nqp = ::sfe_qrules::pyra_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg1_qrule(&cs[0], &(ws.data())[0]);
-  }
+}
+
+// quad_25 - Biquartic quadrilateral element with equidistant points
+static inline void quad_25(double xi, double eta, double sfvals[25],
+                           double sdvals[50])
+{
+  ::sfe_sfuncs::quad_25_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_36   Biquintic quadrilateral element with equidistant points
+static inline void quad_36(double xi, double eta, double sfvals[36],
+                           double sdvals[72])
+{
+  ::sfe_sfuncs::quad_36_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_49 - Bisextic quadrilateral element with equidistant points
+static inline void quad_49(double xi, double eta, double sfvals[49],
+                           double sdvals[98])
+{
+  ::sfe_sfuncs::quad_49_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_gl_25 - Biquartic quadrilateral element with Gauss-Lobatto points
+static inline void quad_gl_25(double xi, double eta, double sfvals[25],
+                              double sdvals[50])
+{
+  ::sfe_sfuncs::quad_gl_25_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_gl_36 - Biquintic quadrilateral element with equidistant points
+static inline void quad_gl_36(double xi, double eta, double sfvals[36],
+                              double sdvals[72])
+{
+  ::sfe_sfuncs::quad_gl_36_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_gl_49 - Bisextic quadrilateral element with equidistant points
+static inline void quad_gl_49(double xi, double eta, double sfvals[49],
+                              double sdvals[98])
+{
+  ::sfe_sfuncs::quad_gl_49_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
 }
 
 static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
@@ -2615,378 +2809,1153 @@ static void sfe1_tabulate_shapefuncs(coder::SizeType etype,
   }
 }
 
-static void sfe2_tabulate_equi_tri(coder::SizeType etype,
-                                   const ::coder::array<double, 2U> &cs,
-                                   ::coder::array<double, 2U> &sfvals,
-                                   ::coder::array<double, 3U> &sdvals)
+static void sfe2_tabulate_equi_quad(coder::SizeType etype,
+                                    const ::coder::array<double, 2U> &cs,
+                                    ::coder::array<double, 2U> &sfvals,
+                                    ::coder::array<double, 3U> &sdvals)
 {
+  double b_tmp_data[1029];
+  double tmp_data[1029];
+  double dv10[98];
+  double dv7[72];
+  double dv6[50];
+  double dv11[49];
+  double dv9[36];
+  double dv8[25];
+  coder::SizeType b_tmp_size_idx_1;
+  coder::SizeType b_tmp_size_idx_2;
+  coder::SizeType i;
+  coder::SizeType i4;
+  coder::SizeType i5;
+  coder::SizeType i6;
+  coder::SizeType i7;
+  coder::SizeType loop_ub;
   coder::SizeType nqp;
-  coder::SizeType sdvals_tmp;
+  short b_unnamed_idx_1;
+  short b_unnamed_idx_2;
   //  triangular
   nqp = cs.size(0) - 1;
-  sdvals_tmp = iv[etype - 1];
-  sfvals.set_size(cs.size(0), sdvals_tmp);
-  sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   switch (etype) {
-  case 68: {
+  case 100: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
-      double deriv[6];
-      double N[3];
-      ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &N[0], &deriv[0]);
-      sfvals[sfvals.size(1) * q] = N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
-      sfvals[sfvals.size(1) * q + 1] = N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[2];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[3];
-      sfvals[sfvals.size(1) * q + 2] = N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[4];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[5];
-    }
-  } break;
-  case 72: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double b_deriv[12];
-      double b_N[6];
-      ::sfe_sfuncs::tri_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &b_N[0], &b_deriv[0]);
-      sfvals[sfvals.size(1) * q] = b_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
-      sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[2];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[3];
-      sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[4];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[5];
-      sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[6];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[7];
-      sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[8];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[9];
-      sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[10];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[11];
-    }
-  } break;
-  case 76: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double c_deriv[20];
-      double c_N[10];
-      ::sfe_sfuncs::tri_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &c_N[0], &c_deriv[0]);
-      sfvals[sfvals.size(1) * q] = c_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
-      sfvals[sfvals.size(1) * q + 1] = c_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = c_deriv[2];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[3];
-      sfvals[sfvals.size(1) * q + 2] = c_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[4];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[5];
-      sfvals[sfvals.size(1) * q + 3] = c_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[6];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[7];
-      sfvals[sfvals.size(1) * q + 4] = c_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[8];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[9];
-      sfvals[sfvals.size(1) * q + 5] = c_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[10];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[11];
-      sfvals[sfvals.size(1) * q + 6] = c_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[12];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[13];
-      sfvals[sfvals.size(1) * q + 7] = c_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[14];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[15];
-      sfvals[sfvals.size(1) * q + 8] = c_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[16];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[17];
-      sfvals[sfvals.size(1) * q + 9] = c_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[18];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[19];
-    }
-  } break;
-  case 80: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double d_deriv[30];
-      double d_N[15];
-      ::sfe_sfuncs::tri_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &d_N[0], &d_deriv[0]);
-      for (coder::SizeType i{0}; i < 15; i++) {
-        sfvals[i + sfvals.size(1) * q] = d_N[i];
-        sdvals_tmp = i << 1;
-        sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[sdvals_tmp];
-        sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[sdvals_tmp + 1];
+      double dv3[8];
+      double dv[4];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 3) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
       }
     }
   } break;
-  case 84: {
+  case 104: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
-      double e_deriv[42];
-      double e_N[21];
-      ::sfe_sfuncs::tri_21_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &e_N[0], &e_deriv[0]);
-      for (coder::SizeType i{0}; i < 21; i++) {
-        sfvals[i + sfvals.size(1) * q] = e_N[i];
-        sdvals_tmp = i << 1;
-        sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[sdvals_tmp];
-        sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            e_deriv[sdvals_tmp + 1];
+      double dv4[18];
+      double dv1[9];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::quad_9_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv1[0], &dv4[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 8) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 108: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv5[32];
+      double dv2[16];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::quad_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                  &dv2[0], &dv5[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 15) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 112: {
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv6);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 24) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  case 116: {
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv9, dv7);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv7[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 35) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
       }
     }
   } break;
   default: {
-    m2cAssert(etype == 88, "Only support up to sextic.");
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double f_deriv[56];
-      double f_N[28];
-      ::sfe_sfuncs::tri_28_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &f_N[0], &f_deriv[0]);
-      for (coder::SizeType i{0}; i < 28; i++) {
-        sfvals[i + sfvals.size(1) * q] = f_N[i];
-        sdvals_tmp = i << 1;
-        sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[sdvals_tmp];
-        sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            f_deriv[sdvals_tmp + 1];
+    coder::SizeType ub_loop;
+    m2cAssert(etype == 120, "Only supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv11, dv10);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 48) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
       }
     }
   } break;
   }
 }
 
-static void sfe2_tabulate_gl(coder::SizeType etype,
-                             const ::coder::array<double, 2U> &cs,
-                             ::coder::array<double, 2U> &sfvals,
-                             ::coder::array<double, 3U> &sdvals)
+static void sfe2_tabulate_equi_tri(coder::SizeType etype,
+                                   const ::coder::array<double, 2U> &cs,
+                                   ::coder::array<double, 2U> &sfvals,
+                                   ::coder::array<double, 3U> &sdvals)
 {
-  //  GL kernel
-  if ((etype >> 5 & 7) == 2) {
-    coder::SizeType nqp;
-    coder::SizeType sdvals_tmp;
-    //  triangular
-    nqp = cs.size(0) - 1;
-    sdvals_tmp = iv[etype - 1];
-    sfvals.set_size(cs.size(0), sdvals_tmp);
-    sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
-    switch (etype) {
-    case 77: {
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double d_deriv[20];
-        double d_N[10];
-        ::sfe_sfuncs::tri_gl_10_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &d_N[0], &d_deriv[0]);
-        sfvals[sfvals.size(1) * q] = d_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = d_deriv[1];
-        sfvals[sfvals.size(1) * q + 1] = d_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[2];
-        sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[3];
-        sfvals[sfvals.size(1) * q + 2] = d_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[4];
-        sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[5];
-        sfvals[sfvals.size(1) * q + 3] = d_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[6];
-        sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[7];
-        sfvals[sfvals.size(1) * q + 4] = d_N[4];
-        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[8];
-        sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[9];
-        sfvals[sfvals.size(1) * q + 5] = d_N[5];
-        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[10];
-        sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[11];
-        sfvals[sfvals.size(1) * q + 6] = d_N[6];
-        sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[12];
-        sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[13];
-        sfvals[sfvals.size(1) * q + 7] = d_N[7];
-        sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[14];
-        sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[15];
-        sfvals[sfvals.size(1) * q + 8] = d_N[8];
-        sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[16];
-        sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[17];
-        sfvals[sfvals.size(1) * q + 9] = d_N[9];
-        sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[18];
-        sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-            d_deriv[19];
+  double b_tmp_data[1029];
+  double tmp_data[1029];
+  double dv9[56];
+  double dv7[42];
+  double dv10[28];
+  double dv8[21];
+  coder::SizeType b_tmp_size_idx_1;
+  coder::SizeType b_tmp_size_idx_2;
+  coder::SizeType i;
+  coder::SizeType i3;
+  coder::SizeType i5;
+  coder::SizeType i6;
+  coder::SizeType i7;
+  coder::SizeType loop_ub;
+  coder::SizeType nqp;
+  short b_unnamed_idx_1;
+  short b_unnamed_idx_2;
+  //  triangular
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 68: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv1[6];
+      double dv[3];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                &dv[0], &dv1[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
       }
-    } break;
-    case 81: {
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double e_deriv[30];
-        double e_N[15];
-        ::sfe_sfuncs::tri_gl_15_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &e_N[0], &e_deriv[0]);
-        for (coder::SizeType i{0}; i < 15; i++) {
-          sfvals[i + sfvals.size(1) * q] = e_N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              e_deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = e_deriv[sdvals_tmp + 1];
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 2) {
+          ub_loop = 0;
+          i2++;
         }
       }
-    } break;
-    case 85: {
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double f_deriv[42];
-        double f_N[21];
-        ::sfe_sfuncs::tri_gl_21_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &f_N[0], &f_deriv[0]);
-        for (coder::SizeType i{0}; i < 21; i++) {
-          sfvals[i + sfvals.size(1) * q] = f_N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              f_deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = f_deriv[sdvals_tmp + 1];
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
         }
       }
-    } break;
-    default: {
-      m2cAssert(etype == 85, "Only support up to sextic");
-      //  Sextic GL points do not exist. Use Fekete points instead.
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double h_deriv[56];
-        double h_N[28];
-        ::sfe_sfuncs::tri_fek_28_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &h_N[0], &h_deriv[0]);
-        for (coder::SizeType i{0}; i < 28; i++) {
-          sfvals[i + sfvals.size(1) * q] = h_N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              h_deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = h_deriv[sdvals_tmp + 1];
-        }
-      }
-    } break;
     }
-  } else {
-    coder::SizeType nqp;
-    coder::SizeType sdvals_tmp;
-    //  quad
-    nqp = cs.size(0) - 1;
-    sdvals_tmp = iv[etype - 1];
-    sfvals.set_size(cs.size(0), sdvals_tmp);
-    sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
-    switch (etype) {
-    case 109: {
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double deriv[32];
-        double N[16];
-        ::sfe_sfuncs::quad_gl_16_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &N[0], &deriv[0]);
-        for (coder::SizeType i{0}; i < 16; i++) {
-          sfvals[i + sfvals.size(1) * q] = N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = deriv[sdvals_tmp + 1];
+  } break;
+  case 72: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv4[12];
+      double dv1[6];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::tri_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                &dv1[0], &dv4[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 5) {
+          ub_loop = 0;
+          i2++;
         }
       }
-    } break;
-    case 113: {
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double b_deriv[50];
-        double b_N[25];
-        ::sfe_sfuncs::quad_gl_25_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &b_N[0], &b_deriv[0]);
-        for (coder::SizeType i{0}; i < 25; i++) {
-          sfvals[i + sfvals.size(1) * q] = b_N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              b_deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = b_deriv[sdvals_tmp + 1];
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
         }
       }
-    } break;
-    case 117: {
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double c_deriv[72];
-        double c_N[36];
-        ::sfe_sfuncs::quad_gl_36_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &c_N[0], &c_deriv[0]);
-        for (coder::SizeType i{0}; i < 36; i++) {
-          sfvals[i + sfvals.size(1) * q] = c_N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              c_deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = c_deriv[sdvals_tmp + 1];
-        }
-      }
-    } break;
-    default: {
-      m2cAssert(etype == 121, "Only supports up to sextic.");
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double g_deriv[98];
-        double g_N[49];
-        ::sfe_sfuncs::quad_gl_49_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &g_N[0], &g_deriv[0]);
-        for (coder::SizeType i{0}; i < 49; i++) {
-          sfvals[i + sfvals.size(1) * q] = g_N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              g_deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = g_deriv[sdvals_tmp + 1];
-        }
-      }
-    } break;
     }
+  } break;
+  case 76: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv5[20];
+      double dv2[10];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::tri_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv2[0], &dv5[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 9) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 80: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv6[30];
+      double dv3[15];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::tri_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv3[0], &dv6[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 14) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 84: {
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tri_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv7);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv8[i3];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv7[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 20) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  default: {
+    coder::SizeType ub_loop;
+    m2cAssert(etype == 88, "Only support up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tri_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv10, dv9);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv10[i3];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv9[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 27) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+static void sfe2_tabulate_fek_tri(coder::SizeType etype,
+                                  const ::coder::array<double, 2U> &cs,
+                                  ::coder::array<double, 2U> &sfvals,
+                                  ::coder::array<double, 3U> &sdvals)
+{
+  double tmp_data[1029];
+  double dv4[56];
+  double dv1[42];
+  double dv[30];
+  double dv5[28];
+  double dv3[21];
+  double dv2[15];
+  coder::SizeType i;
+  coder::SizeType i1;
+  coder::SizeType i2;
+  coder::SizeType i3;
+  coder::SizeType loop_ub;
+  coder::SizeType tmp_size_idx_1;
+  coder::SizeType tmp_size_idx_2;
+  coder::SizeType ub_loop;
+  short unnamed_idx_1;
+  short unnamed_idx_2;
+  //  triangular
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  switch (etype) {
+  case 82:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      tri_fek_15(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv2, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + (loop_ub << 1)];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 14) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  case 86:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      tri_fek_21(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv3, dv1);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (loop_ub << 1)];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 20) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  default:
+    m2cAssert(etype == 90, "Only supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      tri_fek_28(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv5[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (loop_ub << 1)];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 27) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  }
+}
+
+static void sfe2_tabulate_gl_quad(coder::SizeType etype,
+                                  const ::coder::array<double, 2U> &cs,
+                                  ::coder::array<double, 2U> &sfvals,
+                                  ::coder::array<double, 3U> &sdvals)
+{
+  double b_tmp_data[1029];
+  double tmp_data[1029];
+  double dv6[98];
+  double dv3[72];
+  double dv2[50];
+  double dv7[49];
+  double dv5[36];
+  double dv4[25];
+  coder::SizeType b_tmp_size_idx_1;
+  coder::SizeType b_tmp_size_idx_2;
+  coder::SizeType i;
+  coder::SizeType i4;
+  coder::SizeType i5;
+  coder::SizeType i6;
+  coder::SizeType i7;
+  coder::SizeType loop_ub;
+  coder::SizeType nqp;
+  short b_unnamed_idx_1;
+  short b_unnamed_idx_2;
+  //  quad
+  nqp = cs.size(0);
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 109: {
+    for (coder::SizeType q{0}; q < nqp; q++) {
+      double dv1[32];
+      double dv[16];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::quad_gl_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                     &dv[0], &dv1[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 15) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 113: {
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_gl_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv4, dv2);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv4[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv2[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 24) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  case 117: {
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_gl_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv3);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 35) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  default: {
+    coder::SizeType ub_loop;
+    m2cAssert(etype == 121, "Only supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_gl_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 48) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+static void sfe2_tabulate_gl_tri(coder::SizeType etype,
+                                 const ::coder::array<double, 2U> &cs,
+                                 ::coder::array<double, 2U> &sfvals,
+                                 ::coder::array<double, 3U> &sdvals)
+{
+  double b_tmp_data[1029];
+  double tmp_data[1029];
+  double dv6[56];
+  double dv4[42];
+  double dv7[28];
+  double dv5[21];
+  coder::SizeType b_tmp_size_idx_1;
+  coder::SizeType b_tmp_size_idx_2;
+  coder::SizeType i;
+  coder::SizeType i3;
+  coder::SizeType i5;
+  coder::SizeType i6;
+  coder::SizeType i7;
+  coder::SizeType loop_ub;
+  coder::SizeType nqp;
+  short b_unnamed_idx_1;
+  short b_unnamed_idx_2;
+  //  triangular
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 77: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv2[20];
+      double dv[10];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::tri_gl_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                    &dv[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 9) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 81: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv3[30];
+      double dv1[15];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::tri_gl_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                    &dv1[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 14) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 85: {
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tri_gl_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv5[i3];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv4[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 20) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  default: {
+    coder::SizeType ub_loop;
+    m2cAssert(etype == 85, "Only support up to sextic");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tri_fek_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv7[i3];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv6[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 27) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
   }
 }
 
@@ -2996,225 +3965,275 @@ static inline void sfe2_tabulate_shapefuncs(
     ::coder::array<double, 2U> &sfvals, ::coder::array<double, 3U> &sdvals)
 {
   switch (etype & 3) {
-  case 0: {
+  case 0:
     //  equi kernel
     if ((etype >> 5 & 7) == 2) {
       sfe2_tabulate_equi_tri(etype, cs, sfvals, sdvals);
     } else {
-      coder::SizeType nqp;
-      coder::SizeType sdvals_tmp;
-      //  triangular
-      nqp = cs.size(0) - 1;
-      sdvals_tmp = iv[etype - 1];
-      sfvals.set_size(cs.size(0), sdvals_tmp);
-      sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
-      switch (etype) {
-      case 100: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double c_deriv[8];
-          double c_N[4];
-          ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                     &c_N[0], &c_deriv[0]);
-          sfvals[sfvals.size(1) * q] = c_N[0];
-          sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
-          sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
-          sfvals[sfvals.size(1) * q + 1] = c_N[1];
-          sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-              c_deriv[2];
-          sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-              c_deriv[3];
-          sfvals[sfvals.size(1) * q + 2] = c_N[2];
-          sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-              c_deriv[4];
-          sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = c_deriv[5];
-          sfvals[sfvals.size(1) * q + 3] = c_N[3];
-          sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-              c_deriv[6];
-          sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = c_deriv[7];
+      sfe2_tabulate_equi_quad(etype, cs, sfvals, sdvals);
+    }
+    break;
+  case 1:
+    //  GL kernel
+    if ((etype >> 5 & 7) == 2) {
+      sfe2_tabulate_gl_tri(etype, cs, sfvals, sdvals);
+    } else {
+      sfe2_tabulate_gl_quad(etype, cs, sfvals, sdvals);
+    }
+    break;
+  default:
+    //  FEK kernel
+    sfe2_tabulate_fek_tri(etype, cs, sfvals, sdvals);
+    break;
+  }
+}
+
+static void sfe3_tabulate_equi_hexa(coder::SizeType etype,
+                                    const ::coder::array<double, 2U> &cs,
+                                    ::coder::array<double, 2U> &sfvals,
+                                    ::coder::array<double, 3U> &sdvals)
+{
+  double b_tmp_data[1029];
+  double tmp_data[1029];
+  double dv8[648];
+  double dv5[375];
+  double dv9[216];
+  double dv4[192];
+  double dv7[125];
+  double dv6[64];
+  coder::SizeType b_tmp_size_idx_1;
+  coder::SizeType b_tmp_size_idx_2;
+  coder::SizeType i;
+  coder::SizeType i4;
+  coder::SizeType i5;
+  coder::SizeType i6;
+  coder::SizeType i7;
+  coder::SizeType loop_ub;
+  coder::SizeType nqp;
+  short b_unnamed_idx_1;
+  short b_unnamed_idx_2;
+  //  hex
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 228: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv2[24];
+      double dv[8];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::hexa_8_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
         }
-      } break;
-      case 104: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double d_deriv[18];
-          double d_N[9];
-          ::sfe_sfuncs::quad_9_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                     &d_N[0], &d_deriv[0]);
-          sfvals[sfvals.size(1) * q] = d_N[0];
-          sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
-          sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = d_deriv[1];
-          sfvals[sfvals.size(1) * q + 1] = d_N[1];
-          sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-              d_deriv[2];
-          sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-              d_deriv[3];
-          sfvals[sfvals.size(1) * q + 2] = d_N[2];
-          sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-              d_deriv[4];
-          sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = d_deriv[5];
-          sfvals[sfvals.size(1) * q + 3] = d_N[3];
-          sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-              d_deriv[6];
-          sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = d_deriv[7];
-          sfvals[sfvals.size(1) * q + 4] = d_N[4];
-          sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-              d_deriv[8];
-          sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = d_deriv[9];
-          sfvals[sfvals.size(1) * q + 5] = d_N[5];
-          sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-              d_deriv[10];
-          sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = d_deriv[11];
-          sfvals[sfvals.size(1) * q + 6] = d_N[6];
-          sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-              d_deriv[12];
-          sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = d_deriv[13];
-          sfvals[sfvals.size(1) * q + 7] = d_N[7];
-          sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-              d_deriv[14];
-          sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = d_deriv[15];
-          sfvals[sfvals.size(1) * q + 8] = d_N[8];
-          sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-              d_deriv[16];
-          sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = d_deriv[17];
+        if (ub_loop > 7) {
+          ub_loop = 0;
+          i2++;
         }
-      } break;
-      case 108: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double e_deriv[32];
-          double e_N[16];
-          ::sfe_sfuncs::quad_16_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &e_N[0], &e_deriv[0]);
-          for (coder::SizeType i{0}; i < 16; i++) {
-            sfvals[i + sfvals.size(1) * q] = e_N[i];
-            sdvals_tmp = i << 1;
-            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-                e_deriv[sdvals_tmp];
-            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = e_deriv[sdvals_tmp + 1];
-          }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
         }
-      } break;
-      case 112: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double f_deriv[50];
-          double f_N[25];
-          ::sfe_sfuncs::quad_25_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &f_N[0], &f_deriv[0]);
-          for (coder::SizeType i{0}; i < 25; i++) {
-            sfvals[i + sfvals.size(1) * q] = f_N[i];
-            sdvals_tmp = i << 1;
-            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-                f_deriv[sdvals_tmp];
-            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = f_deriv[sdvals_tmp + 1];
-          }
-        }
-      } break;
-      case 116: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double g_deriv[72];
-          double g_N[36];
-          ::sfe_sfuncs::quad_36_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &g_N[0], &g_deriv[0]);
-          for (coder::SizeType i{0}; i < 36; i++) {
-            sfvals[i + sfvals.size(1) * q] = g_N[i];
-            sdvals_tmp = i << 1;
-            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-                g_deriv[sdvals_tmp];
-            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = g_deriv[sdvals_tmp + 1];
-          }
-        }
-      } break;
-      default: {
-        m2cAssert(etype == 120, "Only supports up to sextic.");
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double i_deriv[98];
-          double i_N[49];
-          ::sfe_sfuncs::quad_49_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &i_N[0], &i_deriv[0]);
-          for (coder::SizeType i{0}; i < 49; i++) {
-            sfvals[i + sfvals.size(1) * q] = i_N[i];
-            sdvals_tmp = i << 1;
-            sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-                i_deriv[sdvals_tmp];
-            sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = i_deriv[sdvals_tmp + 1];
-          }
-        }
-      } break;
       }
     }
   } break;
-  case 1:
-    sfe2_tabulate_gl(etype, cs, sfvals, sdvals);
-    break;
+  case 232: {
+    for (coder::SizeType q{0}; q <= nqp; q++) {
+      double dv3[81];
+      double dv1[27];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
+      ::sfe_sfuncs::hexa_27_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 26) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 236: {
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      hexa_64(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+              cs[cs.size(1) * b_q + 2], dv6, dv4);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv6[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 63) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  case 240: {
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      hexa_125(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv7, dv5);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 124) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
   default: {
-    coder::SizeType nqp;
-    coder::SizeType sdvals_tmp;
-    //  FEK kernel
-    nqp = cs.size(0) - 1;
-    sdvals_tmp = iv[etype - 1];
-    sfvals.set_size(cs.size(0), sdvals_tmp);
-    sdvals.set_size(cs.size(0), sdvals_tmp, cs.size(1));
-    switch (etype) {
-    case 82: {
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double deriv[30];
-        double N[15];
-        ::sfe_sfuncs::tri_fek_15_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &N[0], &deriv[0]);
-        for (coder::SizeType i{0}; i < 15; i++) {
-          sfvals[i + sfvals.size(1) * q] = N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = deriv[sdvals_tmp + 1];
+    coder::SizeType ub_loop;
+    m2cAssert(etype == 244, "Hex elements supports up to quintic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      hexa_216(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv9, dv8);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv8[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 215) {
+          loop_ub = 0;
+          i6++;
         }
       }
-    } break;
-    case 86: {
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double b_deriv[42];
-        double b_N[21];
-        ::sfe_sfuncs::tri_fek_21_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &b_N[0], &b_deriv[0]);
-        for (coder::SizeType i{0}; i < 21; i++) {
-          sfvals[i + sfvals.size(1) * q] = b_N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              b_deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = b_deriv[sdvals_tmp + 1];
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
         }
       }
-    } break;
-    default: {
-      m2cAssert(etype == 90, "Only supports up to sextic.");
-      for (coder::SizeType q{0}; q <= nqp; q++) {
-        double h_deriv[56];
-        double h_N[28];
-        ::sfe_sfuncs::tri_fek_28_sfunc(
-            cs[cs.size(1) * q], cs[cs.size(1) * q + 1], &h_N[0], &h_deriv[0]);
-        for (coder::SizeType i{0}; i < 28; i++) {
-          sfvals[i + sfvals.size(1) * q] = h_N[i];
-          sdvals_tmp = i << 1;
-          sdvals[sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q] =
-              h_deriv[sdvals_tmp];
-          sdvals[(sdvals.size(2) * i + sdvals.size(2) * sdvals.size(1) * q) +
-                 1] = h_deriv[sdvals_tmp + 1];
-        }
-      }
-    } break;
     }
   } break;
   }
@@ -3225,8 +4244,25 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
                                      ::coder::array<double, 2U> &sfvals,
                                      ::coder::array<double, 3U> &sdvals)
 {
+  double b_tmp_data[1029];
+  double tmp_data[1029];
+  double dv7[378];
+  double dv4[225];
+  double dv8[126];
+  double dv3[120];
+  double dv6[75];
+  double dv5[40];
+  coder::SizeType b_tmp_size_idx_1;
+  coder::SizeType b_tmp_size_idx_2;
   coder::SizeType i;
+  coder::SizeType i4;
+  coder::SizeType i5;
+  coder::SizeType i6;
+  coder::SizeType i7;
+  coder::SizeType loop_ub;
   coder::SizeType nqp;
+  short b_unnamed_idx_1;
+  short b_unnamed_idx_2;
   //  prisms
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
@@ -3235,1882 +4271,220 @@ static void sfe3_tabulate_equi_prism(coder::SizeType etype,
   switch (etype) {
   case 196: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
-      double deriv[18];
-      double N[6];
+      double dv1[18];
+      double dv[6];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
       ::sfe_sfuncs::prism_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
-      sfvals[sfvals.size(1) * q] = N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[17];
+                                  cs[cs.size(1) * q + 2], &dv[0], &dv1[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 5) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 200: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
-      double b_deriv[54];
-      double b_N[18];
+      double dv2[54];
+      double dv1[18];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
       ::sfe_sfuncs::prism_18_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                   cs[cs.size(1) * q + 2], &b_N[0],
-                                   &b_deriv[0]);
-      sfvals[sfvals.size(1) * q] = b_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = b_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = b_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = b_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = b_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = b_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = b_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = b_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = b_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = b_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = b_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = b_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = b_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[53];
+                                   cs[cs.size(1) * q + 2], &dv1[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 17) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 204: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double c_deriv[120];
-      double c_N[40];
-      ::sfe_sfuncs::prism_40_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                   cs[cs.size(1) * q + 2], &c_N[0],
-                                   &c_deriv[0]);
-      sfvals[sfvals.size(1) * q] = c_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = c_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = c_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = c_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = c_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = c_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = c_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = c_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = c_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = c_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = c_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = c_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = c_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = c_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = c_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = c_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = c_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = c_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = c_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = c_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = c_N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = c_N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = c_N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = c_N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = c_N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = c_N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = c_N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = c_N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = c_N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = c_N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = c_N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = c_N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[89];
-      sfvals[sfvals.size(1) * q + 30] = c_N[30];
-      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[90];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[91];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[92];
-      sfvals[sfvals.size(1) * q + 31] = c_N[31];
-      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[93];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[94];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[95];
-      sfvals[sfvals.size(1) * q + 32] = c_N[32];
-      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[96];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[97];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[98];
-      sfvals[sfvals.size(1) * q + 33] = c_N[33];
-      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[99];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[100];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[101];
-      sfvals[sfvals.size(1) * q + 34] = c_N[34];
-      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[102];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[103];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[104];
-      sfvals[sfvals.size(1) * q + 35] = c_N[35];
-      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[105];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[106];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[107];
-      sfvals[sfvals.size(1) * q + 36] = c_N[36];
-      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[108];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[109];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[110];
-      sfvals[sfvals.size(1) * q + 37] = c_N[37];
-      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[111];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[112];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[113];
-      sfvals[sfvals.size(1) * q + 38] = c_N[38];
-      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[114];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[115];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[116];
-      sfvals[sfvals.size(1) * q + 39] = c_N[39];
-      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[117];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[118];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[119];
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      prism_40(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv5, dv3);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 39) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
     }
   } break;
   case 208: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double d_deriv[225];
-      double d_N[75];
-      ::sfe_sfuncs::prism_75_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                   cs[cs.size(1) * q + 2], &d_N[0],
-                                   &d_deriv[0]);
-      sfvals[sfvals.size(1) * q] = d_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = d_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = d_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = d_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = d_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = d_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = d_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = d_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = d_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = d_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = d_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = d_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = d_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = d_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = d_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = d_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = d_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = d_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = d_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = d_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = d_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = d_N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = d_N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = d_N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = d_N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = d_N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = d_N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = d_N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = d_N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = d_N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = d_N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = d_N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = d_N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[89];
-      sfvals[sfvals.size(1) * q + 30] = d_N[30];
-      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[90];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[91];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[92];
-      sfvals[sfvals.size(1) * q + 31] = d_N[31];
-      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[93];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[94];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[95];
-      sfvals[sfvals.size(1) * q + 32] = d_N[32];
-      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[96];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[97];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[98];
-      sfvals[sfvals.size(1) * q + 33] = d_N[33];
-      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[99];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[100];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[101];
-      sfvals[sfvals.size(1) * q + 34] = d_N[34];
-      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[102];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[103];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[104];
-      sfvals[sfvals.size(1) * q + 35] = d_N[35];
-      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[105];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[106];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[107];
-      sfvals[sfvals.size(1) * q + 36] = d_N[36];
-      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[108];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[109];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[110];
-      sfvals[sfvals.size(1) * q + 37] = d_N[37];
-      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[111];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[112];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[113];
-      sfvals[sfvals.size(1) * q + 38] = d_N[38];
-      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[114];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[115];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[116];
-      sfvals[sfvals.size(1) * q + 39] = d_N[39];
-      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[117];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[118];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[119];
-      sfvals[sfvals.size(1) * q + 40] = d_N[40];
-      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[120];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[121];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[122];
-      sfvals[sfvals.size(1) * q + 41] = d_N[41];
-      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[123];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[124];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[125];
-      sfvals[sfvals.size(1) * q + 42] = d_N[42];
-      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[126];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[127];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[128];
-      sfvals[sfvals.size(1) * q + 43] = d_N[43];
-      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[129];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[130];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[131];
-      sfvals[sfvals.size(1) * q + 44] = d_N[44];
-      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[132];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[133];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[134];
-      sfvals[sfvals.size(1) * q + 45] = d_N[45];
-      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[135];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[136];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[137];
-      sfvals[sfvals.size(1) * q + 46] = d_N[46];
-      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[138];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[139];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[140];
-      sfvals[sfvals.size(1) * q + 47] = d_N[47];
-      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[141];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[142];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[143];
-      sfvals[sfvals.size(1) * q + 48] = d_N[48];
-      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[144];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[145];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[146];
-      sfvals[sfvals.size(1) * q + 49] = d_N[49];
-      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[147];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[148];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[149];
-      sfvals[sfvals.size(1) * q + 50] = d_N[50];
-      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[150];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[151];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[152];
-      sfvals[sfvals.size(1) * q + 51] = d_N[51];
-      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[153];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[154];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[155];
-      sfvals[sfvals.size(1) * q + 52] = d_N[52];
-      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[156];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[157];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[158];
-      sfvals[sfvals.size(1) * q + 53] = d_N[53];
-      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[159];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[160];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[161];
-      sfvals[sfvals.size(1) * q + 54] = d_N[54];
-      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[162];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[163];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[164];
-      sfvals[sfvals.size(1) * q + 55] = d_N[55];
-      sdvals[sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[165];
-      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[166];
-      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[167];
-      sfvals[sfvals.size(1) * q + 56] = d_N[56];
-      sdvals[sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[168];
-      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[169];
-      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[170];
-      sfvals[sfvals.size(1) * q + 57] = d_N[57];
-      sdvals[sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[171];
-      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[172];
-      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[173];
-      sfvals[sfvals.size(1) * q + 58] = d_N[58];
-      sdvals[sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[174];
-      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[175];
-      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[176];
-      sfvals[sfvals.size(1) * q + 59] = d_N[59];
-      sdvals[sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[177];
-      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[178];
-      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[179];
-      sfvals[sfvals.size(1) * q + 60] = d_N[60];
-      sdvals[sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[180];
-      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[181];
-      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[182];
-      sfvals[sfvals.size(1) * q + 61] = d_N[61];
-      sdvals[sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[183];
-      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[184];
-      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[185];
-      sfvals[sfvals.size(1) * q + 62] = d_N[62];
-      sdvals[sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[186];
-      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[187];
-      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[188];
-      sfvals[sfvals.size(1) * q + 63] = d_N[63];
-      sdvals[sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[189];
-      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[190];
-      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[191];
-      sfvals[sfvals.size(1) * q + 64] = d_N[64];
-      sdvals[sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[192];
-      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[193];
-      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[194];
-      sfvals[sfvals.size(1) * q + 65] = d_N[65];
-      sdvals[sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[195];
-      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[196];
-      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[197];
-      sfvals[sfvals.size(1) * q + 66] = d_N[66];
-      sdvals[sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[198];
-      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[199];
-      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[200];
-      sfvals[sfvals.size(1) * q + 67] = d_N[67];
-      sdvals[sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[201];
-      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[202];
-      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[203];
-      sfvals[sfvals.size(1) * q + 68] = d_N[68];
-      sdvals[sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[204];
-      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[205];
-      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[206];
-      sfvals[sfvals.size(1) * q + 69] = d_N[69];
-      sdvals[sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[207];
-      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[208];
-      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[209];
-      sfvals[sfvals.size(1) * q + 70] = d_N[70];
-      sdvals[sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[210];
-      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[211];
-      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[212];
-      sfvals[sfvals.size(1) * q + 71] = d_N[71];
-      sdvals[sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[213];
-      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[214];
-      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[215];
-      sfvals[sfvals.size(1) * q + 72] = d_N[72];
-      sdvals[sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[216];
-      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[217];
-      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[218];
-      sfvals[sfvals.size(1) * q + 73] = d_N[73];
-      sdvals[sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[219];
-      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[220];
-      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[221];
-      sfvals[sfvals.size(1) * q + 74] = d_N[74];
-      sdvals[sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[222];
-      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[223];
-      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[224];
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      prism_75(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv6, dv4);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv6[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 74) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
     }
   } break;
   default: {
+    coder::SizeType ub_loop;
     m2cAssert(etype == 212, "prismatic elements supports up to quintic.");
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double e_deriv[378];
-      double e_N[126];
-      ::sfe_sfuncs::prism_126_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                    cs[cs.size(1) * q + 2], &e_N[0],
-                                    &e_deriv[0]);
-      sfvals[sfvals.size(1) * q] = e_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = e_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = e_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = e_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = e_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = e_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = e_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = e_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = e_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = e_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = e_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = e_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = e_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = e_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = e_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = e_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = e_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = e_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = e_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = e_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = e_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = e_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = e_N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = e_N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = e_N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = e_N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = e_N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = e_N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = e_N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = e_N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = e_N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = e_N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = e_N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = e_N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[89];
-      sfvals[sfvals.size(1) * q + 30] = e_N[30];
-      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[90];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[91];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[92];
-      sfvals[sfvals.size(1) * q + 31] = e_N[31];
-      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[93];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[94];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[95];
-      sfvals[sfvals.size(1) * q + 32] = e_N[32];
-      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[96];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[97];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[98];
-      sfvals[sfvals.size(1) * q + 33] = e_N[33];
-      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[99];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[100];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[101];
-      sfvals[sfvals.size(1) * q + 34] = e_N[34];
-      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[102];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[103];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[104];
-      sfvals[sfvals.size(1) * q + 35] = e_N[35];
-      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[105];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[106];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[107];
-      sfvals[sfvals.size(1) * q + 36] = e_N[36];
-      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[108];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[109];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[110];
-      sfvals[sfvals.size(1) * q + 37] = e_N[37];
-      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[111];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[112];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[113];
-      sfvals[sfvals.size(1) * q + 38] = e_N[38];
-      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[114];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[115];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[116];
-      sfvals[sfvals.size(1) * q + 39] = e_N[39];
-      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[117];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[118];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[119];
-      sfvals[sfvals.size(1) * q + 40] = e_N[40];
-      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[120];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[121];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[122];
-      sfvals[sfvals.size(1) * q + 41] = e_N[41];
-      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[123];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[124];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[125];
-      sfvals[sfvals.size(1) * q + 42] = e_N[42];
-      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[126];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[127];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[128];
-      sfvals[sfvals.size(1) * q + 43] = e_N[43];
-      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[129];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[130];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[131];
-      sfvals[sfvals.size(1) * q + 44] = e_N[44];
-      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[132];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[133];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[134];
-      sfvals[sfvals.size(1) * q + 45] = e_N[45];
-      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[135];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[136];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[137];
-      sfvals[sfvals.size(1) * q + 46] = e_N[46];
-      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[138];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[139];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[140];
-      sfvals[sfvals.size(1) * q + 47] = e_N[47];
-      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[141];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[142];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[143];
-      sfvals[sfvals.size(1) * q + 48] = e_N[48];
-      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[144];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[145];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[146];
-      sfvals[sfvals.size(1) * q + 49] = e_N[49];
-      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[147];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[148];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[149];
-      sfvals[sfvals.size(1) * q + 50] = e_N[50];
-      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[150];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[151];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[152];
-      sfvals[sfvals.size(1) * q + 51] = e_N[51];
-      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[153];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[154];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[155];
-      sfvals[sfvals.size(1) * q + 52] = e_N[52];
-      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[156];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[157];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[158];
-      sfvals[sfvals.size(1) * q + 53] = e_N[53];
-      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[159];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[160];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[161];
-      sfvals[sfvals.size(1) * q + 54] = e_N[54];
-      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[162];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[163];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[164];
-      sfvals[sfvals.size(1) * q + 55] = e_N[55];
-      sdvals[sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[165];
-      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[166];
-      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[167];
-      sfvals[sfvals.size(1) * q + 56] = e_N[56];
-      sdvals[sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[168];
-      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[169];
-      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[170];
-      sfvals[sfvals.size(1) * q + 57] = e_N[57];
-      sdvals[sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[171];
-      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[172];
-      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[173];
-      sfvals[sfvals.size(1) * q + 58] = e_N[58];
-      sdvals[sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[174];
-      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[175];
-      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[176];
-      sfvals[sfvals.size(1) * q + 59] = e_N[59];
-      sdvals[sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[177];
-      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[178];
-      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[179];
-      sfvals[sfvals.size(1) * q + 60] = e_N[60];
-      sdvals[sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[180];
-      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[181];
-      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[182];
-      sfvals[sfvals.size(1) * q + 61] = e_N[61];
-      sdvals[sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[183];
-      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[184];
-      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[185];
-      sfvals[sfvals.size(1) * q + 62] = e_N[62];
-      sdvals[sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[186];
-      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[187];
-      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[188];
-      sfvals[sfvals.size(1) * q + 63] = e_N[63];
-      sdvals[sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[189];
-      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[190];
-      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[191];
-      sfvals[sfvals.size(1) * q + 64] = e_N[64];
-      sdvals[sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[192];
-      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[193];
-      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[194];
-      sfvals[sfvals.size(1) * q + 65] = e_N[65];
-      sdvals[sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[195];
-      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[196];
-      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[197];
-      sfvals[sfvals.size(1) * q + 66] = e_N[66];
-      sdvals[sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[198];
-      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[199];
-      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[200];
-      sfvals[sfvals.size(1) * q + 67] = e_N[67];
-      sdvals[sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[201];
-      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[202];
-      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[203];
-      sfvals[sfvals.size(1) * q + 68] = e_N[68];
-      sdvals[sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[204];
-      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[205];
-      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[206];
-      sfvals[sfvals.size(1) * q + 69] = e_N[69];
-      sdvals[sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[207];
-      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[208];
-      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[209];
-      sfvals[sfvals.size(1) * q + 70] = e_N[70];
-      sdvals[sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[210];
-      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[211];
-      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[212];
-      sfvals[sfvals.size(1) * q + 71] = e_N[71];
-      sdvals[sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[213];
-      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[214];
-      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[215];
-      sfvals[sfvals.size(1) * q + 72] = e_N[72];
-      sdvals[sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[216];
-      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[217];
-      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[218];
-      sfvals[sfvals.size(1) * q + 73] = e_N[73];
-      sdvals[sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[219];
-      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[220];
-      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[221];
-      sfvals[sfvals.size(1) * q + 74] = e_N[74];
-      sdvals[sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[222];
-      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[223];
-      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[224];
-      sfvals[sfvals.size(1) * q + 75] = e_N[75];
-      sdvals[sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[225];
-      sdvals[(sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[226];
-      sdvals[(sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[227];
-      sfvals[sfvals.size(1) * q + 76] = e_N[76];
-      sdvals[sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[228];
-      sdvals[(sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[229];
-      sdvals[(sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[230];
-      sfvals[sfvals.size(1) * q + 77] = e_N[77];
-      sdvals[sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[231];
-      sdvals[(sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[232];
-      sdvals[(sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[233];
-      sfvals[sfvals.size(1) * q + 78] = e_N[78];
-      sdvals[sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[234];
-      sdvals[(sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[235];
-      sdvals[(sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[236];
-      sfvals[sfvals.size(1) * q + 79] = e_N[79];
-      sdvals[sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[237];
-      sdvals[(sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[238];
-      sdvals[(sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[239];
-      sfvals[sfvals.size(1) * q + 80] = e_N[80];
-      sdvals[sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[240];
-      sdvals[(sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[241];
-      sdvals[(sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[242];
-      sfvals[sfvals.size(1) * q + 81] = e_N[81];
-      sdvals[sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[243];
-      sdvals[(sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[244];
-      sdvals[(sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[245];
-      sfvals[sfvals.size(1) * q + 82] = e_N[82];
-      sdvals[sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[246];
-      sdvals[(sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[247];
-      sdvals[(sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[248];
-      sfvals[sfvals.size(1) * q + 83] = e_N[83];
-      sdvals[sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[249];
-      sdvals[(sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[250];
-      sdvals[(sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[251];
-      sfvals[sfvals.size(1) * q + 84] = e_N[84];
-      sdvals[sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[252];
-      sdvals[(sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[253];
-      sdvals[(sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[254];
-      sfvals[sfvals.size(1) * q + 85] = e_N[85];
-      sdvals[sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[255];
-      sdvals[(sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[256];
-      sdvals[(sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[257];
-      sfvals[sfvals.size(1) * q + 86] = e_N[86];
-      sdvals[sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[258];
-      sdvals[(sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[259];
-      sdvals[(sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[260];
-      sfvals[sfvals.size(1) * q + 87] = e_N[87];
-      sdvals[sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[261];
-      sdvals[(sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[262];
-      sdvals[(sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[263];
-      sfvals[sfvals.size(1) * q + 88] = e_N[88];
-      sdvals[sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[264];
-      sdvals[(sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[265];
-      sdvals[(sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[266];
-      sfvals[sfvals.size(1) * q + 89] = e_N[89];
-      sdvals[sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[267];
-      sdvals[(sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[268];
-      sdvals[(sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[269];
-      sfvals[sfvals.size(1) * q + 90] = e_N[90];
-      sdvals[sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[270];
-      sdvals[(sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[271];
-      sdvals[(sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[272];
-      sfvals[sfvals.size(1) * q + 91] = e_N[91];
-      sdvals[sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[273];
-      sdvals[(sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[274];
-      sdvals[(sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[275];
-      sfvals[sfvals.size(1) * q + 92] = e_N[92];
-      sdvals[sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[276];
-      sdvals[(sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[277];
-      sdvals[(sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[278];
-      sfvals[sfvals.size(1) * q + 93] = e_N[93];
-      sdvals[sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[279];
-      sdvals[(sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[280];
-      sdvals[(sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[281];
-      sfvals[sfvals.size(1) * q + 94] = e_N[94];
-      sdvals[sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[282];
-      sdvals[(sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[283];
-      sdvals[(sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[284];
-      sfvals[sfvals.size(1) * q + 95] = e_N[95];
-      sdvals[sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[285];
-      sdvals[(sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[286];
-      sdvals[(sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[287];
-      sfvals[sfvals.size(1) * q + 96] = e_N[96];
-      sdvals[sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[288];
-      sdvals[(sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[289];
-      sdvals[(sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[290];
-      sfvals[sfvals.size(1) * q + 97] = e_N[97];
-      sdvals[sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[291];
-      sdvals[(sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[292];
-      sdvals[(sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[293];
-      sfvals[sfvals.size(1) * q + 98] = e_N[98];
-      sdvals[sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[294];
-      sdvals[(sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[295];
-      sdvals[(sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[296];
-      sfvals[sfvals.size(1) * q + 99] = e_N[99];
-      sdvals[sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[297];
-      sdvals[(sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[298];
-      sdvals[(sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[299];
-      sfvals[sfvals.size(1) * q + 100] = e_N[100];
-      sdvals[sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[300];
-      sdvals[(sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[301];
-      sdvals[(sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[302];
-      sfvals[sfvals.size(1) * q + 101] = e_N[101];
-      sdvals[sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[303];
-      sdvals[(sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[304];
-      sdvals[(sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[305];
-      sfvals[sfvals.size(1) * q + 102] = e_N[102];
-      sdvals[sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[306];
-      sdvals[(sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[307];
-      sdvals[(sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[308];
-      sfvals[sfvals.size(1) * q + 103] = e_N[103];
-      sdvals[sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[309];
-      sdvals[(sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[310];
-      sdvals[(sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[311];
-      sfvals[sfvals.size(1) * q + 104] = e_N[104];
-      sdvals[sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[312];
-      sdvals[(sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[313];
-      sdvals[(sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[314];
-      sfvals[sfvals.size(1) * q + 105] = e_N[105];
-      sdvals[sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[315];
-      sdvals[(sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[316];
-      sdvals[(sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[317];
-      sfvals[sfvals.size(1) * q + 106] = e_N[106];
-      sdvals[sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[318];
-      sdvals[(sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[319];
-      sdvals[(sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[320];
-      sfvals[sfvals.size(1) * q + 107] = e_N[107];
-      sdvals[sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[321];
-      sdvals[(sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[322];
-      sdvals[(sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[323];
-      sfvals[sfvals.size(1) * q + 108] = e_N[108];
-      sdvals[sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[324];
-      sdvals[(sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[325];
-      sdvals[(sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[326];
-      sfvals[sfvals.size(1) * q + 109] = e_N[109];
-      sdvals[sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[327];
-      sdvals[(sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[328];
-      sdvals[(sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[329];
-      sfvals[sfvals.size(1) * q + 110] = e_N[110];
-      sdvals[sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[330];
-      sdvals[(sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[331];
-      sdvals[(sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[332];
-      sfvals[sfvals.size(1) * q + 111] = e_N[111];
-      sdvals[sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[333];
-      sdvals[(sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[334];
-      sdvals[(sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[335];
-      sfvals[sfvals.size(1) * q + 112] = e_N[112];
-      sdvals[sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[336];
-      sdvals[(sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[337];
-      sdvals[(sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[338];
-      sfvals[sfvals.size(1) * q + 113] = e_N[113];
-      sdvals[sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[339];
-      sdvals[(sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[340];
-      sdvals[(sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[341];
-      sfvals[sfvals.size(1) * q + 114] = e_N[114];
-      sdvals[sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[342];
-      sdvals[(sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[343];
-      sdvals[(sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[344];
-      sfvals[sfvals.size(1) * q + 115] = e_N[115];
-      sdvals[sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[345];
-      sdvals[(sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[346];
-      sdvals[(sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[347];
-      sfvals[sfvals.size(1) * q + 116] = e_N[116];
-      sdvals[sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[348];
-      sdvals[(sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[349];
-      sdvals[(sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[350];
-      sfvals[sfvals.size(1) * q + 117] = e_N[117];
-      sdvals[sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[351];
-      sdvals[(sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[352];
-      sdvals[(sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[353];
-      sfvals[sfvals.size(1) * q + 118] = e_N[118];
-      sdvals[sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[354];
-      sdvals[(sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[355];
-      sdvals[(sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[356];
-      sfvals[sfvals.size(1) * q + 119] = e_N[119];
-      sdvals[sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[357];
-      sdvals[(sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[358];
-      sdvals[(sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[359];
-      sfvals[sfvals.size(1) * q + 120] = e_N[120];
-      sdvals[sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[360];
-      sdvals[(sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[361];
-      sdvals[(sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[362];
-      sfvals[sfvals.size(1) * q + 121] = e_N[121];
-      sdvals[sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[363];
-      sdvals[(sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[364];
-      sdvals[(sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[365];
-      sfvals[sfvals.size(1) * q + 122] = e_N[122];
-      sdvals[sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[366];
-      sdvals[(sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[367];
-      sdvals[(sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[368];
-      sfvals[sfvals.size(1) * q + 123] = e_N[123];
-      sdvals[sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[369];
-      sdvals[(sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[370];
-      sdvals[(sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[371];
-      sfvals[sfvals.size(1) * q + 124] = e_N[124];
-      sdvals[sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[372];
-      sdvals[(sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[373];
-      sdvals[(sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[374];
-      sfvals[sfvals.size(1) * q + 125] = e_N[125];
-      sdvals[sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q] =
-          e_deriv[375];
-      sdvals[(sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          e_deriv[376];
-      sdvals[(sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          e_deriv[377];
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      prism_126(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+                cs[cs.size(1) * b_q + 2], dv8, dv7);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv7[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 125) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
     }
   } break;
   }
@@ -5121,8 +4495,23 @@ static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
                                     ::coder::array<double, 2U> &sfvals,
                                     ::coder::array<double, 3U> &sdvals)
 {
+  double b_tmp_data[1029];
+  double tmp_data[1029];
+  double dv6[165];
+  double dv4[90];
+  double dv7[55];
+  double dv5[30];
+  coder::SizeType b_tmp_size_idx_1;
+  coder::SizeType b_tmp_size_idx_2;
   coder::SizeType i;
+  coder::SizeType i2;
+  coder::SizeType i5;
+  coder::SizeType i6;
+  coder::SizeType i7;
+  coder::SizeType loop_ub;
   coder::SizeType nqp;
+  short b_unnamed_idx_1;
+  short b_unnamed_idx_2;
   //  pyra
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
@@ -5131,747 +4520,179 @@ static void sfe3_tabulate_equi_pyra(coder::SizeType etype,
   switch (etype) {
   case 164: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
-      double deriv[15];
-      double N[5];
+      double dv2[15];
+      double dv[5];
+      coder::SizeType i1;
+      coder::SizeType i3;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
       ::sfe_sfuncs::pyra_5_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
-      sfvals[sfvals.size(1) * q] = N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[14];
+                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i3 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i3 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 4) {
+          ub_loop = 0;
+          i3++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 168: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
-      double b_deriv[42];
-      double b_N[14];
+      double dv3[42];
+      double dv1[14];
+      coder::SizeType i1;
+      coder::SizeType i3;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
       ::sfe_sfuncs::pyra_14_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &b_N[0], &b_deriv[0]);
-      sfvals[sfvals.size(1) * q] = b_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = b_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = b_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = b_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = b_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = b_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = b_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = b_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = b_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[41];
+                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i3 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i3 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 13) {
+          ub_loop = 0;
+          i3++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 172: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double c_deriv[90];
-      double c_N[30];
-      ::sfe_sfuncs::pyra_30_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &c_N[0], &c_deriv[0]);
-      sfvals[sfvals.size(1) * q] = c_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = c_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = c_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = c_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = c_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = c_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = c_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = c_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = c_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = c_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = c_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = c_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = c_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = c_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = c_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = c_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = c_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = c_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = c_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = c_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = c_N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = c_N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = c_N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = c_N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = c_N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = c_N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = c_N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = c_N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = c_N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = c_N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = c_N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = c_N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[89];
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      pyra_30(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+              cs[cs.size(1) * b_q + 2], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        sfvals[i2 + sfvals.size(1) * b_q] = dv5[i2];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i2 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i2] = dv4[i6 + 3 * loop_ub];
+        loop_ub++;
+        i2++;
+        if (i2 > b_tmp_size_idx_1 - 1) {
+          i2 = 0;
+          i5++;
+        }
+        if (loop_ub > 29) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i2 = 0; i2 < b_tmp_size_idx_1; i2++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i2) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i2];
+        }
+      }
     }
   } break;
   default: {
+    coder::SizeType ub_loop;
     m2cAssert(etype == 176, "Pyramid only support up to quartic");
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double d_deriv[165];
-      double d_N[55];
-      ::sfe_sfuncs::pyra_55_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &d_N[0], &d_deriv[0]);
-      sfvals[sfvals.size(1) * q] = d_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = d_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = d_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = d_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = d_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = d_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = d_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = d_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = d_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = d_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = d_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = d_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = d_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = d_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = d_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = d_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = d_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = d_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = d_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = d_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = d_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = d_N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = d_N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = d_N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = d_N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = d_N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = d_N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = d_N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = d_N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = d_N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = d_N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = d_N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = d_N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[89];
-      sfvals[sfvals.size(1) * q + 30] = d_N[30];
-      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[90];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[91];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[92];
-      sfvals[sfvals.size(1) * q + 31] = d_N[31];
-      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[93];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[94];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[95];
-      sfvals[sfvals.size(1) * q + 32] = d_N[32];
-      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[96];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[97];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[98];
-      sfvals[sfvals.size(1) * q + 33] = d_N[33];
-      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[99];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[100];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[101];
-      sfvals[sfvals.size(1) * q + 34] = d_N[34];
-      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[102];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[103];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[104];
-      sfvals[sfvals.size(1) * q + 35] = d_N[35];
-      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[105];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[106];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[107];
-      sfvals[sfvals.size(1) * q + 36] = d_N[36];
-      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[108];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[109];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[110];
-      sfvals[sfvals.size(1) * q + 37] = d_N[37];
-      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[111];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[112];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[113];
-      sfvals[sfvals.size(1) * q + 38] = d_N[38];
-      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[114];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[115];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[116];
-      sfvals[sfvals.size(1) * q + 39] = d_N[39];
-      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[117];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[118];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[119];
-      sfvals[sfvals.size(1) * q + 40] = d_N[40];
-      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[120];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[121];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[122];
-      sfvals[sfvals.size(1) * q + 41] = d_N[41];
-      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[123];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[124];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[125];
-      sfvals[sfvals.size(1) * q + 42] = d_N[42];
-      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[126];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[127];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[128];
-      sfvals[sfvals.size(1) * q + 43] = d_N[43];
-      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[129];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[130];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[131];
-      sfvals[sfvals.size(1) * q + 44] = d_N[44];
-      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[132];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[133];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[134];
-      sfvals[sfvals.size(1) * q + 45] = d_N[45];
-      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[135];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[136];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[137];
-      sfvals[sfvals.size(1) * q + 46] = d_N[46];
-      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[138];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[139];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[140];
-      sfvals[sfvals.size(1) * q + 47] = d_N[47];
-      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[141];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[142];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[143];
-      sfvals[sfvals.size(1) * q + 48] = d_N[48];
-      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[144];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[145];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[146];
-      sfvals[sfvals.size(1) * q + 49] = d_N[49];
-      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[147];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[148];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[149];
-      sfvals[sfvals.size(1) * q + 50] = d_N[50];
-      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[150];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[151];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[152];
-      sfvals[sfvals.size(1) * q + 51] = d_N[51];
-      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[153];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[154];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[155];
-      sfvals[sfvals.size(1) * q + 52] = d_N[52];
-      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[156];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[157];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[158];
-      sfvals[sfvals.size(1) * q + 53] = d_N[53];
-      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[159];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[160];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[161];
-      sfvals[sfvals.size(1) * q + 54] = d_N[54];
-      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
-          d_deriv[162];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          d_deriv[163];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          d_deriv[164];
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      pyra_55(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+              cs[cs.size(1) * b_q + 2], dv7, dv6);
+      loop_ub = sfvals.size(1);
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        sfvals[i2 + sfvals.size(1) * b_q] = dv7[i2];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i2 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i2] = dv6[i6 + 3 * loop_ub];
+        loop_ub++;
+        i2++;
+        if (i2 > b_tmp_size_idx_1 - 1) {
+          i2 = 0;
+          i5++;
+        }
+        if (loop_ub > 54) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i2 = 0; i2 < b_tmp_size_idx_1; i2++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i2) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i2];
+        }
+      }
     }
   } break;
   }
@@ -5882,8 +4703,25 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
                                    ::coder::array<double, 2U> &sfvals,
                                    ::coder::array<double, 3U> &sdvals)
 {
+  double b_tmp_data[1029];
+  double tmp_data[1029];
+  double dv8[168];
+  double dv5[105];
+  double dv4[60];
+  double dv9[56];
+  double dv7[35];
+  double dv6[20];
+  coder::SizeType b_tmp_size_idx_1;
+  coder::SizeType b_tmp_size_idx_2;
   coder::SizeType i;
+  coder::SizeType i3;
+  coder::SizeType i5;
+  coder::SizeType i6;
+  coder::SizeType i7;
+  coder::SizeType loop_ub;
   coder::SizeType nqp;
+  short b_unnamed_idx_1;
+  short b_unnamed_idx_2;
   //  tet
   nqp = cs.size(0) - 1;
   i = iv[etype - 1];
@@ -5892,164 +4730,375 @@ static void sfe3_tabulate_equi_tet(coder::SizeType etype,
   switch (etype) {
   case 132: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
-      double deriv[12];
-      double N[4];
+      double dv2[12];
+      double dv[4];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
       ::sfe_sfuncs::tet_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
-      sfvals[sfvals.size(1) * q] = N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[11];
+                                cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 3) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 136: {
     for (coder::SizeType q{0}; q <= nqp; q++) {
-      double b_deriv[30];
-      double b_N[10];
+      double dv3[30];
+      double dv1[10];
+      coder::SizeType i1;
+      coder::SizeType i2;
+      coder::SizeType tmp_size_idx_1;
+      coder::SizeType tmp_size_idx_2;
+      coder::SizeType ub_loop;
+      short unnamed_idx_1;
+      short unnamed_idx_2;
       ::sfe_sfuncs::tet_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &b_N[0], &b_deriv[0]);
-      sfvals[sfvals.size(1) * q] = b_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = b_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = b_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = b_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = b_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[29];
+                                 cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 9) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 140: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double c_deriv[60];
-      double c_N[20];
-      ::sfe_sfuncs::tet_20_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &c_N[0], &c_deriv[0]);
-      for (coder::SizeType b_i{0}; b_i < 20; b_i++) {
-        sfvals[b_i + sfvals.size(1) * q] = c_N[b_i];
-        sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-            c_deriv[3 * b_i];
-        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
-               1] = c_deriv[3 * b_i + 1];
-        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
-               2] = c_deriv[3 * b_i + 2];
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tet_20(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+             cs[cs.size(1) * b_q + 2], dv6, dv4);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv6[i3];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv4[i6 + 3 * loop_ub];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 19) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
       }
     }
   } break;
   case 144: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double d_deriv[105];
-      double d_N[35];
-      ::sfe_sfuncs::tet_35_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &d_N[0], &d_deriv[0]);
-      for (coder::SizeType b_i{0}; b_i < 35; b_i++) {
-        sfvals[b_i + sfvals.size(1) * q] = d_N[b_i];
-        sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[3 * b_i];
-        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
-               1] = d_deriv[3 * b_i + 1];
-        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
-               2] = d_deriv[3 * b_i + 2];
+    coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tet_35(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+             cs[cs.size(1) * b_q + 2], dv7, dv5);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv7[i3];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv5[i6 + 3 * loop_ub];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 34) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
       }
     }
   } break;
   default: {
+    coder::SizeType ub_loop;
     m2cAssert(
         etype == 148,
         "Gauss-Lobatto tetrahedral elements are supported only up to quintic");
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double e_deriv[168];
-      double e_N[56];
-      ::sfe_sfuncs::tet_56_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &e_N[0], &e_deriv[0]);
-      for (coder::SizeType b_i{0}; b_i < 56; b_i++) {
-        sfvals[b_i + sfvals.size(1) * q] = e_N[b_i];
-        sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[3 * b_i];
-        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
-               1] = e_deriv[3 * b_i + 1];
-        sdvals[(sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q) +
-               2] = e_deriv[3 * b_i + 2];
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tet_56(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+             cs[cs.size(1) * b_q + 2], dv9, dv8);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv9[i3];
+      }
+      b_unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv8[i6 + 3 * loop_ub];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 55) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
       }
     }
   } break;
+  }
+}
+
+static void sfe3_tabulate_gl_hexa(coder::SizeType etype,
+                                  const ::coder::array<double, 2U> &cs,
+                                  ::coder::array<double, 2U> &sfvals,
+                                  ::coder::array<double, 3U> &sdvals)
+{
+  double tmp_data[1029];
+  double dv4[648];
+  double dv1[375];
+  double dv5[216];
+  double dv[192];
+  double dv3[125];
+  double dv2[64];
+  coder::SizeType i;
+  coder::SizeType i1;
+  coder::SizeType i2;
+  coder::SizeType i3;
+  coder::SizeType loop_ub;
+  coder::SizeType tmp_size_idx_1;
+  coder::SizeType tmp_size_idx_2;
+  coder::SizeType ub_loop;
+  short unnamed_idx_1;
+  short unnamed_idx_2;
+  //  hex
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  switch (etype) {
+  case 237:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      hexa_gl_64(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                 cs[cs.size(1) * q + 2], dv2, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 63) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  case 241:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      hexa_gl_125(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv3, dv1);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 124) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  default:
+    m2cAssert(etype == 245, "Gauss-Lobatto only supports up to quintic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      hexa_gl_216(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv5[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 215) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
   }
 }
 
@@ -6058,1717 +5107,149 @@ static void sfe3_tabulate_gl_prism(coder::SizeType etype,
                                    ::coder::array<double, 2U> &sfvals,
                                    ::coder::array<double, 3U> &sdvals)
 {
+  double tmp_data[1029];
+  double dv4[378];
+  double dv1[225];
+  double dv5[126];
+  double dv[120];
+  double dv3[75];
+  double dv2[40];
   coder::SizeType i;
-  coder::SizeType nqp;
+  coder::SizeType i1;
+  coder::SizeType i2;
+  coder::SizeType i3;
+  coder::SizeType loop_ub;
+  coder::SizeType tmp_size_idx_1;
+  coder::SizeType tmp_size_idx_2;
+  coder::SizeType ub_loop;
+  short unnamed_idx_1;
+  short unnamed_idx_2;
   //  prisms
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
   switch (etype) {
-  case 205: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double deriv[120];
-      double N[40];
-      ::sfe_sfuncs::prism_gl_40_sfunc(cs[cs.size(1) * q],
-                                      cs[cs.size(1) * q + 1],
-                                      cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
-      sfvals[sfvals.size(1) * q] = N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[89];
-      sfvals[sfvals.size(1) * q + 30] = N[30];
-      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[90];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[91];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[92];
-      sfvals[sfvals.size(1) * q + 31] = N[31];
-      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[93];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[94];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[95];
-      sfvals[sfvals.size(1) * q + 32] = N[32];
-      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[96];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[97];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[98];
-      sfvals[sfvals.size(1) * q + 33] = N[33];
-      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[99];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[100];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[101];
-      sfvals[sfvals.size(1) * q + 34] = N[34];
-      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[102];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[103];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[104];
-      sfvals[sfvals.size(1) * q + 35] = N[35];
-      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[105];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[106];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[107];
-      sfvals[sfvals.size(1) * q + 36] = N[36];
-      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[108];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[109];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[110];
-      sfvals[sfvals.size(1) * q + 37] = N[37];
-      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[111];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[112];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[113];
-      sfvals[sfvals.size(1) * q + 38] = N[38];
-      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[114];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[115];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[116];
-      sfvals[sfvals.size(1) * q + 39] = N[39];
-      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[117];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[118];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[119];
+  case 205:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      prism_gl_40(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv2, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 39) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
-  } break;
-  case 209: {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double b_deriv[225];
-      double b_N[75];
-      ::sfe_sfuncs::prism_gl_75_sfunc(
-          cs[cs.size(1) * q], cs[cs.size(1) * q + 1], cs[cs.size(1) * q + 2],
-          &b_N[0], &b_deriv[0]);
-      sfvals[sfvals.size(1) * q] = b_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = b_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = b_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = b_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = b_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = b_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = b_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = b_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = b_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = b_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = b_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = b_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = b_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = b_N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = b_N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = b_N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = b_N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = b_N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = b_N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = b_N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = b_N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = b_N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = b_N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = b_N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = b_N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[89];
-      sfvals[sfvals.size(1) * q + 30] = b_N[30];
-      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[90];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[91];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[92];
-      sfvals[sfvals.size(1) * q + 31] = b_N[31];
-      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[93];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[94];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[95];
-      sfvals[sfvals.size(1) * q + 32] = b_N[32];
-      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[96];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[97];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[98];
-      sfvals[sfvals.size(1) * q + 33] = b_N[33];
-      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[99];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[100];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[101];
-      sfvals[sfvals.size(1) * q + 34] = b_N[34];
-      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[102];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[103];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[104];
-      sfvals[sfvals.size(1) * q + 35] = b_N[35];
-      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[105];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[106];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[107];
-      sfvals[sfvals.size(1) * q + 36] = b_N[36];
-      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[108];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[109];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[110];
-      sfvals[sfvals.size(1) * q + 37] = b_N[37];
-      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[111];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[112];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[113];
-      sfvals[sfvals.size(1) * q + 38] = b_N[38];
-      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[114];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[115];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[116];
-      sfvals[sfvals.size(1) * q + 39] = b_N[39];
-      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[117];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[118];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[119];
-      sfvals[sfvals.size(1) * q + 40] = b_N[40];
-      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[120];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[121];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[122];
-      sfvals[sfvals.size(1) * q + 41] = b_N[41];
-      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[123];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[124];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[125];
-      sfvals[sfvals.size(1) * q + 42] = b_N[42];
-      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[126];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[127];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[128];
-      sfvals[sfvals.size(1) * q + 43] = b_N[43];
-      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[129];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[130];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[131];
-      sfvals[sfvals.size(1) * q + 44] = b_N[44];
-      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[132];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[133];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[134];
-      sfvals[sfvals.size(1) * q + 45] = b_N[45];
-      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[135];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[136];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[137];
-      sfvals[sfvals.size(1) * q + 46] = b_N[46];
-      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[138];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[139];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[140];
-      sfvals[sfvals.size(1) * q + 47] = b_N[47];
-      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[141];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[142];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[143];
-      sfvals[sfvals.size(1) * q + 48] = b_N[48];
-      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[144];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[145];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[146];
-      sfvals[sfvals.size(1) * q + 49] = b_N[49];
-      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[147];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[148];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[149];
-      sfvals[sfvals.size(1) * q + 50] = b_N[50];
-      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[150];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[151];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[152];
-      sfvals[sfvals.size(1) * q + 51] = b_N[51];
-      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[153];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[154];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[155];
-      sfvals[sfvals.size(1) * q + 52] = b_N[52];
-      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[156];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[157];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[158];
-      sfvals[sfvals.size(1) * q + 53] = b_N[53];
-      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[159];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[160];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[161];
-      sfvals[sfvals.size(1) * q + 54] = b_N[54];
-      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[162];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[163];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[164];
-      sfvals[sfvals.size(1) * q + 55] = b_N[55];
-      sdvals[sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[165];
-      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[166];
-      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[167];
-      sfvals[sfvals.size(1) * q + 56] = b_N[56];
-      sdvals[sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[168];
-      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[169];
-      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[170];
-      sfvals[sfvals.size(1) * q + 57] = b_N[57];
-      sdvals[sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[171];
-      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[172];
-      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[173];
-      sfvals[sfvals.size(1) * q + 58] = b_N[58];
-      sdvals[sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[174];
-      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[175];
-      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[176];
-      sfvals[sfvals.size(1) * q + 59] = b_N[59];
-      sdvals[sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[177];
-      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[178];
-      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[179];
-      sfvals[sfvals.size(1) * q + 60] = b_N[60];
-      sdvals[sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[180];
-      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[181];
-      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[182];
-      sfvals[sfvals.size(1) * q + 61] = b_N[61];
-      sdvals[sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[183];
-      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[184];
-      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[185];
-      sfvals[sfvals.size(1) * q + 62] = b_N[62];
-      sdvals[sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[186];
-      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[187];
-      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[188];
-      sfvals[sfvals.size(1) * q + 63] = b_N[63];
-      sdvals[sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[189];
-      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[190];
-      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[191];
-      sfvals[sfvals.size(1) * q + 64] = b_N[64];
-      sdvals[sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[192];
-      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[193];
-      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[194];
-      sfvals[sfvals.size(1) * q + 65] = b_N[65];
-      sdvals[sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[195];
-      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[196];
-      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[197];
-      sfvals[sfvals.size(1) * q + 66] = b_N[66];
-      sdvals[sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[198];
-      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[199];
-      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[200];
-      sfvals[sfvals.size(1) * q + 67] = b_N[67];
-      sdvals[sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[201];
-      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[202];
-      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[203];
-      sfvals[sfvals.size(1) * q + 68] = b_N[68];
-      sdvals[sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[204];
-      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[205];
-      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[206];
-      sfvals[sfvals.size(1) * q + 69] = b_N[69];
-      sdvals[sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[207];
-      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[208];
-      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[209];
-      sfvals[sfvals.size(1) * q + 70] = b_N[70];
-      sdvals[sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[210];
-      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[211];
-      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[212];
-      sfvals[sfvals.size(1) * q + 71] = b_N[71];
-      sdvals[sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[213];
-      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[214];
-      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[215];
-      sfvals[sfvals.size(1) * q + 72] = b_N[72];
-      sdvals[sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[216];
-      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[217];
-      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[218];
-      sfvals[sfvals.size(1) * q + 73] = b_N[73];
-      sdvals[sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[219];
-      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[220];
-      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[221];
-      sfvals[sfvals.size(1) * q + 74] = b_N[74];
-      sdvals[sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[222];
-      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[223];
-      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[224];
+    break;
+  case 209:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      prism_gl_75(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv3, dv1);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 74) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
-  } break;
-  default: {
-    m2cAssert(etype == 213, "Gauss-Lobatoo only supports up to quintic.");
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double c_deriv[378];
-      double c_N[126];
-      ::sfe_sfuncs::prism_gl_126_sfunc(
-          cs[cs.size(1) * q], cs[cs.size(1) * q + 1], cs[cs.size(1) * q + 2],
-          &c_N[0], &c_deriv[0]);
-      sfvals[sfvals.size(1) * q] = c_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = c_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = c_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = c_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = c_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = c_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = c_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = c_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = c_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = c_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = c_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = c_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = c_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = c_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = c_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = c_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = c_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = c_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = c_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = c_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = c_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = c_N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = c_N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = c_N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = c_N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = c_N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = c_N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = c_N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = c_N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = c_N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = c_N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = c_N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = c_N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[89];
-      sfvals[sfvals.size(1) * q + 30] = c_N[30];
-      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[90];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[91];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[92];
-      sfvals[sfvals.size(1) * q + 31] = c_N[31];
-      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[93];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[94];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[95];
-      sfvals[sfvals.size(1) * q + 32] = c_N[32];
-      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[96];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[97];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[98];
-      sfvals[sfvals.size(1) * q + 33] = c_N[33];
-      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[99];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[100];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[101];
-      sfvals[sfvals.size(1) * q + 34] = c_N[34];
-      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[102];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[103];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[104];
-      sfvals[sfvals.size(1) * q + 35] = c_N[35];
-      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[105];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[106];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[107];
-      sfvals[sfvals.size(1) * q + 36] = c_N[36];
-      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[108];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[109];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[110];
-      sfvals[sfvals.size(1) * q + 37] = c_N[37];
-      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[111];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[112];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[113];
-      sfvals[sfvals.size(1) * q + 38] = c_N[38];
-      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[114];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[115];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[116];
-      sfvals[sfvals.size(1) * q + 39] = c_N[39];
-      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[117];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[118];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[119];
-      sfvals[sfvals.size(1) * q + 40] = c_N[40];
-      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[120];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[121];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[122];
-      sfvals[sfvals.size(1) * q + 41] = c_N[41];
-      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[123];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[124];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[125];
-      sfvals[sfvals.size(1) * q + 42] = c_N[42];
-      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[126];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[127];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[128];
-      sfvals[sfvals.size(1) * q + 43] = c_N[43];
-      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[129];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[130];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[131];
-      sfvals[sfvals.size(1) * q + 44] = c_N[44];
-      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[132];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[133];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[134];
-      sfvals[sfvals.size(1) * q + 45] = c_N[45];
-      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[135];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[136];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[137];
-      sfvals[sfvals.size(1) * q + 46] = c_N[46];
-      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[138];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[139];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[140];
-      sfvals[sfvals.size(1) * q + 47] = c_N[47];
-      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[141];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[142];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[143];
-      sfvals[sfvals.size(1) * q + 48] = c_N[48];
-      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[144];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[145];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[146];
-      sfvals[sfvals.size(1) * q + 49] = c_N[49];
-      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[147];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[148];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[149];
-      sfvals[sfvals.size(1) * q + 50] = c_N[50];
-      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[150];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[151];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[152];
-      sfvals[sfvals.size(1) * q + 51] = c_N[51];
-      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[153];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[154];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[155];
-      sfvals[sfvals.size(1) * q + 52] = c_N[52];
-      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[156];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[157];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[158];
-      sfvals[sfvals.size(1) * q + 53] = c_N[53];
-      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[159];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[160];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[161];
-      sfvals[sfvals.size(1) * q + 54] = c_N[54];
-      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[162];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[163];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[164];
-      sfvals[sfvals.size(1) * q + 55] = c_N[55];
-      sdvals[sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[165];
-      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[166];
-      sdvals[(sdvals.size(2) * 55 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[167];
-      sfvals[sfvals.size(1) * q + 56] = c_N[56];
-      sdvals[sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[168];
-      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[169];
-      sdvals[(sdvals.size(2) * 56 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[170];
-      sfvals[sfvals.size(1) * q + 57] = c_N[57];
-      sdvals[sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[171];
-      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[172];
-      sdvals[(sdvals.size(2) * 57 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[173];
-      sfvals[sfvals.size(1) * q + 58] = c_N[58];
-      sdvals[sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[174];
-      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[175];
-      sdvals[(sdvals.size(2) * 58 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[176];
-      sfvals[sfvals.size(1) * q + 59] = c_N[59];
-      sdvals[sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[177];
-      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[178];
-      sdvals[(sdvals.size(2) * 59 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[179];
-      sfvals[sfvals.size(1) * q + 60] = c_N[60];
-      sdvals[sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[180];
-      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[181];
-      sdvals[(sdvals.size(2) * 60 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[182];
-      sfvals[sfvals.size(1) * q + 61] = c_N[61];
-      sdvals[sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[183];
-      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[184];
-      sdvals[(sdvals.size(2) * 61 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[185];
-      sfvals[sfvals.size(1) * q + 62] = c_N[62];
-      sdvals[sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[186];
-      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[187];
-      sdvals[(sdvals.size(2) * 62 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[188];
-      sfvals[sfvals.size(1) * q + 63] = c_N[63];
-      sdvals[sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[189];
-      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[190];
-      sdvals[(sdvals.size(2) * 63 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[191];
-      sfvals[sfvals.size(1) * q + 64] = c_N[64];
-      sdvals[sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[192];
-      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[193];
-      sdvals[(sdvals.size(2) * 64 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[194];
-      sfvals[sfvals.size(1) * q + 65] = c_N[65];
-      sdvals[sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[195];
-      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[196];
-      sdvals[(sdvals.size(2) * 65 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[197];
-      sfvals[sfvals.size(1) * q + 66] = c_N[66];
-      sdvals[sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[198];
-      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[199];
-      sdvals[(sdvals.size(2) * 66 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[200];
-      sfvals[sfvals.size(1) * q + 67] = c_N[67];
-      sdvals[sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[201];
-      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[202];
-      sdvals[(sdvals.size(2) * 67 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[203];
-      sfvals[sfvals.size(1) * q + 68] = c_N[68];
-      sdvals[sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[204];
-      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[205];
-      sdvals[(sdvals.size(2) * 68 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[206];
-      sfvals[sfvals.size(1) * q + 69] = c_N[69];
-      sdvals[sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[207];
-      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[208];
-      sdvals[(sdvals.size(2) * 69 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[209];
-      sfvals[sfvals.size(1) * q + 70] = c_N[70];
-      sdvals[sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[210];
-      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[211];
-      sdvals[(sdvals.size(2) * 70 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[212];
-      sfvals[sfvals.size(1) * q + 71] = c_N[71];
-      sdvals[sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[213];
-      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[214];
-      sdvals[(sdvals.size(2) * 71 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[215];
-      sfvals[sfvals.size(1) * q + 72] = c_N[72];
-      sdvals[sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[216];
-      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[217];
-      sdvals[(sdvals.size(2) * 72 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[218];
-      sfvals[sfvals.size(1) * q + 73] = c_N[73];
-      sdvals[sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[219];
-      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[220];
-      sdvals[(sdvals.size(2) * 73 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[221];
-      sfvals[sfvals.size(1) * q + 74] = c_N[74];
-      sdvals[sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[222];
-      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[223];
-      sdvals[(sdvals.size(2) * 74 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[224];
-      sfvals[sfvals.size(1) * q + 75] = c_N[75];
-      sdvals[sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[225];
-      sdvals[(sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[226];
-      sdvals[(sdvals.size(2) * 75 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[227];
-      sfvals[sfvals.size(1) * q + 76] = c_N[76];
-      sdvals[sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[228];
-      sdvals[(sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[229];
-      sdvals[(sdvals.size(2) * 76 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[230];
-      sfvals[sfvals.size(1) * q + 77] = c_N[77];
-      sdvals[sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[231];
-      sdvals[(sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[232];
-      sdvals[(sdvals.size(2) * 77 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[233];
-      sfvals[sfvals.size(1) * q + 78] = c_N[78];
-      sdvals[sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[234];
-      sdvals[(sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[235];
-      sdvals[(sdvals.size(2) * 78 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[236];
-      sfvals[sfvals.size(1) * q + 79] = c_N[79];
-      sdvals[sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[237];
-      sdvals[(sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[238];
-      sdvals[(sdvals.size(2) * 79 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[239];
-      sfvals[sfvals.size(1) * q + 80] = c_N[80];
-      sdvals[sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[240];
-      sdvals[(sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[241];
-      sdvals[(sdvals.size(2) * 80 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[242];
-      sfvals[sfvals.size(1) * q + 81] = c_N[81];
-      sdvals[sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[243];
-      sdvals[(sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[244];
-      sdvals[(sdvals.size(2) * 81 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[245];
-      sfvals[sfvals.size(1) * q + 82] = c_N[82];
-      sdvals[sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[246];
-      sdvals[(sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[247];
-      sdvals[(sdvals.size(2) * 82 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[248];
-      sfvals[sfvals.size(1) * q + 83] = c_N[83];
-      sdvals[sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[249];
-      sdvals[(sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[250];
-      sdvals[(sdvals.size(2) * 83 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[251];
-      sfvals[sfvals.size(1) * q + 84] = c_N[84];
-      sdvals[sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[252];
-      sdvals[(sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[253];
-      sdvals[(sdvals.size(2) * 84 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[254];
-      sfvals[sfvals.size(1) * q + 85] = c_N[85];
-      sdvals[sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[255];
-      sdvals[(sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[256];
-      sdvals[(sdvals.size(2) * 85 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[257];
-      sfvals[sfvals.size(1) * q + 86] = c_N[86];
-      sdvals[sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[258];
-      sdvals[(sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[259];
-      sdvals[(sdvals.size(2) * 86 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[260];
-      sfvals[sfvals.size(1) * q + 87] = c_N[87];
-      sdvals[sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[261];
-      sdvals[(sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[262];
-      sdvals[(sdvals.size(2) * 87 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[263];
-      sfvals[sfvals.size(1) * q + 88] = c_N[88];
-      sdvals[sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[264];
-      sdvals[(sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[265];
-      sdvals[(sdvals.size(2) * 88 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[266];
-      sfvals[sfvals.size(1) * q + 89] = c_N[89];
-      sdvals[sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[267];
-      sdvals[(sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[268];
-      sdvals[(sdvals.size(2) * 89 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[269];
-      sfvals[sfvals.size(1) * q + 90] = c_N[90];
-      sdvals[sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[270];
-      sdvals[(sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[271];
-      sdvals[(sdvals.size(2) * 90 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[272];
-      sfvals[sfvals.size(1) * q + 91] = c_N[91];
-      sdvals[sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[273];
-      sdvals[(sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[274];
-      sdvals[(sdvals.size(2) * 91 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[275];
-      sfvals[sfvals.size(1) * q + 92] = c_N[92];
-      sdvals[sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[276];
-      sdvals[(sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[277];
-      sdvals[(sdvals.size(2) * 92 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[278];
-      sfvals[sfvals.size(1) * q + 93] = c_N[93];
-      sdvals[sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[279];
-      sdvals[(sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[280];
-      sdvals[(sdvals.size(2) * 93 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[281];
-      sfvals[sfvals.size(1) * q + 94] = c_N[94];
-      sdvals[sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[282];
-      sdvals[(sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[283];
-      sdvals[(sdvals.size(2) * 94 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[284];
-      sfvals[sfvals.size(1) * q + 95] = c_N[95];
-      sdvals[sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[285];
-      sdvals[(sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[286];
-      sdvals[(sdvals.size(2) * 95 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[287];
-      sfvals[sfvals.size(1) * q + 96] = c_N[96];
-      sdvals[sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[288];
-      sdvals[(sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[289];
-      sdvals[(sdvals.size(2) * 96 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[290];
-      sfvals[sfvals.size(1) * q + 97] = c_N[97];
-      sdvals[sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[291];
-      sdvals[(sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[292];
-      sdvals[(sdvals.size(2) * 97 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[293];
-      sfvals[sfvals.size(1) * q + 98] = c_N[98];
-      sdvals[sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[294];
-      sdvals[(sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[295];
-      sdvals[(sdvals.size(2) * 98 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[296];
-      sfvals[sfvals.size(1) * q + 99] = c_N[99];
-      sdvals[sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[297];
-      sdvals[(sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[298];
-      sdvals[(sdvals.size(2) * 99 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[299];
-      sfvals[sfvals.size(1) * q + 100] = c_N[100];
-      sdvals[sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[300];
-      sdvals[(sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[301];
-      sdvals[(sdvals.size(2) * 100 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[302];
-      sfvals[sfvals.size(1) * q + 101] = c_N[101];
-      sdvals[sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[303];
-      sdvals[(sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[304];
-      sdvals[(sdvals.size(2) * 101 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[305];
-      sfvals[sfvals.size(1) * q + 102] = c_N[102];
-      sdvals[sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[306];
-      sdvals[(sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[307];
-      sdvals[(sdvals.size(2) * 102 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[308];
-      sfvals[sfvals.size(1) * q + 103] = c_N[103];
-      sdvals[sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[309];
-      sdvals[(sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[310];
-      sdvals[(sdvals.size(2) * 103 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[311];
-      sfvals[sfvals.size(1) * q + 104] = c_N[104];
-      sdvals[sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[312];
-      sdvals[(sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[313];
-      sdvals[(sdvals.size(2) * 104 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[314];
-      sfvals[sfvals.size(1) * q + 105] = c_N[105];
-      sdvals[sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[315];
-      sdvals[(sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[316];
-      sdvals[(sdvals.size(2) * 105 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[317];
-      sfvals[sfvals.size(1) * q + 106] = c_N[106];
-      sdvals[sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[318];
-      sdvals[(sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[319];
-      sdvals[(sdvals.size(2) * 106 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[320];
-      sfvals[sfvals.size(1) * q + 107] = c_N[107];
-      sdvals[sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[321];
-      sdvals[(sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[322];
-      sdvals[(sdvals.size(2) * 107 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[323];
-      sfvals[sfvals.size(1) * q + 108] = c_N[108];
-      sdvals[sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[324];
-      sdvals[(sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[325];
-      sdvals[(sdvals.size(2) * 108 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[326];
-      sfvals[sfvals.size(1) * q + 109] = c_N[109];
-      sdvals[sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[327];
-      sdvals[(sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[328];
-      sdvals[(sdvals.size(2) * 109 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[329];
-      sfvals[sfvals.size(1) * q + 110] = c_N[110];
-      sdvals[sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[330];
-      sdvals[(sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[331];
-      sdvals[(sdvals.size(2) * 110 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[332];
-      sfvals[sfvals.size(1) * q + 111] = c_N[111];
-      sdvals[sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[333];
-      sdvals[(sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[334];
-      sdvals[(sdvals.size(2) * 111 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[335];
-      sfvals[sfvals.size(1) * q + 112] = c_N[112];
-      sdvals[sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[336];
-      sdvals[(sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[337];
-      sdvals[(sdvals.size(2) * 112 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[338];
-      sfvals[sfvals.size(1) * q + 113] = c_N[113];
-      sdvals[sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[339];
-      sdvals[(sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[340];
-      sdvals[(sdvals.size(2) * 113 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[341];
-      sfvals[sfvals.size(1) * q + 114] = c_N[114];
-      sdvals[sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[342];
-      sdvals[(sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[343];
-      sdvals[(sdvals.size(2) * 114 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[344];
-      sfvals[sfvals.size(1) * q + 115] = c_N[115];
-      sdvals[sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[345];
-      sdvals[(sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[346];
-      sdvals[(sdvals.size(2) * 115 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[347];
-      sfvals[sfvals.size(1) * q + 116] = c_N[116];
-      sdvals[sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[348];
-      sdvals[(sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[349];
-      sdvals[(sdvals.size(2) * 116 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[350];
-      sfvals[sfvals.size(1) * q + 117] = c_N[117];
-      sdvals[sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[351];
-      sdvals[(sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[352];
-      sdvals[(sdvals.size(2) * 117 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[353];
-      sfvals[sfvals.size(1) * q + 118] = c_N[118];
-      sdvals[sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[354];
-      sdvals[(sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[355];
-      sdvals[(sdvals.size(2) * 118 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[356];
-      sfvals[sfvals.size(1) * q + 119] = c_N[119];
-      sdvals[sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[357];
-      sdvals[(sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[358];
-      sdvals[(sdvals.size(2) * 119 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[359];
-      sfvals[sfvals.size(1) * q + 120] = c_N[120];
-      sdvals[sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[360];
-      sdvals[(sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[361];
-      sdvals[(sdvals.size(2) * 120 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[362];
-      sfvals[sfvals.size(1) * q + 121] = c_N[121];
-      sdvals[sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[363];
-      sdvals[(sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[364];
-      sdvals[(sdvals.size(2) * 121 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[365];
-      sfvals[sfvals.size(1) * q + 122] = c_N[122];
-      sdvals[sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[366];
-      sdvals[(sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[367];
-      sdvals[(sdvals.size(2) * 122 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[368];
-      sfvals[sfvals.size(1) * q + 123] = c_N[123];
-      sdvals[sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[369];
-      sdvals[(sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[370];
-      sdvals[(sdvals.size(2) * 123 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[371];
-      sfvals[sfvals.size(1) * q + 124] = c_N[124];
-      sdvals[sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[372];
-      sdvals[(sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[373];
-      sdvals[(sdvals.size(2) * 124 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[374];
-      sfvals[sfvals.size(1) * q + 125] = c_N[125];
-      sdvals[sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q] =
-          c_deriv[375];
-      sdvals[(sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          c_deriv[376];
-      sdvals[(sdvals.size(2) * 125 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          c_deriv[377];
+    break;
+  default:
+    m2cAssert(etype == 213, "Gauss-Lobatto only supports up to quintic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      prism_gl_126(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                   cs[cs.size(1) * q + 2], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv5[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 125) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
-  } break;
+    break;
   }
 }
 
@@ -7777,615 +5258,210 @@ static void sfe3_tabulate_gl_pyra(coder::SizeType etype,
                                   ::coder::array<double, 2U> &sfvals,
                                   ::coder::array<double, 3U> &sdvals)
 {
+  double tmp_data[1029];
+  double dv2[165];
+  double dv[90];
+  double dv3[55];
+  double dv1[30];
   coder::SizeType i;
-  coder::SizeType nqp;
+  coder::SizeType i1;
+  coder::SizeType i2;
+  coder::SizeType i3;
+  coder::SizeType loop_ub;
+  coder::SizeType tmp_size_idx_1;
+  coder::SizeType tmp_size_idx_2;
+  coder::SizeType ub_loop;
+  short unnamed_idx_1;
+  short unnamed_idx_2;
   //  pyra
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
   if (etype == 173) {
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double deriv[90];
-      double N[30];
-      ::sfe_sfuncs::pyra_gl_30_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                     cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
-      sfvals[sfvals.size(1) * q] = N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          deriv[89];
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      pyra_gl_30(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                 cs[cs.size(1) * q + 2], dv1, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 29) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } else {
     m2cAssert(etype == 177, "Pyramid only support up to quartic");
-    for (coder::SizeType q{0}; q <= nqp; q++) {
-      double b_deriv[165];
-      double b_N[55];
-      ::sfe_sfuncs::pyra_gl_55_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                     cs[cs.size(1) * q + 2], &b_N[0],
-                                     &b_deriv[0]);
-      sfvals[sfvals.size(1) * q] = b_N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 1] = b_deriv[1];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q + 2] = b_deriv[2];
-      sfvals[sfvals.size(1) * q + 1] = b_N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = b_deriv[3];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[4];
-      sdvals[(sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[5];
-      sfvals[sfvals.size(1) * q + 2] = b_N[2];
-      sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[6];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[7];
-      sdvals[(sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[8];
-      sfvals[sfvals.size(1) * q + 3] = b_N[3];
-      sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[9];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[10];
-      sdvals[(sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[11];
-      sfvals[sfvals.size(1) * q + 4] = b_N[4];
-      sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[12];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[13];
-      sdvals[(sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[14];
-      sfvals[sfvals.size(1) * q + 5] = b_N[5];
-      sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[15];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[16];
-      sdvals[(sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[17];
-      sfvals[sfvals.size(1) * q + 6] = b_N[6];
-      sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[18];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[19];
-      sdvals[(sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[20];
-      sfvals[sfvals.size(1) * q + 7] = b_N[7];
-      sdvals[sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[21];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[22];
-      sdvals[(sdvals.size(2) * 7 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[23];
-      sfvals[sfvals.size(1) * q + 8] = b_N[8];
-      sdvals[sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[24];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[25];
-      sdvals[(sdvals.size(2) * 8 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[26];
-      sfvals[sfvals.size(1) * q + 9] = b_N[9];
-      sdvals[sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[27];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[28];
-      sdvals[(sdvals.size(2) * 9 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[29];
-      sfvals[sfvals.size(1) * q + 10] = b_N[10];
-      sdvals[sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[30];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[31];
-      sdvals[(sdvals.size(2) * 10 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[32];
-      sfvals[sfvals.size(1) * q + 11] = b_N[11];
-      sdvals[sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[33];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[34];
-      sdvals[(sdvals.size(2) * 11 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[35];
-      sfvals[sfvals.size(1) * q + 12] = b_N[12];
-      sdvals[sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[36];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[37];
-      sdvals[(sdvals.size(2) * 12 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[38];
-      sfvals[sfvals.size(1) * q + 13] = b_N[13];
-      sdvals[sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[39];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[40];
-      sdvals[(sdvals.size(2) * 13 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[41];
-      sfvals[sfvals.size(1) * q + 14] = b_N[14];
-      sdvals[sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[42];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[43];
-      sdvals[(sdvals.size(2) * 14 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[44];
-      sfvals[sfvals.size(1) * q + 15] = b_N[15];
-      sdvals[sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[45];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[46];
-      sdvals[(sdvals.size(2) * 15 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[47];
-      sfvals[sfvals.size(1) * q + 16] = b_N[16];
-      sdvals[sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[48];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[49];
-      sdvals[(sdvals.size(2) * 16 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[50];
-      sfvals[sfvals.size(1) * q + 17] = b_N[17];
-      sdvals[sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[51];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[52];
-      sdvals[(sdvals.size(2) * 17 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[53];
-      sfvals[sfvals.size(1) * q + 18] = b_N[18];
-      sdvals[sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[54];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[55];
-      sdvals[(sdvals.size(2) * 18 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[56];
-      sfvals[sfvals.size(1) * q + 19] = b_N[19];
-      sdvals[sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[57];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[58];
-      sdvals[(sdvals.size(2) * 19 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[59];
-      sfvals[sfvals.size(1) * q + 20] = b_N[20];
-      sdvals[sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[60];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[61];
-      sdvals[(sdvals.size(2) * 20 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[62];
-      sfvals[sfvals.size(1) * q + 21] = b_N[21];
-      sdvals[sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[63];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[64];
-      sdvals[(sdvals.size(2) * 21 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[65];
-      sfvals[sfvals.size(1) * q + 22] = b_N[22];
-      sdvals[sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[66];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[67];
-      sdvals[(sdvals.size(2) * 22 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[68];
-      sfvals[sfvals.size(1) * q + 23] = b_N[23];
-      sdvals[sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[69];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[70];
-      sdvals[(sdvals.size(2) * 23 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[71];
-      sfvals[sfvals.size(1) * q + 24] = b_N[24];
-      sdvals[sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[72];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[73];
-      sdvals[(sdvals.size(2) * 24 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[74];
-      sfvals[sfvals.size(1) * q + 25] = b_N[25];
-      sdvals[sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[75];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[76];
-      sdvals[(sdvals.size(2) * 25 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[77];
-      sfvals[sfvals.size(1) * q + 26] = b_N[26];
-      sdvals[sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[78];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[79];
-      sdvals[(sdvals.size(2) * 26 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[80];
-      sfvals[sfvals.size(1) * q + 27] = b_N[27];
-      sdvals[sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[81];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[82];
-      sdvals[(sdvals.size(2) * 27 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[83];
-      sfvals[sfvals.size(1) * q + 28] = b_N[28];
-      sdvals[sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[84];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[85];
-      sdvals[(sdvals.size(2) * 28 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[86];
-      sfvals[sfvals.size(1) * q + 29] = b_N[29];
-      sdvals[sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[87];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[88];
-      sdvals[(sdvals.size(2) * 29 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[89];
-      sfvals[sfvals.size(1) * q + 30] = b_N[30];
-      sdvals[sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[90];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[91];
-      sdvals[(sdvals.size(2) * 30 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[92];
-      sfvals[sfvals.size(1) * q + 31] = b_N[31];
-      sdvals[sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[93];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[94];
-      sdvals[(sdvals.size(2) * 31 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[95];
-      sfvals[sfvals.size(1) * q + 32] = b_N[32];
-      sdvals[sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[96];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[97];
-      sdvals[(sdvals.size(2) * 32 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[98];
-      sfvals[sfvals.size(1) * q + 33] = b_N[33];
-      sdvals[sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[99];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[100];
-      sdvals[(sdvals.size(2) * 33 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[101];
-      sfvals[sfvals.size(1) * q + 34] = b_N[34];
-      sdvals[sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[102];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[103];
-      sdvals[(sdvals.size(2) * 34 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[104];
-      sfvals[sfvals.size(1) * q + 35] = b_N[35];
-      sdvals[sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[105];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[106];
-      sdvals[(sdvals.size(2) * 35 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[107];
-      sfvals[sfvals.size(1) * q + 36] = b_N[36];
-      sdvals[sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[108];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[109];
-      sdvals[(sdvals.size(2) * 36 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[110];
-      sfvals[sfvals.size(1) * q + 37] = b_N[37];
-      sdvals[sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[111];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[112];
-      sdvals[(sdvals.size(2) * 37 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[113];
-      sfvals[sfvals.size(1) * q + 38] = b_N[38];
-      sdvals[sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[114];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[115];
-      sdvals[(sdvals.size(2) * 38 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[116];
-      sfvals[sfvals.size(1) * q + 39] = b_N[39];
-      sdvals[sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[117];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[118];
-      sdvals[(sdvals.size(2) * 39 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[119];
-      sfvals[sfvals.size(1) * q + 40] = b_N[40];
-      sdvals[sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[120];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[121];
-      sdvals[(sdvals.size(2) * 40 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[122];
-      sfvals[sfvals.size(1) * q + 41] = b_N[41];
-      sdvals[sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[123];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[124];
-      sdvals[(sdvals.size(2) * 41 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[125];
-      sfvals[sfvals.size(1) * q + 42] = b_N[42];
-      sdvals[sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[126];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[127];
-      sdvals[(sdvals.size(2) * 42 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[128];
-      sfvals[sfvals.size(1) * q + 43] = b_N[43];
-      sdvals[sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[129];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[130];
-      sdvals[(sdvals.size(2) * 43 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[131];
-      sfvals[sfvals.size(1) * q + 44] = b_N[44];
-      sdvals[sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[132];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[133];
-      sdvals[(sdvals.size(2) * 44 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[134];
-      sfvals[sfvals.size(1) * q + 45] = b_N[45];
-      sdvals[sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[135];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[136];
-      sdvals[(sdvals.size(2) * 45 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[137];
-      sfvals[sfvals.size(1) * q + 46] = b_N[46];
-      sdvals[sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[138];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[139];
-      sdvals[(sdvals.size(2) * 46 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[140];
-      sfvals[sfvals.size(1) * q + 47] = b_N[47];
-      sdvals[sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[141];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[142];
-      sdvals[(sdvals.size(2) * 47 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[143];
-      sfvals[sfvals.size(1) * q + 48] = b_N[48];
-      sdvals[sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[144];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[145];
-      sdvals[(sdvals.size(2) * 48 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[146];
-      sfvals[sfvals.size(1) * q + 49] = b_N[49];
-      sdvals[sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[147];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[148];
-      sdvals[(sdvals.size(2) * 49 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[149];
-      sfvals[sfvals.size(1) * q + 50] = b_N[50];
-      sdvals[sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[150];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[151];
-      sdvals[(sdvals.size(2) * 50 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[152];
-      sfvals[sfvals.size(1) * q + 51] = b_N[51];
-      sdvals[sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[153];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[154];
-      sdvals[(sdvals.size(2) * 51 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[155];
-      sfvals[sfvals.size(1) * q + 52] = b_N[52];
-      sdvals[sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[156];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[157];
-      sdvals[(sdvals.size(2) * 52 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[158];
-      sfvals[sfvals.size(1) * q + 53] = b_N[53];
-      sdvals[sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[159];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[160];
-      sdvals[(sdvals.size(2) * 53 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[161];
-      sfvals[sfvals.size(1) * q + 54] = b_N[54];
-      sdvals[sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q] =
-          b_deriv[162];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 1] =
-          b_deriv[163];
-      sdvals[(sdvals.size(2) * 54 + sdvals.size(2) * sdvals.size(1) * q) + 2] =
-          b_deriv[164];
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      pyra_gl_55(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                 cs[cs.size(1) * q + 2], dv3, dv2);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 54) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  }
+}
+
+static void sfe3_tabulate_gl_tet(coder::SizeType etype,
+                                 const ::coder::array<double, 2U> &cs,
+                                 ::coder::array<double, 2U> &sfvals,
+                                 ::coder::array<double, 3U> &sdvals)
+{
+  double tmp_data[1029];
+  double dv2[105];
+  double dv[60];
+  double dv3[35];
+  double dv1[20];
+  coder::SizeType i;
+  coder::SizeType i1;
+  coder::SizeType i2;
+  coder::SizeType i3;
+  coder::SizeType loop_ub;
+  coder::SizeType tmp_size_idx_1;
+  coder::SizeType tmp_size_idx_2;
+  coder::SizeType ub_loop;
+  short unnamed_idx_1;
+  short unnamed_idx_2;
+  //  tet
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  if (etype == 141) {
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      tet_gl_20(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                cs[cs.size(1) * q + 2], dv1, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 19) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } else {
+    m2cAssert(
+        etype == 145,
+        "Gauss-Lobatto tetrahedral elements are supported only up to quartic");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      tet_gl_35(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                cs[cs.size(1) * q + 2], dv3, dv2);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<short>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<short>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 34) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   }
 }
@@ -8408,114 +5484,7 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
     } else if (i == 6) {
       sfe3_tabulate_equi_prism(etype, cs, sfvals, sdvals);
     } else {
-      coder::SizeType nqp;
-      //  hex
-      nqp = cs.size(0) - 1;
-      i = iv[etype - 1];
-      sfvals.set_size(cs.size(0), i);
-      sdvals.set_size(cs.size(0), i, cs.size(1));
-      switch (etype) {
-      case 228: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double deriv[24];
-          double N[8];
-          ::sfe_sfuncs::hexa_8_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                     cs[cs.size(1) * q + 2], &N[0], &deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 8; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = deriv[3 * b_i + 2];
-          }
-        }
-      } break;
-      case 232: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double b_deriv[81];
-          double b_N[27];
-          ::sfe_sfuncs::hexa_27_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &b_N[0], &b_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 27; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = b_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                b_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = b_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = b_deriv[3 * b_i + 2];
-          }
-        }
-      } break;
-      case 236: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double c_deriv[192];
-          double c_N[64];
-          ::sfe_sfuncs::hexa_64_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &c_N[0], &c_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 64; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = c_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                c_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = c_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = c_deriv[3 * b_i + 2];
-          }
-        }
-      } break;
-      case 240: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double d_deriv[375];
-          double d_N[125];
-          ::sfe_sfuncs::hexa_125_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &d_N[0], &d_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 125; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = d_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                d_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = d_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = d_deriv[3 * b_i + 2];
-          }
-        }
-      } break;
-      default: {
-        m2cAssert(etype == 244, "Hex elements supports up to quinitic.");
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double e_deriv[648];
-          double e_N[216];
-          ::sfe_sfuncs::hexa_216_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &e_N[0], &e_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 216; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = e_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                e_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = e_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = e_deriv[3 * b_i + 2];
-          }
-        }
-      } break;
-      }
+      sfe3_tabulate_equi_hexa(etype, cs, sfvals, sdvals);
     }
   } else {
     coder::SizeType i;
@@ -8523,127 +5492,849 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
               "Only supports Equidistant and Gauss-Lobatto points in 3D");
     i = etype >> 5 & 7;
     if (i == 4) {
-      coder::SizeType nqp;
-      //  tet
-      nqp = cs.size(0) - 1;
-      i = iv[etype - 1];
-      sfvals.set_size(cs.size(0), i);
-      sdvals.set_size(cs.size(0), i, cs.size(1));
-      if (etype == 141) {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double f_deriv[60];
-          double f_N[20];
-          ::sfe_sfuncs::tet_gl_20_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &f_N[0], &f_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 20; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = f_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                f_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = f_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = f_deriv[3 * b_i + 2];
-          }
-        }
-      } else {
-        m2cAssert(etype == 145, "Gauss-Lobatto tetrahedral elements are "
-                                "supported only up to quartic");
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double g_deriv[105];
-          double g_N[35];
-          ::sfe_sfuncs::tet_gl_35_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &g_N[0], &g_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 35; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = g_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                g_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = g_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = g_deriv[3 * b_i + 2];
-          }
-        }
-      }
+      sfe3_tabulate_gl_tet(etype, cs, sfvals, sdvals);
     } else if (i == 5) {
       sfe3_tabulate_gl_pyra(etype, cs, sfvals, sdvals);
     } else if (i == 6) {
       sfe3_tabulate_gl_prism(etype, cs, sfvals, sdvals);
     } else {
-      coder::SizeType nqp;
-      //  hex
-      nqp = cs.size(0) - 1;
-      i = iv[etype - 1];
-      sfvals.set_size(cs.size(0), i);
-      sdvals.set_size(cs.size(0), i, cs.size(1));
-      switch (etype) {
-      case 237: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double c_deriv[192];
-          double c_N[64];
-          ::sfe_sfuncs::hexa_gl_64_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &c_N[0], &c_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 64; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = c_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                c_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = c_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = c_deriv[3 * b_i + 2];
-          }
-        }
-      } break;
-      case 241: {
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double d_deriv[375];
-          double d_N[125];
-          ::sfe_sfuncs::hexa_gl_125_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &d_N[0], &d_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 125; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = d_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                d_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = d_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = d_deriv[3 * b_i + 2];
-          }
-        }
-      } break;
-      default: {
-        m2cAssert(etype == 245, "Gauss-Lobatoo only supports up to quintic.");
-        for (coder::SizeType q{0}; q <= nqp; q++) {
-          double e_deriv[648];
-          double e_N[216];
-          ::sfe_sfuncs::hexa_gl_216_sfunc(
-              cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-              cs[cs.size(1) * q + 2], &e_N[0], &e_deriv[0]);
-          for (coder::SizeType b_i{0}; b_i < 216; b_i++) {
-            sfvals[b_i + sfvals.size(1) * q] = e_N[b_i];
-            sdvals[sdvals.size(2) * b_i + sdvals.size(2) * sdvals.size(1) * q] =
-                e_deriv[3 * b_i];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   1] = e_deriv[3 * b_i + 1];
-            sdvals[(sdvals.size(2) * b_i +
-                    sdvals.size(2) * sdvals.size(1) * q) +
-                   2] = e_deriv[3 * b_i + 2];
-          }
-        }
-      } break;
+      sfe3_tabulate_gl_hexa(etype, cs, sfvals, sdvals);
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
+                     coder::SizeType etypes_size,
+                     const ::coder::array<double, 2U> &xs,
+                     const ::coder::array<double, 2U> &qd_or_natcoords)
+{
+  coder::SizeType geom_etype;
+  coder::SizeType i;
+  coder::SizeType sfe_idx_0;
+  boolean_T flag;
+  if ((etypes_size < 2) || (etypes_data[1] == 0)) {
+    geom_etype = etypes_data[0];
+  } else {
+    geom_etype = etypes_data[1];
+  }
+  flag = etypes_data[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (etypes_data[0] >> 5 & 7) == (geom_etype >> 5 & 7);
+  }
+  m2cAssert(flag, "invalid element combinations");
+  if (etypes_data[0] != -1) {
+    coder::SizeType shape;
+    coder::SizeType topo_dim;
+    shape = etypes_data[0] >> 5 & 7;
+    topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
+    //  Geometric dimension
+    if (xs.size(1) < topo_dim) {
+      m2cErrMsgIdAndTxt("sfe_init:badDim",
+                        "geometric dim cannot be smaller than topo dim");
+    }
+    b_sfe->geom_dim = xs.size(1);
+    //  assign geom dimension
+    b_sfe->topo_dim = topo_dim;
+    //  assign topo dimension
+    m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+    b_sfe->etypes[0] = etypes_data[0];
+    b_sfe->etypes[1] = geom_etype;
+    //  Get number of nodes per element
+    b_sfe->nnodes[0] = iv[etypes_data[0] - 1];
+    b_sfe->nnodes[1] = iv[geom_etype - 1];
+    //  User-input natural coordinates
+    b_sfe->nqp = qd_or_natcoords.size(0);
+    sfe_idx_0 = b_sfe->nqp;
+    b_sfe->ws.set_size(sfe_idx_0);
+    for (i = 0; i < sfe_idx_0; i++) {
+      b_sfe->ws[i] = 1.0;
+    }
+    //  user ones for dummy quad weights
+    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
+    i = b_sfe->nqp;
+    for (coder::SizeType q{0}; q < i; q++) {
+      for (coder::SizeType k{0}; k < topo_dim; k++) {
+        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+            qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
       }
+    }
+    //  Solution space shape functions & derivs
+    tabulate_shapefuncs(etypes_data[0], b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+    sfe_idx_0 = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+    b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                               b_sfe->shapes_geom.size(1));
+    for (i = 0; i < sfe_idx_0; i++) {
+      b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+    }
+    sfe_idx_0 = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+                b_sfe->derivs_geom.size(0);
+    b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                               b_sfe->derivs_geom.size(1),
+                               b_sfe->derivs_geom.size(2));
+    for (i = 0; i < sfe_idx_0; i++) {
+      b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+    }
+    //  Geometry space shape functions & derivs
+    if (etypes_data[0] != geom_etype) {
+      tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                          b_sfe->derivs_geom);
+    }
+  } else {
+    if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
+      flag = true;
+    } else {
+      flag = false;
+    }
+    m2cAssert(flag, "");
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0 = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0, xs.size(1));
+  for (coder::SizeType q{0}; q < sfe_idx_0; q++) {
+    i = xs.size(1);
+    for (coder::SizeType k{0}; k < i; k++) {
+      double v;
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
+                     const ::coder::array<double, 2U> &xs,
+                     const ::coder::array<double, 2U> &qd_or_natcoords)
+{
+  coder::SizeType i;
+  coder::SizeType loop_ub;
+  coder::SizeType sfe_idx_0_tmp_tmp;
+  coder::SizeType topo_dim;
+  unsigned char c;
+  unsigned char geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (static_cast<coder::SizeType>(static_cast<unsigned int>(etypes[0]) >>
+                                         5) ==
+            static_cast<coder::SizeType>(
+                static_cast<unsigned int>(geom_etype) >> 5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<unsigned char>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  User-input natural coordinates
+  b_sfe->nqp = qd_or_natcoords.size(0);
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->ws.set_size(sfe_idx_0_tmp_tmp);
+  for (i = 0; i < sfe_idx_0_tmp_tmp; i++) {
+    b_sfe->ws[i] = 1.0;
+  }
+  //  user ones for dummy quad weights
+  b_sfe->cs.set_size(sfe_idx_0_tmp_tmp, topo_dim);
+  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    for (coder::SizeType k{0}; k < topo_dim; k++) {
+      b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+          qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
+    }
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (coder::SizeType k{0}; k < i; k++) {
+      double v;
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
+                     const ::coder::array<double, 2U> &xs,
+                     coder::SizeType qd_or_natcoords,
+                     const ::coder::array<double, 2U> &userquad)
+{
+  double dv[9];
+  double v;
+  coder::SizeType a;
+  coder::SizeType i;
+  coder::SizeType i1;
+  coder::SizeType topo_dim;
+  unsigned char c;
+  unsigned char geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (static_cast<coder::SizeType>(static_cast<unsigned int>(etypes[0]) >>
+                                         5) ==
+            static_cast<coder::SizeType>(
+                static_cast<unsigned int>(geom_etype) >> 5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<unsigned char>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  Set up quadrature
+  if (qd_or_natcoords != -1) {
+    if (qd_or_natcoords == 0) {
+      //  trial+test+nonlinear_geom?1:0
+      a = obtain_elemdegree((etypes[0]));
+      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
+                        (xs.size(1) > topo_dim);
+    }
+    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+    b_sfe->nqp = b_sfe->ws.size(0);
+  } else {
+    if ((userquad.size(0) == 0) || (userquad.size(1) == 0)) {
+      m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
+                        "missing user quadrature data");
+    }
+    if (userquad.size(1) != topo_dim + 1) {
+      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                        "bad user quadrature data size");
+    }
+    b_sfe->nqp = userquad.size(0);
+    b_sfe->ws.set_size(b_sfe->nqp);
+    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
+    i = b_sfe->nqp;
+    for (coder::SizeType q{0}; q < i; q++) {
+      b_sfe->ws[q] = userquad[userquad.size(1) * q];
+      for (coder::SizeType k{0}; k < topo_dim; k++) {
+        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+            userquad[(k + userquad.size(1) * q) + 1];
+      }
+    }
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < a; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+      b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < a; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  b_sfe->cs_phy.set_size(b_sfe->nqp, xs.size(1));
+  i = b_sfe->nqp;
+  for (coder::SizeType q{0}; q < i; q++) {
+    i1 = xs.size(1);
+    for (coder::SizeType k{0}; k < i1; k++) {
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    double d;
+    coder::SizeType geom_dim;
+    coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(double));
+    n = xs.size(0);
+    for (coder::SizeType k{0}; k < n; k++) {
+      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    i = b_sfe->nqp;
+    for (coder::SizeType q{0}; q < i; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    //  Super-parametric
+    a = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(a, 3);
+    i = b_sfe->nqp;
+    for (coder::SizeType q{0}; q < i; q++) {
+      coder::SizeType geom_dim;
+      coder::SizeType n;
+      coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(double));
+      n = xs.size(0);
+      for (coder::SizeType k{0}; k < n; k++) {
+        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (coder::SizeType j{0}; j < geom_dim; j++) {
+            i1 = j + 3 * b_i;
+            dv[i1] +=
+                xs[j + xs.size(1) * k] *
+                b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                   b_sfe->derivs_geom.size(2) *
+                                       b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i1 = 0; i1 < 3; i1++) {
+        a = i1 + y;
+        b_sfe->jacTs[3 * a] = dv[3 * i1];
+        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
+        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
+                     coder::SizeType etypes_size,
+                     const ::coder::array<double, 2U> &xs)
+{
+  double dv[9];
+  double v;
+  coder::SizeType a;
+  coder::SizeType geom_etype;
+  coder::SizeType i;
+  coder::SizeType sfe_idx_0_tmp_tmp;
+  coder::SizeType topo_dim;
+  boolean_T flag;
+  if ((etypes_size < 2) || (etypes_data[1] == 0)) {
+    geom_etype = etypes_data[0];
+  } else {
+    geom_etype = etypes_data[1];
+  }
+  flag = etypes_data[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (etypes_data[0] >> 5 & 7) == (geom_etype >> 5 & 7);
+  }
+  m2cAssert(flag, "invalid element combinations");
+  if (etypes_data[0] != -1) {
+    coder::SizeType qd_or_natcoords;
+    coder::SizeType shape;
+    shape = etypes_data[0] >> 5 & 7;
+    topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
+    //  Geometric dimension
+    if (xs.size(1) < topo_dim) {
+      m2cErrMsgIdAndTxt("sfe_init:badDim",
+                        "geometric dim cannot be smaller than topo dim");
+    }
+    b_sfe->geom_dim = xs.size(1);
+    //  assign geom dimension
+    b_sfe->topo_dim = topo_dim;
+    //  assign topo dimension
+    m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+    b_sfe->etypes[0] = etypes_data[0];
+    b_sfe->etypes[1] = geom_etype;
+    //  Get number of nodes per element
+    b_sfe->nnodes[0] = iv[etypes_data[0] - 1];
+    b_sfe->nnodes[1] = iv[geom_etype - 1];
+    //  Set up quadrature
+    a = obtain_elemdegree(etypes_data[0]);
+    qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
+                      (xs.size(1) > topo_dim);
+    tabulate_quadratures(etypes_data[0], qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+    b_sfe->nqp = b_sfe->ws.size(0);
+    //  Solution space shape functions & derivs
+    tabulate_shapefuncs(etypes_data[0], b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+    a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+    b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                               b_sfe->shapes_geom.size(1));
+    for (i = 0; i < a; i++) {
+      b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+    }
+    a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+        b_sfe->derivs_geom.size(0);
+    b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                               b_sfe->derivs_geom.size(1),
+                               b_sfe->derivs_geom.size(2));
+    for (i = 0; i < a; i++) {
+      b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+    }
+    //  Geometry space shape functions & derivs
+    if (etypes_data[0] != geom_etype) {
+      tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                          b_sfe->derivs_geom);
+    }
+  } else {
+    if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
+      flag = true;
+    } else {
+      flag = false;
+    }
+    m2cAssert(flag, "");
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (coder::SizeType k{0}; k < i; k++) {
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    double d;
+    coder::SizeType geom_dim;
+    coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(double));
+    n = xs.size(0);
+    for (coder::SizeType k{0}; k < n; k++) {
+      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    //  Super-parametric
+    a = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(a, 3);
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      coder::SizeType geom_dim;
+      coder::SizeType n;
+      coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(double));
+      n = xs.size(0);
+      for (coder::SizeType k{0}; k < n; k++) {
+        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        a = i + y;
+        b_sfe->jacTs[3 * a] = dv[3 * i];
+        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
+                     const ::coder::array<double, 2U> &xs)
+{
+  double dv[9];
+  double v;
+  coder::SizeType a;
+  coder::SizeType i;
+  coder::SizeType qd_or_natcoords;
+  coder::SizeType sfe_idx_0_tmp_tmp;
+  coder::SizeType topo_dim;
+  unsigned char c;
+  unsigned char geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (static_cast<coder::SizeType>(static_cast<unsigned int>(etypes[0]) >>
+                                         5) ==
+            static_cast<coder::SizeType>(
+                static_cast<unsigned int>(geom_etype) >> 5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<unsigned char>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  Set up quadrature
+  a = obtain_elemdegree((etypes[0]));
+  qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
+                    (xs.size(1) > topo_dim);
+  tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+  b_sfe->nqp = b_sfe->ws.size(0);
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < a; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+      b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < a; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (coder::SizeType k{0}; k < i; k++) {
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    double d;
+    coder::SizeType geom_dim;
+    coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(double));
+    n = xs.size(0);
+    for (coder::SizeType k{0}; k < n; k++) {
+      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    //  Super-parametric
+    a = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(a, 3);
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      coder::SizeType geom_dim;
+      coder::SizeType n;
+      coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(double));
+      n = xs.size(0);
+      for (coder::SizeType k{0}; k < n; k++) {
+        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        a = i + y;
+        b_sfe->jacTs[3 * a] = dv[3 * i];
+        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
     }
   }
 }
@@ -8880,842 +6571,6 @@ static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
   }
 }
 
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
-                     coder::SizeType etypes_size,
-                     const ::coder::array<double, 2U> &xs,
-                     const ::coder::array<double, 2U> &qd_or_natcoords)
-{
-  coder::SizeType geom_etype;
-  coder::SizeType i;
-  coder::SizeType sfe_idx_0;
-  boolean_T flag;
-  if ((etypes_size < 2) || (etypes_data[1] == 0)) {
-    geom_etype = etypes_data[0];
-  } else {
-    geom_etype = etypes_data[1];
-  }
-  flag = etypes_data[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (etypes_data[0] >> 5 & 7) == (geom_etype >> 5 & 7);
-  }
-  m2cAssert(flag, "invalid element combinations");
-  if (etypes_data[0] != -1) {
-    coder::SizeType shape;
-    coder::SizeType topo_dim;
-    shape = etypes_data[0] >> 5 & 7;
-    topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
-    //  Geometric dimension
-    if (xs.size(1) < topo_dim) {
-      m2cErrMsgIdAndTxt("sfe_init:badDim",
-                        "geometric dim cannot be smaller than topo dim");
-    }
-    b_sfe->geom_dim = xs.size(1);
-    //  assign geom dimension
-    b_sfe->topo_dim = topo_dim;
-    //  assign topo dimension
-    m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-    b_sfe->etypes[0] = etypes_data[0];
-    b_sfe->etypes[1] = geom_etype;
-    //  Get number of nodes per element
-    b_sfe->nnodes[0] = iv[etypes_data[0] - 1];
-    b_sfe->nnodes[1] = iv[geom_etype - 1];
-    //  User-input natural coordinates
-    b_sfe->nqp = qd_or_natcoords.size(0);
-    sfe_idx_0 = b_sfe->nqp;
-    b_sfe->ws.set_size(sfe_idx_0);
-    for (i = 0; i < sfe_idx_0; i++) {
-      b_sfe->ws[i] = 1.0;
-    }
-    //  user ones for dummy quad weights
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      for (coder::SizeType k{0}; k < topo_dim; k++) {
-        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-            qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
-      }
-    }
-    //  Solution space shape functions & derivs
-    tabulate_shapefuncs(etypes_data[0], b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-    sfe_idx_0 = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-    b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                               b_sfe->shapes_geom.size(1));
-    for (i = 0; i < sfe_idx_0; i++) {
-      b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-    }
-    sfe_idx_0 = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-                b_sfe->derivs_geom.size(0);
-    b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                               b_sfe->derivs_geom.size(1),
-                               b_sfe->derivs_geom.size(2));
-    for (i = 0; i < sfe_idx_0; i++) {
-      b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-    }
-    //  Geometry space shape functions & derivs
-    if (etypes_data[0] != geom_etype) {
-      tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                          b_sfe->derivs_geom);
-    }
-  } else {
-    if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
-      flag = true;
-    } else {
-      flag = false;
-    }
-    m2cAssert(flag, "");
-  }
-  //  potentially skip re-tabulating
-  sfe_idx_0 = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
-      double v;
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
-                     const ::coder::array<double, 2U> &xs)
-{
-  double dv[9];
-  double v;
-  coder::SizeType a;
-  coder::SizeType i;
-  coder::SizeType qd_or_natcoords;
-  coder::SizeType sfe_idx_0_tmp_tmp;
-  coder::SizeType topo_dim;
-  unsigned char c;
-  unsigned char geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (static_cast<coder::SizeType>(static_cast<unsigned int>(etypes[0]) >>
-                                         5) ==
-            static_cast<coder::SizeType>(
-                static_cast<unsigned int>(geom_etype) >> 5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<unsigned char>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  Set up quadrature
-  a = obtain_elemdegree((etypes[0]));
-  qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                    (xs.size(1) > topo_dim);
-  tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
-  b_sfe->nqp = b_sfe->ws.size(0);
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-    double d;
-    coder::SizeType geom_dim;
-    coder::SizeType n;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(double));
-    n = xs.size(0);
-    for (coder::SizeType k{0}; k < n; k++) {
-      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
-    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      coder::SizeType geom_dim;
-      coder::SizeType n;
-      coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(double));
-      n = xs.size(0);
-      for (coder::SizeType k{0}; k < n; k++) {
-        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (coder::SizeType j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] *
-                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                        b_sfe->derivs_geom.size(2) *
-                                            b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i = 0; i < 3; i++) {
-        a = i + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const int etypes_data[],
-                     coder::SizeType etypes_size,
-                     const ::coder::array<double, 2U> &xs)
-{
-  double dv[9];
-  double v;
-  coder::SizeType a;
-  coder::SizeType geom_etype;
-  coder::SizeType i;
-  coder::SizeType sfe_idx_0_tmp_tmp;
-  coder::SizeType topo_dim;
-  boolean_T flag;
-  if ((etypes_size < 2) || (etypes_data[1] == 0)) {
-    geom_etype = etypes_data[0];
-  } else {
-    geom_etype = etypes_data[1];
-  }
-  flag = etypes_data[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (etypes_data[0] >> 5 & 7) == (geom_etype >> 5 & 7);
-  }
-  m2cAssert(flag, "invalid element combinations");
-  if (etypes_data[0] != -1) {
-    coder::SizeType qd_or_natcoords;
-    coder::SizeType shape;
-    shape = etypes_data[0] >> 5 & 7;
-    topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
-    //  Geometric dimension
-    if (xs.size(1) < topo_dim) {
-      m2cErrMsgIdAndTxt("sfe_init:badDim",
-                        "geometric dim cannot be smaller than topo dim");
-    }
-    b_sfe->geom_dim = xs.size(1);
-    //  assign geom dimension
-    b_sfe->topo_dim = topo_dim;
-    //  assign topo dimension
-    m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-    b_sfe->etypes[0] = etypes_data[0];
-    b_sfe->etypes[1] = geom_etype;
-    //  Get number of nodes per element
-    b_sfe->nnodes[0] = iv[etypes_data[0] - 1];
-    b_sfe->nnodes[1] = iv[geom_etype - 1];
-    //  Set up quadrature
-    a = obtain_elemdegree(etypes_data[0]);
-    qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                      (xs.size(1) > topo_dim);
-    tabulate_quadratures(etypes_data[0], qd_or_natcoords, b_sfe->cs, b_sfe->ws);
-    b_sfe->nqp = b_sfe->ws.size(0);
-    //  Solution space shape functions & derivs
-    tabulate_shapefuncs(etypes_data[0], b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-    a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-    b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                               b_sfe->shapes_geom.size(1));
-    for (i = 0; i < a; i++) {
-      b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-    }
-    a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-        b_sfe->derivs_geom.size(0);
-    b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                               b_sfe->derivs_geom.size(1),
-                               b_sfe->derivs_geom.size(2));
-    for (i = 0; i < a; i++) {
-      b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-    }
-    //  Geometry space shape functions & derivs
-    if (etypes_data[0] != geom_etype) {
-      tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                          b_sfe->derivs_geom);
-    }
-  } else {
-    if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
-      flag = true;
-    } else {
-      flag = false;
-    }
-    m2cAssert(flag, "");
-  }
-  //  potentially skip re-tabulating
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-    double d;
-    coder::SizeType geom_dim;
-    coder::SizeType n;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(double));
-    n = xs.size(0);
-    for (coder::SizeType k{0}; k < n; k++) {
-      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
-    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      coder::SizeType geom_dim;
-      coder::SizeType n;
-      coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(double));
-      n = xs.size(0);
-      for (coder::SizeType k{0}; k < n; k++) {
-        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (coder::SizeType j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] *
-                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                        b_sfe->derivs_geom.size(2) *
-                                            b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i = 0; i < 3; i++) {
-        a = i + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
-                     const ::coder::array<double, 2U> &xs,
-                     coder::SizeType qd_or_natcoords,
-                     const ::coder::array<double, 2U> &userquad)
-{
-  double dv[9];
-  double v;
-  coder::SizeType a;
-  coder::SizeType i;
-  coder::SizeType i1;
-  coder::SizeType topo_dim;
-  unsigned char c;
-  unsigned char geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (static_cast<coder::SizeType>(static_cast<unsigned int>(etypes[0]) >>
-                                         5) ==
-            static_cast<coder::SizeType>(
-                static_cast<unsigned int>(geom_etype) >> 5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<unsigned char>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  Set up quadrature
-  if (qd_or_natcoords != -1) {
-    if (qd_or_natcoords == 0) {
-      //  trial+test+nonlinear_geom?1:0
-      a = obtain_elemdegree((etypes[0]));
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                        (xs.size(1) > topo_dim);
-    }
-    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
-    b_sfe->nqp = b_sfe->ws.size(0);
-  } else {
-    if ((userquad.size(0) == 0) || (userquad.size(1) == 0)) {
-      m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
-                        "missing user quadrature data");
-    }
-    if (userquad.size(1) != topo_dim + 1) {
-      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                        "bad user quadrature data size");
-    }
-    b_sfe->nqp = userquad.size(0);
-    b_sfe->ws.set_size(b_sfe->nqp);
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      b_sfe->ws[q] = userquad[userquad.size(1) * q];
-      for (coder::SizeType k{0}; k < topo_dim; k++) {
-        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-            userquad[(k + userquad.size(1) * q) + 1];
-      }
-    }
-  }
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  b_sfe->cs_phy.set_size(b_sfe->nqp, xs.size(1));
-  i = b_sfe->nqp;
-  for (coder::SizeType q{0}; q < i; q++) {
-    i1 = xs.size(1);
-    for (coder::SizeType k{0}; k < i1; k++) {
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-    double d;
-    coder::SizeType geom_dim;
-    coder::SizeType n;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(double));
-    n = xs.size(0);
-    for (coder::SizeType k{0}; k < n; k++) {
-      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      coder::SizeType geom_dim;
-      coder::SizeType n;
-      coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(double));
-      n = xs.size(0);
-      for (coder::SizeType k{0}; k < n; k++) {
-        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (coder::SizeType j{0}; j < geom_dim; j++) {
-            i1 = j + 3 * b_i;
-            dv[i1] +=
-                xs[j + xs.size(1) * k] *
-                b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                   b_sfe->derivs_geom.size(2) *
-                                       b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i1 = 0; i1 < 3; i1++) {
-        a = i1 + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i1];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const unsigned char etypes[2],
-                     const ::coder::array<double, 2U> &xs,
-                     const ::coder::array<double, 2U> &qd_or_natcoords)
-{
-  coder::SizeType i;
-  coder::SizeType loop_ub;
-  coder::SizeType sfe_idx_0_tmp_tmp;
-  coder::SizeType topo_dim;
-  unsigned char c;
-  unsigned char geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (static_cast<coder::SizeType>(static_cast<unsigned int>(etypes[0]) >>
-                                         5) ==
-            static_cast<coder::SizeType>(
-                static_cast<unsigned int>(geom_etype) >> 5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<unsigned char>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  User-input natural coordinates
-  b_sfe->nqp = qd_or_natcoords.size(0);
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->ws.set_size(sfe_idx_0_tmp_tmp);
-  for (i = 0; i < sfe_idx_0_tmp_tmp; i++) {
-    b_sfe->ws[i] = 1.0;
-  }
-  //  user ones for dummy quad weights
-  b_sfe->cs.set_size(sfe_idx_0_tmp_tmp, topo_dim);
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    for (coder::SizeType k{0}; k < topo_dim; k++) {
-      b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-          qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
-    }
-  }
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-            b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
-      double v;
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-}
-
 static void sfe_init_grad(SfeObject *b_sfe, coder::SizeType q)
 {
   double Jt[9];
@@ -9945,164 +6800,54 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
                                  ::coder::array<double, 2U> &cs,
                                  ::coder::array<double, 1U> &ws)
 {
-  coder::SizeType nqp;
   coder::SizeType shape;
-  boolean_T guard1{false};
-  boolean_T guard10{false};
-  boolean_T guard11{false};
-  boolean_T guard12{false};
-  boolean_T guard13{false};
-  boolean_T guard14{false};
-  boolean_T guard15{false};
-  boolean_T guard16{false};
-  boolean_T guard17{false};
-  boolean_T guard18{false};
-  boolean_T guard19{false};
-  boolean_T guard2{false};
-  boolean_T guard20{false};
-  boolean_T guard21{false};
-  boolean_T guard22{false};
-  boolean_T guard23{false};
-  boolean_T guard24{false};
-  boolean_T guard25{false};
-  boolean_T guard3{false};
-  boolean_T guard4{false};
-  boolean_T guard5{false};
-  boolean_T guard6{false};
-  boolean_T guard7{false};
-  boolean_T guard8{false};
-  boolean_T guard9{false};
   shape = etype >> 5 & 7;
-  guard1 = false;
-  guard2 = false;
-  guard3 = false;
-  guard4 = false;
-  guard5 = false;
-  guard6 = false;
-  guard7 = false;
-  guard8 = false;
-  guard9 = false;
-  guard10 = false;
-  guard11 = false;
-  guard12 = false;
-  guard13 = false;
-  guard14 = false;
-  guard15 = false;
-  guard16 = false;
-  guard17 = false;
-  guard18 = false;
-  guard19 = false;
-  guard20 = false;
-  guard21 = false;
-  guard22 = false;
-  guard23 = false;
-  guard24 = false;
-  guard25 = false;
   switch (shape) {
   case 1:
     bar_quadrules(qd, cs, ws);
     break;
   case 2:
-    switch (qd) {
-    case 0:
-      guard1 = true;
-      break;
-    case 1:
-      guard1 = true;
-      break;
-    case 2:
-      nqp = ::sfe_qrules::tri_deg2_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::tri_deg2_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 3:
-      guard2 = true;
-      break;
-    case 4:
-      guard2 = true;
-      break;
-    case 5:
-      nqp = ::sfe_qrules::tri_deg5_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::tri_deg5_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 6:
-      guard3 = true;
-      break;
-    case 7:
-      guard3 = true;
-      break;
-    case 8:
-      nqp = ::sfe_qrules::tri_deg8_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::tri_deg8_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 9:
-      nqp = ::sfe_qrules::tri_deg9_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::tri_deg9_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 10:
-      guard4 = true;
-      break;
-    case 11:
-      guard4 = true;
-      break;
-    default:
-      if (qd > 13) {
-        m2cWarnMsgIdAndTxt("tri_quadrules:UnsupportedDegree",
-                           "Only support up to degree 13");
-      }
-      nqp = ::sfe_qrules::tri_deg13_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::tri_deg13_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    }
+    tri_quadrules(qd, cs, ws);
     break;
-  case 3:
-    switch (qd) {
-    case 0:
-      guard5 = true;
-      break;
-    case 1:
-      guard5 = true;
-      break;
-    case 2:
-      guard6 = true;
-      break;
-    case 3:
-      guard6 = true;
-      break;
-    case 4:
-      guard7 = true;
-      break;
-    case 5:
-      guard7 = true;
-      break;
-    case 6:
-      guard8 = true;
-      break;
-    case 7:
-      guard8 = true;
-      break;
-    case 8:
-      guard9 = true;
-      break;
-    case 9:
-      guard9 = true;
-      break;
-    case 10:
-      guard10 = true;
-      break;
-    case 11:
-      guard10 = true;
-      break;
-    default:
+  case 3: {
+    if (qd <= 1) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg1_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 3) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg3_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg3_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 5) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg5_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg5_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 7) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg7_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg7_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 9) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg9_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg9_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 11) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg11_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg11_qrule(&cs[0], &(ws.data())[0]);
+    } else {
+      coder::SizeType nqp;
       if (qd > 13) {
         m2cWarnMsgIdAndTxt("bar_quadrules:UnsupportedDegree",
                            "Only support up to degree 13");
@@ -10111,60 +6856,60 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       cs.set_size(nqp, 2);
       ws.set_size(nqp);
       ::sfe_qrules::quad_deg13_qrule(&cs[0], &(ws.data())[0]);
-      break;
     }
-    break;
-  case 4:
-    switch (qd) {
-    case 0:
-      guard11 = true;
-      break;
-    case 1:
-      guard11 = true;
-      break;
-    case 2:
+  } break;
+  case 4: {
+    if (qd <= 1) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg1_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg1_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 2) {
+      coder::SizeType nqp;
       nqp = ::sfe_qrules::tet_deg2_qrule();
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::tet_deg2_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 3:
+    } else if (qd <= 3) {
+      coder::SizeType nqp;
       nqp = ::sfe_qrules::tet_deg3_qrule();
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::tet_deg3_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 4:
-      guard12 = true;
-      break;
-    case 5:
-      guard12 = true;
-      break;
-    case 6:
+    } else if (qd <= 5) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg5_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg5_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 6) {
+      coder::SizeType nqp;
       nqp = ::sfe_qrules::tet_deg6_qrule();
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::tet_deg6_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 7:
+    } else if (qd <= 7) {
+      coder::SizeType nqp;
       nqp = ::sfe_qrules::tet_deg7_qrule();
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::tet_deg7_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 8:
-      guard13 = true;
-      break;
-    case 9:
-      guard13 = true;
-      break;
-    case 10:
-      guard14 = true;
-      break;
-    case 11:
-      guard14 = true;
-      break;
-    default:
+    } else if (qd <= 9) {
+      coder::SizeType nqp;
+      //  The degree-8 quadrature rule KEAST9 has negative weights, so we do
+      nqp = ::sfe_qrules::tet_deg9_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg9_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 11) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg11_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg11_qrule(&cs[0], &(ws.data())[0]);
+    } else {
+      coder::SizeType nqp;
       if (qd > 13) {
         m2cWarnMsgIdAndTxt("tet_quadrules:UnsupportedDegree",
                            "Only support up to degree 13");
@@ -10173,48 +6918,47 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::tet_deg13_qrule(&cs[0], &(ws.data())[0]);
-      break;
     }
-    break;
-  case 7:
-    switch (qd) {
-    case 0:
-      guard15 = true;
-      break;
-    case 1:
-      guard15 = true;
-      break;
-    case 2:
-      guard16 = true;
-      break;
-    case 3:
-      guard16 = true;
-      break;
-    case 4:
-      guard17 = true;
-      break;
-    case 5:
-      guard17 = true;
-      break;
-    case 6:
-      guard18 = true;
-      break;
-    case 7:
-      guard18 = true;
-      break;
-    case 8:
-      guard19 = true;
-      break;
-    case 9:
-      guard19 = true;
-      break;
-    case 10:
-      guard20 = true;
-      break;
-    case 11:
-      guard20 = true;
-      break;
-    default:
+  } break;
+  case 7: {
+    if (qd <= 1) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg1_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg1_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 3) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg3_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg3_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 5) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg5_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg5_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 7) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg7_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg7_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 9) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg9_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg9_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 11) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg11_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg11_qrule(&cs[0], &(ws.data())[0]);
+    } else {
+      coder::SizeType nqp;
       if (qd > 13) {
         m2cWarnMsgIdAndTxt("hexa_quadrules:UnsupportedDegree",
                            "Only support up to degree 13");
@@ -10223,54 +6967,53 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::hexa_deg13_qrule(&cs[0], &(ws.data())[0]);
-      break;
     }
-    break;
-  case 6:
-    switch (qd) {
-    case 0:
-      guard21 = true;
-      break;
-    case 1:
-      guard21 = true;
-      break;
-    case 2:
+  } break;
+  case 6: {
+    if (qd <= 1) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg1_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg1_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 2) {
+      coder::SizeType nqp;
       nqp = ::sfe_qrules::prism_deg2_qrule();
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::prism_deg2_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 3:
+    } else if (qd <= 3) {
+      coder::SizeType nqp;
       nqp = ::sfe_qrules::prism_deg3_qrule();
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::prism_deg3_qrule(&cs[0], &(ws.data())[0]);
-      break;
-    case 4:
-      guard22 = true;
-      break;
-    case 5:
-      guard22 = true;
-      break;
-    case 6:
-      guard23 = true;
-      break;
-    case 7:
-      guard23 = true;
-      break;
-    case 8:
-      guard24 = true;
-      break;
-    case 9:
-      guard24 = true;
-      break;
-    case 10:
-      guard25 = true;
-      break;
-    case 11:
-      guard25 = true;
-      break;
-    default:
+    } else if (qd <= 5) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg5_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg5_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 7) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg7_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg7_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 9) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg9_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg9_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 11) {
+      coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg11_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg11_qrule(&cs[0], &(ws.data())[0]);
+    } else {
+      coder::SizeType nqp;
       if (qd > 13) {
         m2cWarnMsgIdAndTxt("prism_quadrules:UnsupportedDegree",
                            "Only support up to degree 13");
@@ -10279,164 +7022,12 @@ static void tabulate_quadratures(coder::SizeType etype, coder::SizeType qd,
       cs.set_size(nqp, 3);
       ws.set_size(nqp);
       ::sfe_qrules::prism_deg13_qrule(&cs[0], &(ws.data())[0]);
-      break;
     }
-    break;
+  } break;
   default:
     m2cAssert(shape == 5, "Unsupported element type");
     pyra_quadrules(qd, cs, ws);
     break;
-  }
-  if (guard25) {
-    nqp = ::sfe_qrules::prism_deg11_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::prism_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard24) {
-    nqp = ::sfe_qrules::prism_deg9_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::prism_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard23) {
-    nqp = ::sfe_qrules::prism_deg7_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::prism_deg7_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard22) {
-    nqp = ::sfe_qrules::prism_deg5_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::prism_deg5_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard21) {
-    nqp = ::sfe_qrules::prism_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::prism_deg1_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard20) {
-    nqp = ::sfe_qrules::hexa_deg11_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::hexa_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard19) {
-    nqp = ::sfe_qrules::hexa_deg9_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::hexa_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard18) {
-    nqp = ::sfe_qrules::hexa_deg7_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::hexa_deg7_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard17) {
-    nqp = ::sfe_qrules::hexa_deg5_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::hexa_deg5_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard16) {
-    nqp = ::sfe_qrules::hexa_deg3_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::hexa_deg3_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard15) {
-    nqp = ::sfe_qrules::hexa_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::hexa_deg1_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard14) {
-    nqp = ::sfe_qrules::tet_deg11_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::tet_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard13) {
-    //  The degree-8 quadrature rule KEAST9 has negative weights, so we do
-    nqp = ::sfe_qrules::tet_deg9_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::tet_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard12) {
-    nqp = ::sfe_qrules::tet_deg5_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::tet_deg5_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard11) {
-    nqp = ::sfe_qrules::tet_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::tet_deg1_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard10) {
-    nqp = ::sfe_qrules::quad_deg11_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard9) {
-    nqp = ::sfe_qrules::quad_deg9_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg9_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard8) {
-    nqp = ::sfe_qrules::quad_deg7_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg7_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard7) {
-    nqp = ::sfe_qrules::quad_deg5_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg5_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard6) {
-    nqp = ::sfe_qrules::quad_deg3_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg3_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard5) {
-    nqp = ::sfe_qrules::quad_deg1_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard4) {
-    nqp = ::sfe_qrules::tri_deg11_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg11_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard3) {
-    nqp = ::sfe_qrules::tri_deg7_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg7_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard2) {
-    nqp = ::sfe_qrules::tri_deg4_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg4_qrule(&cs[0], &(ws.data())[0]);
-  }
-  if (guard1) {
-    nqp = ::sfe_qrules::tri_deg1_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg1_qrule(&cs[0], &(ws.data())[0]);
   }
 }
 
@@ -10458,6 +7049,149 @@ static void tabulate_shapefuncs(coder::SizeType etype,
   default:
     sfe1_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
     break;
+  }
+}
+
+// tet_20 - Compute shape functions and their derivatives of tet_20
+static inline void tet_20(double xi, double eta, double zeta, double sfvals[20],
+                          double sdvals[60])
+{
+  ::sfe_sfuncs::tet_20_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_35 - Compute shape functions and their derivatives of tet_35
+static inline void tet_35(double xi, double eta, double zeta, double sfvals[35],
+                          double sdvals[105])
+{
+  ::sfe_sfuncs::tet_35_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_56 - Compute shape functions and their derivatives of tet_56
+static inline void tet_56(double xi, double eta, double zeta, double sfvals[56],
+                          double sdvals[168])
+{
+  ::sfe_sfuncs::tet_56_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_gl_20 - Compute shape functions and their derivatives of tet_gl_20
+static inline void tet_gl_20(double xi, double eta, double zeta,
+                             double sfvals[20], double sdvals[60])
+{
+  ::sfe_sfuncs::tet_gl_20_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_gl_35 - Compute shape functions and their derivatives of tet_gl_35
+static inline void tet_gl_35(double xi, double eta, double zeta,
+                             double sfvals[35], double sdvals[105])
+{
+  ::sfe_sfuncs::tet_gl_35_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_21 - Compute shape functions and their derivatives of tri_21
+static inline void tri_21(double xi, double eta, double sfvals[21],
+                          double sdvals[42])
+{
+  ::sfe_sfuncs::tri_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_28 - Compute shape functions and their derivatives of tri_28
+static inline void tri_28(double xi, double eta, double sfvals[28],
+                          double sdvals[56])
+{
+  ::sfe_sfuncs::tri_28_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_fek_15 - Compute shape functions and their derivatives of tri_fek_15
+static inline void tri_fek_15(double xi, double eta, double sfvals[15],
+                              double sdvals[30])
+{
+  ::sfe_sfuncs::tri_fek_15_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_fek_21 - Compute shape functions and their derivatives of tri_fek_21
+static inline void tri_fek_21(double xi, double eta, double sfvals[21],
+                              double sdvals[42])
+{
+  ::sfe_sfuncs::tri_fek_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_fek_28 - Compute shape functions and their derivatives of tri_fek_28
+static inline void tri_fek_28(double xi, double eta, double sfvals[28],
+                              double sdvals[56])
+{
+  ::sfe_sfuncs::tri_fek_28_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_gl_21 - Compute shape functions and their derivatives of tri_gl_21
+static inline void tri_gl_21(double xi, double eta, double sfvals[21],
+                             double sdvals[42])
+{
+  ::sfe_sfuncs::tri_gl_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+//  tri_quadrules - Obtain quadrature points and weights of a triangular
+static void tri_quadrules(coder::SizeType degree,
+                          ::coder::array<double, 2U> &cs,
+                          ::coder::array<double, 1U> &ws)
+{
+  if (degree <= 1) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg1_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 2) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg2_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg2_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 4) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg4_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg4_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 5) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg5_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg5_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 7) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg7_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg7_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 8) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg8_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg8_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 9) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg9_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg9_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 11) {
+    coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg11_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg11_qrule(&cs[0], &(ws.data())[0]);
+  } else {
+    coder::SizeType nqp;
+    if (degree > 13) {
+      m2cWarnMsgIdAndTxt("tri_quadrules:UnsupportedDegree",
+                         "Only support up to degree 13");
+    }
+    nqp = ::sfe_qrules::tri_deg13_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg13_qrule(&cs[0], &(ws.data())[0]);
   }
 }
 

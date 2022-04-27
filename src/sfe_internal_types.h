@@ -22,6 +22,7 @@ typedef int SizeType;
 #endif // CODER_ARRAY_SIZE_TYPE_DEFINED
 
 #include "coder_array.h"
+#define MAX_THREADS omp_get_max_threads()
 
 // Type Definitions
 namespace sfe {

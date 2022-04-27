@@ -11,6 +11,7 @@
 // Include files
 #include "coder_array.h"
 #include "m2c_lib.h"
+#include "omp.h"
 #include "rtwtypes.h"
 #include "sfe_internal_types.h"
 #include <cstddef>
