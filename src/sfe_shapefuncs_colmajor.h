@@ -192,6 +192,14 @@ static inline void prism_fek_75_sfunc(double xi, double eta, double zeta,
 static inline void prism_fek_75_sfunc(double xi, double eta, double zeta,
                                       double sfvals[75], double sdvals[225]);
 
+static inline void prism_gl_126_sfunc(double sfvals[378]);
+
+static inline void prism_gl_126_sfunc(double xi, double eta, double zeta,
+                                      double sfvals[126]);
+
+static inline void prism_gl_126_sfunc(double xi, double eta, double zeta,
+                                      double sfvals[126], double sdvals[378]);
+
 static inline void prism_gl_40_sfunc(double sfvals[120]);
 
 static inline void prism_gl_40_sfunc(double xi, double eta, double zeta,

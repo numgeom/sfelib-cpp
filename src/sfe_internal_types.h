@@ -2,7 +2,7 @@
 //
 // sfe_internal_types.h
 //
-// Code generation for function 'obtain_elemdegree'
+// Code generation for function 'sfe_bnd_init'
 //
 
 #ifndef SFE_INTERNAL_TYPES_H

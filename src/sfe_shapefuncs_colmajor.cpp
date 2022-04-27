@@ -1788,6 +1788,60 @@ void prism_fek_75_sfunc(double xi, double eta, double zeta, double sfvals[75],
   }
 }
 
+// prism_gl_126_sfunc - Quintic prismatic element with equidistant nodes
+void prism_gl_126_sfunc(double sfvals[378])
+{
+  double xietas[42];
+  double zetas[6];
+  ::sfe_sfuncs::tri_gl_21_sfunc(&xietas[0]);
+  ::sfe_sfuncs::bar_6_sfunc(&zetas[0]);
+  for (int m{0}; m < 126; m++) {
+    signed char i;
+    i = iv12[m];
+    sfvals[m] = xietas[i - 1];
+    sfvals[m + 126] = xietas[i + 20];
+    sfvals[m + 252] = zetas[iv13[m] - 1];
+  }
+}
+
+// prism_gl_126_sfunc - Quintic prismatic element with equidistant nodes
+void prism_gl_126_sfunc(double xi, double eta, double zeta, double sfvals[126])
+{
+  double N_xieta[21];
+  double N_zeta[6];
+  ::sfe_sfuncs::tri_gl_21_sfunc(xi, eta, &N_xieta[0]);
+  ::sfe_sfuncs::bar_6_sfunc(zeta, &N_zeta[0]);
+  for (int m{0}; m < 126; m++) {
+    sfvals[m] = N_xieta[iv12[m] - 1] * N_zeta[iv13[m] - 1];
+  }
+}
+
+// prism_gl_126_sfunc - Quintic prismatic element with equidistant nodes
+void prism_gl_126_sfunc(double xi, double eta, double zeta, double sfvals[126],
+                        double sdvals[378])
+{
+  double sdvals_xieta[42];
+  double N_xieta[21];
+  double N_zeta[6];
+  double sdvals_zeta[6];
+  ::sfe_sfuncs::tri_gl_21_sfunc(xi, eta, &N_xieta[0], &sdvals_xieta[0]);
+  ::sfe_sfuncs::bar_6_sfunc(zeta, &N_zeta[0], &sdvals_zeta[0]);
+  for (int m{0}; m < 126; m++) {
+    double b_sfvals_tmp;
+    double c_sfvals_tmp;
+    int sfvals_tmp;
+    signed char i;
+    i = iv12[m];
+    sfvals_tmp = iv13[m] - 1;
+    b_sfvals_tmp = N_zeta[sfvals_tmp];
+    c_sfvals_tmp = N_xieta[i - 1];
+    sfvals[m] = c_sfvals_tmp * b_sfvals_tmp;
+    sdvals[m] = sdvals_xieta[i - 1] * b_sfvals_tmp;
+    sdvals[m + 126] = sdvals_xieta[i + 20] * b_sfvals_tmp;
+    sdvals[m + 252] = c_sfvals_tmp * sdvals_zeta[sfvals_tmp];
+  }
+}
+
 // prism_gl_40_sfunc - Quadratic prismatic element with Gauss-Lobatto nodes
 void prism_gl_40_sfunc(double sfvals[120])
 {

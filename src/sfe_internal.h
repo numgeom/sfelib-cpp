@@ -26,15 +26,6 @@ struct SfeObject;
 namespace sfe {
 static inline coder::SizeType obtain_elemdegree(coder::SizeType etype);
 
-extern unsigned char obtain_facets(coder::SizeType etype);
-
-static inline void obtain_facets(coder::SizeType etype, signed char facetid,
-                                 unsigned char *ret, short lids_data[],
-                                 coder::SizeType lids_size[1]);
-
-static inline void obtain_natcoords(coder::SizeType etype,
-                                    ::coder::array<double, 2U> &natcoords);
-
 static inline void sfe_bnd_init(SfeObject *b_sfe, const int etypes_data[],
                                 const coder::SizeType etypes_size[1],
                                 signed char facetid,
