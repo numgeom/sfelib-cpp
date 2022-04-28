@@ -2,7 +2,7 @@
 //
 // sfe_shapefuncs_colmajor_types.h
 //
-// Code generation for function 'bar_2_sfunc'
+// Code generation for function 'bar_2_ncoords'
 //
 
 #ifndef SFE_SHAPEFUNCS_COLMAJOR_TYPES_H

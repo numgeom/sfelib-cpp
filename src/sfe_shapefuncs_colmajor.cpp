@@ -170,11 +170,11 @@ static const signed char iv29[9]{1, 1, 2, 2, 1, 3, 2, 3, 3};
 
 // Function Definitions
 namespace sfe_sfuncs {
-// bar_2_sfunc - Compute shape functions and their derivatives of bar_2
-void bar_2_sfunc(double sfvals[2])
+// bar_2_ncoords - Obtain nodal coordinates in master element for bar_2
+void bar_2_ncoords(double natcoords[2])
 {
-  sfvals[0] = 0.0;
-  sfvals[1] = 1.0;
+  natcoords[0] = 0.0;
+  natcoords[1] = 1.0;
 }
 
 // bar_2_sfunc - Compute shape functions and their derivatives of bar_2
@@ -193,12 +193,12 @@ void bar_2_sfunc(double xi, double sfvals[2], double sdvals[2])
   sdvals[1] = 1.0;
 }
 
-// bar_3_sfunc - Compute shape functions and their derivatives of bar_3
-void bar_3_sfunc(double sfvals[3])
+// bar_3_ncoords - Obtain nodal coordinates in master element for bar_3
+void bar_3_ncoords(double natcoords[3])
 {
-  sfvals[0] = 0.0;
-  sfvals[1] = 1.0;
-  sfvals[2] = 0.5;
+  natcoords[0] = 0.0;
+  natcoords[1] = 1.0;
+  natcoords[2] = 0.5;
 }
 
 // bar_3_sfunc - Compute shape functions and their derivatives of bar_3
@@ -230,13 +230,13 @@ void bar_3_sfunc(double xi, double sfvals[3], double sdvals[3])
   sdvals[2] = -8.0 * xi + 4.0;
 }
 
-// bar_4_sfunc - Compute shape functions and their derivatives of bar_4
-void bar_4_sfunc(double sfvals[4])
+// bar_4_ncoords - Obtain nodal coordinates in master element for bar_4
+void bar_4_ncoords(double natcoords[4])
 {
-  sfvals[0] = 0.0;
-  sfvals[1] = 1.0;
-  sfvals[2] = 0.33333333333333331;
-  sfvals[3] = 0.66666666666666663;
+  natcoords[0] = 0.0;
+  natcoords[1] = 1.0;
+  natcoords[2] = 0.33333333333333331;
+  natcoords[3] = 0.66666666666666663;
 }
 
 // bar_4_sfunc - Compute shape functions and their derivatives of bar_4
@@ -283,12 +283,12 @@ void bar_4_sfunc(double xi, double sfvals[4], double sdvals[4])
   sdvals[3] = (-t8 + 36.0 * xi) - 4.5;
 }
 
-// bar_5_sfunc - Compute shape functions and their derivatives of bar_5
-void bar_5_sfunc(double sfvals[5])
+// bar_5_ncoords - Obtain nodal coordinates in master element for bar_5
+void bar_5_ncoords(double natcoords[5])
 {
   static const double dv[5]{0.0, 1.0, 0.25, 0.5, 0.75};
   for (int i{0}; i < 5; i++) {
-    sfvals[i] = dv[i];
+    natcoords[i] = dv[i];
   }
 }
 
@@ -349,12 +349,12 @@ void bar_5_sfunc(double xi, double sfvals[5], double sdvals[5])
       ((t2 * 224.0 - t9) + -74.666666666666671 * xi) + 5.333333333333333;
 }
 
-// bar_6_sfunc - Compute shape functions and their derivatives of bar_6
-void bar_6_sfunc(double sfvals[6])
+// bar_6_ncoords - Obtain nodal coordinates in master element for bar_6
+void bar_6_ncoords(double natcoords[6])
 {
   static const double dv[6]{0.0, 1.0, 0.2, 0.4, 0.6, 0.8};
   for (int i{0}; i < 6; i++) {
-    sfvals[i] = dv[i];
+    natcoords[i] = dv[i];
   }
 }
 
@@ -464,8 +464,8 @@ void bar_6_sfunc(double xi, double sfvals[6], double sdvals[6])
               6.25;
 }
 
-// bar_7_sfunc - Compute shape functions and their derivatives of bar_7
-void bar_7_sfunc(double sfvals[7])
+// bar_7_ncoords - Obtain nodal coordinates in master element for bar_7
+void bar_7_ncoords(double natcoords[7])
 {
   static const double dv[7]{0.0,
                             1.0,
@@ -475,7 +475,7 @@ void bar_7_sfunc(double sfvals[7])
                             0.66666666666666663,
                             0.83333333333333337};
   for (int i{0}; i < 7; i++) {
-    sfvals[i] = dv[i];
+    natcoords[i] = dv[i];
   }
 }
 
@@ -583,13 +583,13 @@ void bar_7_sfunc(double xi, double sfvals[7], double sdvals[7])
       ((((t2 * 1404.0 - t3 * 4104.0) + t4 * 5184.0) - t13) + -194.4 * xi) + 7.2;
 }
 
-// bar_gl_4_sfunc - Compute shape functions and their derivatives of bar_gl_4
-void bar_gl_4_sfunc(double sfvals[4])
+// bar_gl_4_ncoords - Obtain nodal coordinates in master element for bar_gl_4
+void bar_gl_4_ncoords(double natcoords[4])
 {
-  sfvals[0] = 0.0;
-  sfvals[1] = 1.0;
-  sfvals[2] = 0.276393202250021;
-  sfvals[3] = 0.72360679774997894;
+  natcoords[0] = 0.0;
+  natcoords[1] = 1.0;
+  natcoords[2] = 0.276393202250021;
+  natcoords[3] = 0.72360679774997894;
 }
 
 // bar_gl_4_sfunc - Compute shape functions and their derivatives of bar_gl_4
@@ -634,13 +634,13 @@ void bar_gl_4_sfunc(double xi, double sfvals[4], double sdvals[4])
               3.0901699437494741;
 }
 
-// bar_gl_5_sfunc - Compute shape functions and their derivatives of bar_gl_5
-void bar_gl_5_sfunc(double sfvals[5])
+// bar_gl_5_ncoords - Obtain nodal coordinates in master element for bar_gl_5
+void bar_gl_5_ncoords(double natcoords[5])
 {
   static const double dv[5]{0.0, 1.0, 0.1726731646460114, 0.5,
                             0.82732683535398854};
   for (int i{0}; i < 5; i++) {
-    sfvals[i] = dv[i];
+    natcoords[i] = dv[i];
   }
 }
 
@@ -705,8 +705,8 @@ void bar_gl_5_sfunc(double xi, double sfvals[5], double sdvals[5])
               2.820328355884854;
 }
 
-// bar_gl_6_sfunc - Compute shape functions and their derivatives of bar_gl_6
-void bar_gl_6_sfunc(double sfvals[6])
+// bar_gl_6_ncoords - Obtain nodal coordinates in master element for bar_gl_6
+void bar_gl_6_ncoords(double natcoords[6])
 {
   static const double dv[6]{0.0,
                             1.0,
@@ -715,7 +715,7 @@ void bar_gl_6_sfunc(double sfvals[6])
                             0.64261575824032258,
                             0.88252766196473231};
   for (int i{0}; i < 6; i++) {
-    sfvals[i] = dv[i];
+    natcoords[i] = dv[i];
   }
 }
 
@@ -815,8 +815,8 @@ void bar_gl_6_sfunc(double xi, double sfvals[6], double sdvals[6])
               2.699826628380976;
 }
 
-// bar_gl_7_sfunc - Compute shape functions and their derivatives of bar_gl_7
-void bar_gl_7_sfunc(double sfvals[7])
+// bar_gl_7_ncoords - Obtain nodal coordinates in master element for bar_gl_7
+void bar_gl_7_ncoords(double natcoords[7])
 {
   static const double dv[7]{0.0,
                             1.0,
@@ -826,7 +826,7 @@ void bar_gl_7_sfunc(double sfvals[7])
                             0.73442439673535709,
                             0.91511194813928343};
   for (int i{0}; i < 7; i++) {
-    sfvals[i] = dv[i];
+    natcoords[i] = dv[i];
   }
 }
 
@@ -961,15 +961,15 @@ void bar_gl_7_sfunc(double xi, double sfvals[7], double sdvals[7])
               2.634746871404869;
 }
 
-// hexa_125_sfunc - Triquartic hexahedral element with equidistant points
-void hexa_125_sfunc(double sfvals[375])
+// hexa_125_ncoords - Obtain nodal coordinates in master element for hexa_125
+void hexa_125_ncoords(double natcoords[375])
 {
   double xis[5];
-  ::sfe_sfuncs::bar_5_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_5_ncoords(&xis[0]);
   for (int m{0}; m < 125; m++) {
-    sfvals[m] = xis[iv[m] - 1];
-    sfvals[m + 125] = xis[iv1[m] - 1];
-    sfvals[m + 250] = xis[iv2[m] - 1];
+    natcoords[m] = xis[iv[m] - 1];
+    natcoords[m + 125] = xis[iv1[m] - 1];
+    natcoords[m + 250] = xis[iv2[m] - 1];
   }
 }
 
@@ -1022,15 +1022,15 @@ void hexa_125_sfunc(double xi, double eta, double zeta, double sfvals[125],
   }
 }
 
-// hexa_216_sfunc - Triquintic hexahedral element with equidistant points
-void hexa_216_sfunc(double sfvals[648])
+// hexa_216_ncoords - Obtain nodal coordinates in master element for hexa_216
+void hexa_216_ncoords(double natcoords[648])
 {
   double xis[6];
-  ::sfe_sfuncs::bar_6_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_6_ncoords(&xis[0]);
   for (int m{0}; m < 216; m++) {
-    sfvals[m] = xis[iv3[m] - 1];
-    sfvals[m + 216] = xis[iv4[m] - 1];
-    sfvals[m + 432] = xis[iv5[m] - 1];
+    natcoords[m] = xis[iv3[m] - 1];
+    natcoords[m + 216] = xis[iv4[m] - 1];
+    natcoords[m + 432] = xis[iv5[m] - 1];
   }
 }
 
@@ -1083,15 +1083,15 @@ void hexa_216_sfunc(double xi, double eta, double zeta, double sfvals[216],
   }
 }
 
-// hexa_27_sfunc - Triquadratic hexahedral element with equidistant nodes
-void hexa_27_sfunc(double sfvals[81])
+// hexa_27_ncoords - Obtain nodal coordinates in master element for hexa_27
+void hexa_27_ncoords(double natcoords[81])
 {
   double xis[3];
-  ::sfe_sfuncs::bar_3_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_3_ncoords(&xis[0]);
   for (int m{0}; m < 27; m++) {
-    sfvals[m] = xis[iv6[m] - 1];
-    sfvals[m + 27] = xis[iv7[m] - 1];
-    sfvals[m + 54] = xis[iv8[m] - 1];
+    natcoords[m] = xis[iv6[m] - 1];
+    natcoords[m + 27] = xis[iv7[m] - 1];
+    natcoords[m + 54] = xis[iv8[m] - 1];
   }
 }
 
@@ -1144,15 +1144,15 @@ void hexa_27_sfunc(double xi, double eta, double zeta, double sfvals[27],
   }
 }
 
-// hexa_64_sfunc - Tricubic hexahedral element with equidistant nodes
-void hexa_64_sfunc(double sfvals[192])
+// hexa_64_ncoords - Obtain nodal coordinates in master element for hexa_64
+void hexa_64_ncoords(double natcoords[192])
 {
   double xis[4];
-  ::sfe_sfuncs::bar_4_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_4_ncoords(&xis[0]);
   for (int m{0}; m < 64; m++) {
-    sfvals[m] = xis[iv9[m] - 1];
-    sfvals[m + 64] = xis[iv10[m] - 1];
-    sfvals[m + 128] = xis[iv11[m] - 1];
+    natcoords[m] = xis[iv9[m] - 1];
+    natcoords[m + 64] = xis[iv10[m] - 1];
+    natcoords[m + 128] = xis[iv11[m] - 1];
   }
 }
 
@@ -1205,18 +1205,18 @@ void hexa_64_sfunc(double xi, double eta, double zeta, double sfvals[64],
   }
 }
 
-// hexa_8_sfunc - Trilinear hexahedral element
-void hexa_8_sfunc(double sfvals[24])
+// hexa_8_ncoords - Obtain nodal coordinates in master element for hexa_8
+void hexa_8_ncoords(double natcoords[24])
 {
   static const signed char b_iv[8]{1, 2, 2, 1, 1, 2, 2, 1};
   static const signed char b_iv1[8]{1, 1, 2, 2, 1, 1, 2, 2};
   static const signed char b_iv2[8]{1, 1, 1, 1, 2, 2, 2, 2};
   double xis[2];
-  ::sfe_sfuncs::bar_2_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_2_ncoords(&xis[0]);
   for (int m{0}; m < 8; m++) {
-    sfvals[m] = xis[b_iv[m] - 1];
-    sfvals[m + 8] = xis[b_iv1[m] - 1];
-    sfvals[m + 16] = xis[b_iv2[m] - 1];
+    natcoords[m] = xis[b_iv[m] - 1];
+    natcoords[m + 8] = xis[b_iv1[m] - 1];
+    natcoords[m + 16] = xis[b_iv2[m] - 1];
   }
 }
 
@@ -1275,15 +1275,15 @@ void hexa_8_sfunc(double xi, double eta, double zeta, double sfvals[8],
   }
 }
 
-// hexa_gl_125_sfunc - Triquartic hexahedral element with Gauss-Lobatto points
-void hexa_gl_125_sfunc(double sfvals[375])
+// hexa_gl_125_ncoords - Obtain nodal coordinates in master element for
+void hexa_gl_125_ncoords(double natcoords[375])
 {
   double xis[5];
-  ::sfe_sfuncs::bar_gl_5_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_gl_5_ncoords(&xis[0]);
   for (int m{0}; m < 125; m++) {
-    sfvals[m] = xis[iv[m] - 1];
-    sfvals[m + 125] = xis[iv1[m] - 1];
-    sfvals[m + 250] = xis[iv2[m] - 1];
+    natcoords[m] = xis[iv[m] - 1];
+    natcoords[m + 125] = xis[iv1[m] - 1];
+    natcoords[m + 250] = xis[iv2[m] - 1];
   }
 }
 
@@ -1336,15 +1336,15 @@ void hexa_gl_125_sfunc(double xi, double eta, double zeta, double sfvals[125],
   }
 }
 
-// hexa_gl_216_sfunc - Triquintic hexahedral element with equidistant points
-void hexa_gl_216_sfunc(double sfvals[648])
+// hexa_gl_216_ncoords - Obtain nodal coordinates in master element for
+void hexa_gl_216_ncoords(double natcoords[648])
 {
   double xis[6];
-  ::sfe_sfuncs::bar_gl_6_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_gl_6_ncoords(&xis[0]);
   for (int m{0}; m < 216; m++) {
-    sfvals[m] = xis[iv3[m] - 1];
-    sfvals[m + 216] = xis[iv4[m] - 1];
-    sfvals[m + 432] = xis[iv5[m] - 1];
+    natcoords[m] = xis[iv3[m] - 1];
+    natcoords[m + 216] = xis[iv4[m] - 1];
+    natcoords[m + 432] = xis[iv5[m] - 1];
   }
 }
 
@@ -1397,15 +1397,15 @@ void hexa_gl_216_sfunc(double xi, double eta, double zeta, double sfvals[216],
   }
 }
 
-// hexa_gl_64_sfunc - Tricubic hexahedral element with Gauss-Lobatto nodes
-void hexa_gl_64_sfunc(double sfvals[192])
+// hexa_gl_64_ncoords - Obtain nodal coordinates in master element for
+void hexa_gl_64_ncoords(double natcoords[192])
 {
   double xis[4];
-  ::sfe_sfuncs::bar_gl_4_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_gl_4_ncoords(&xis[0]);
   for (int m{0}; m < 64; m++) {
-    sfvals[m] = xis[iv9[m] - 1];
-    sfvals[m + 64] = xis[iv10[m] - 1];
-    sfvals[m + 128] = xis[iv11[m] - 1];
+    natcoords[m] = xis[iv9[m] - 1];
+    natcoords[m + 64] = xis[iv10[m] - 1];
+    natcoords[m + 128] = xis[iv11[m] - 1];
   }
 }
 
@@ -1458,19 +1458,19 @@ void hexa_gl_64_sfunc(double xi, double eta, double zeta, double sfvals[64],
   }
 }
 
-// prism_126_sfunc - Quintic prismatic element with equidistant nodes
-void prism_126_sfunc(double sfvals[378])
+// prism_126_ncoords - Obtain nodal coordinates in master element for
+void prism_126_ncoords(double natcoords[378])
 {
   double xietas[42];
   double zetas[6];
-  ::sfe_sfuncs::tri_21_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_6_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_21_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_6_ncoords(&zetas[0]);
   for (int m{0}; m < 126; m++) {
     signed char i;
     i = iv12[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 126] = xietas[i + 20];
-    sfvals[m + 252] = zetas[iv13[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 126] = xietas[i + 20];
+    natcoords[m + 252] = zetas[iv13[m] - 1];
   }
 }
 
@@ -1512,19 +1512,19 @@ void prism_126_sfunc(double xi, double eta, double zeta, double sfvals[126],
   }
 }
 
-// prism_18_sfunc - Quadratic prismatic element
-void prism_18_sfunc(double sfvals[54])
+// prism_18_ncoords - Obtain nodal coordinates in master element for prism_18
+void prism_18_ncoords(double natcoords[54])
 {
   double xietas[12];
   double zetas[3];
-  ::sfe_sfuncs::tri_6_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_3_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_6_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_3_ncoords(&zetas[0]);
   for (int m{0}; m < 18; m++) {
     signed char i;
     i = iv14[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 18] = xietas[i + 5];
-    sfvals[m + 36] = zetas[iv15[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 18] = xietas[i + 5];
+    natcoords[m + 36] = zetas[iv15[m] - 1];
   }
 }
 
@@ -1566,19 +1566,19 @@ void prism_18_sfunc(double xi, double eta, double zeta, double sfvals[18],
   }
 }
 
-// prism_40_sfunc - Cubic prismatic element
-void prism_40_sfunc(double sfvals[120])
+// prism_40_ncoords - Obtain nodal coordinates in master element for prism_40
+void prism_40_ncoords(double natcoords[120])
 {
   double xietas[20];
   double zetas[4];
-  ::sfe_sfuncs::tri_10_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_4_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_10_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_4_ncoords(&zetas[0]);
   for (int m{0}; m < 40; m++) {
     signed char i;
     i = iv16[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 40] = xietas[i + 9];
-    sfvals[m + 80] = zetas[iv17[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 40] = xietas[i + 9];
+    natcoords[m + 80] = zetas[iv17[m] - 1];
   }
 }
 
@@ -1620,21 +1620,21 @@ void prism_40_sfunc(double xi, double eta, double zeta, double sfvals[40],
   }
 }
 
-// prism_6_sfunc - Linear prismatic element
-void prism_6_sfunc(double sfvals[18])
+// prism_6_ncoords - Obtain nodal coordinates in master element for prism_6
+void prism_6_ncoords(double natcoords[18])
 {
   static const signed char b_iv[6]{1, 2, 3, 1, 2, 3};
   static const signed char b_iv1[6]{1, 1, 1, 2, 2, 2};
   double xietas[6];
   double zetas[2];
-  ::sfe_sfuncs::tri_3_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_2_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_3_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_2_ncoords(&zetas[0]);
   for (int m{0}; m < 6; m++) {
     signed char i;
     i = b_iv[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 6] = xietas[i + 2];
-    sfvals[m + 12] = zetas[b_iv1[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 6] = xietas[i + 2];
+    natcoords[m + 12] = zetas[b_iv1[m] - 1];
   }
 }
 
@@ -1680,19 +1680,19 @@ void prism_6_sfunc(double xi, double eta, double zeta, double sfvals[6],
   }
 }
 
-// prism_75_sfunc - Quartic prismatic element with equidistant nodes
-void prism_75_sfunc(double sfvals[225])
+// prism_75_ncoords - Obtain nodal coordinates in master element for prism_75
+void prism_75_ncoords(double natcoords[225])
 {
   double xietas[30];
   double zetas[5];
-  ::sfe_sfuncs::tri_15_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_5_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_15_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_5_ncoords(&zetas[0]);
   for (int m{0}; m < 75; m++) {
     signed char i;
     i = iv18[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 75] = xietas[i + 14];
-    sfvals[m + 150] = zetas[iv19[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 75] = xietas[i + 14];
+    natcoords[m + 150] = zetas[iv19[m] - 1];
   }
 }
 
@@ -1734,19 +1734,19 @@ void prism_75_sfunc(double xi, double eta, double zeta, double sfvals[75],
   }
 }
 
-// prism_fek_75_sfunc - Quartic prismatic element with Fekete points
-void prism_fek_75_sfunc(double sfvals[225])
+// prism_fek_75_ncoords - Obtain nodal coordinates in master element for
+void prism_fek_75_ncoords(double natcoords[225])
 {
   double xietas[30];
   double zetas[5];
-  ::sfe_sfuncs::tri_fek_15_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_gl_5_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_fek_15_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_gl_5_ncoords(&zetas[0]);
   for (int m{0}; m < 75; m++) {
     signed char i;
     i = iv18[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 75] = xietas[i + 14];
-    sfvals[m + 150] = zetas[iv19[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 75] = xietas[i + 14];
+    natcoords[m + 150] = zetas[iv19[m] - 1];
   }
 }
 
@@ -1788,19 +1788,19 @@ void prism_fek_75_sfunc(double xi, double eta, double zeta, double sfvals[75],
   }
 }
 
-// prism_gl_126_sfunc - Quintic prismatic element with equidistant nodes
-void prism_gl_126_sfunc(double sfvals[378])
+// prism_gl_126_ncoords - Obtain nodal coordinates in master element for
+void prism_gl_126_ncoords(double natcoords[378])
 {
   double xietas[42];
   double zetas[6];
-  ::sfe_sfuncs::tri_gl_21_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_6_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_gl_21_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_6_ncoords(&zetas[0]);
   for (int m{0}; m < 126; m++) {
     signed char i;
     i = iv12[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 126] = xietas[i + 20];
-    sfvals[m + 252] = zetas[iv13[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 126] = xietas[i + 20];
+    natcoords[m + 252] = zetas[iv13[m] - 1];
   }
 }
 
@@ -1842,19 +1842,19 @@ void prism_gl_126_sfunc(double xi, double eta, double zeta, double sfvals[126],
   }
 }
 
-// prism_gl_40_sfunc - Quadratic prismatic element with Gauss-Lobatto nodes
-void prism_gl_40_sfunc(double sfvals[120])
+// prism_gl_40_ncoords - Obtain nodal coordinates in master element for
+void prism_gl_40_ncoords(double natcoords[120])
 {
   double xietas[20];
   double zetas[4];
-  ::sfe_sfuncs::tri_gl_10_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_gl_4_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_gl_10_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_gl_4_ncoords(&zetas[0]);
   for (int m{0}; m < 40; m++) {
     signed char i;
     i = iv16[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 40] = xietas[i + 9];
-    sfvals[m + 80] = zetas[iv17[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 40] = xietas[i + 9];
+    natcoords[m + 80] = zetas[iv17[m] - 1];
   }
 }
 
@@ -1896,19 +1896,19 @@ void prism_gl_40_sfunc(double xi, double eta, double zeta, double sfvals[40],
   }
 }
 
-// prism_gl_75_sfunc - Quartic prismatic element with Gauss-Lobatto nodes
-void prism_gl_75_sfunc(double sfvals[225])
+// prism_gl_75_ncoords - Obtain nodal coordinates in master element for
+void prism_gl_75_ncoords(double natcoords[225])
 {
   double xietas[30];
   double zetas[5];
-  ::sfe_sfuncs::tri_gl_15_sfunc(&xietas[0]);
-  ::sfe_sfuncs::bar_gl_5_sfunc(&zetas[0]);
+  ::sfe_sfuncs::tri_gl_15_ncoords(&xietas[0]);
+  ::sfe_sfuncs::bar_gl_5_ncoords(&zetas[0]);
   for (int m{0}; m < 75; m++) {
     signed char i;
     i = iv18[m];
-    sfvals[m] = xietas[i - 1];
-    sfvals[m + 75] = xietas[i + 14];
-    sfvals[m + 150] = zetas[iv19[m] - 1];
+    natcoords[m] = xietas[i - 1];
+    natcoords[m + 75] = xietas[i + 14];
+    natcoords[m + 150] = zetas[iv19[m] - 1];
   }
 }
 
@@ -1950,14 +1950,14 @@ void prism_gl_75_sfunc(double xi, double eta, double zeta, double sfvals[75],
   }
 }
 
-void pyra_14_sfunc(double sfvals[42])
+void pyra_14_ncoords(double natcoords[42])
 {
   static const double dv[42]{-1.0, 1.0,  1.0, -1.0, 0.0, 0.0,  1.0,  0.0, -1.0,
                              -0.5, 0.5,  0.5, -0.5, 0.0, -1.0, -1.0, 1.0, 1.0,
                              0.0,  -1.0, 0.0, 1.0,  0.0, -0.5, -0.5, 0.5, 0.5,
                              0.0,  0.0,  0.0, 0.0,  0.0, 1.0,  0.0,  0.0, 0.0,
                              0.0,  0.5,  0.5, 0.5,  0.5, 0.0};
-  std::copy(&dv[0], &dv[42], &sfvals[0]);
+  std::copy(&dv[0], &dv[42], &natcoords[0]);
 }
 
 // pyra_14_sfunc - Compute shape functions and their derivatives of pyra_14
@@ -2211,7 +2211,7 @@ void pyra_14_sfunc(double xi, double eta, double zeta, double sfvals[14],
   sdvals[41] = (t6 - t63 * 2.0) - 2.0;
 }
 
-void pyra_30_sfunc(double sfvals[90])
+void pyra_30_ncoords(double natcoords[90])
 {
   static const double dv[90]{-1.0,
                              1.0,
@@ -2303,7 +2303,7 @@ void pyra_30_sfunc(double sfvals[90])
                              0.33333333333333331,
                              0.33333333333333331,
                              0.33333333333333331};
-  std::copy(&dv[0], &dv[90], &sfvals[0]);
+  std::copy(&dv[0], &dv[90], &natcoords[0]);
 }
 
 // pyra_30_sfunc - Compute shape functions and their derivatives of pyra_30
@@ -3505,7 +3505,7 @@ void pyra_30_sfunc(double xi, double eta, double zeta, double sfvals[30],
                6.75;
 }
 
-void pyra_55_sfunc(double sfvals[165])
+void pyra_55_ncoords(double natcoords[165])
 {
   static const double dv[165]{
       -1.0,  1.0,   1.0,  -1.0,  0.0,   -0.5,  0.0,   0.5,   1.0,   1.0,   1.0,
@@ -3523,7 +3523,7 @@ void pyra_55_sfunc(double sfvals[165])
       0.75,  0.25,  0.5,  0.75,  0.25,  0.5,   0.75,  0.0,   0.0,   0.0,   0.0,
       0.0,   0.0,   0.0,  0.0,   0.0,   0.25,  0.25,  0.5,   0.25,  0.25,  0.5,
       0.25,  0.25,  0.5,  0.25,  0.25,  0.5,   0.25,  0.25,  0.25,  0.25,  0.5};
-  std::copy(&dv[0], &dv[165], &sfvals[0]);
+  std::copy(&dv[0], &dv[165], &natcoords[0]);
 }
 
 // pyra_55_sfunc - Compute shape functions and their derivatives of pyra_55
@@ -7732,13 +7732,13 @@ void pyra_55_sfunc(double xi, double eta, double zeta, double sfvals[55],
       8.0;
 }
 
-// pyra_5_sfunc - Compute shape functions and their derivatives of pyra_5
-void pyra_5_sfunc(double sfvals[15])
+// pyra_5_ncoords - Obtain nodal coordinates in master element for pyra_5
+void pyra_5_ncoords(double natcoords[15])
 {
   static const signed char b_iv[15]{-1, 1, 1, -1, 0, -1, -1, 1,
                                     1,  0, 0, 0,  0, 0,  1};
   for (int i{0}; i < 15; i++) {
-    sfvals[i] = b_iv[i];
+    natcoords[i] = b_iv[i];
   }
 }
 
@@ -7820,7 +7820,7 @@ void pyra_5_sfunc(double xi, double eta, double zeta, double sfvals[5],
   sdvals[14] = 1.0;
 }
 
-void pyra_91_sfunc(double sfvals[273])
+void pyra_91_ncoords(double natcoords[273])
 {
   static const double dv[273]{
       -1.0, 1.0,  1.0,  -1.0, 0.0,  -0.6, -0.2, 0.2,  0.6,  1.0,  1.0,  1.0,
@@ -7846,7 +7846,7 @@ void pyra_91_sfunc(double sfvals[273])
       0.4,  0.2,  0.2,  0.2,  0.4,  0.6,  0.4,  0.2,  0.2,  0.2,  0.4,  0.6,
       0.4,  0.2,  0.2,  0.2,  0.4,  0.6,  0.4,  0.2,  0.2,  0.2,  0.2,  0.2,
       0.2,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.6,  0.2};
-  std::copy(&dv[0], &dv[273], &sfvals[0]);
+  std::copy(&dv[0], &dv[273], &natcoords[0]);
 }
 
 // pyra_91_sfunc - Compute shape functions and their derivatives of pyra_91
@@ -24836,7 +24836,7 @@ void pyra_91_sfunc(double xi, double eta, double zeta, double sfvals[91],
        14.32291666666667);
 }
 
-void pyra_fek_55_sfunc(double sfvals[165])
+void pyra_fek_55_ncoords(double natcoords[165])
 {
   static const double dv[165]{-1.0,
                               1.0,
@@ -25003,7 +25003,7 @@ void pyra_fek_55_sfunc(double sfvals[165])
                               0.23183358740807039,
                               0.23183358740807039,
                               0.57266760543509443};
-  std::copy(&dv[0], &dv[165], &sfvals[0]);
+  std::copy(&dv[0], &dv[165], &natcoords[0]);
 }
 
 // pyra_fek_55_sfunc - Compute shape functions and their derivatives of
@@ -30831,7 +30831,7 @@ void pyra_fek_55_sfunc(double xi, double eta, double zeta, double sfvals[55],
        6.5042791448492);
 }
 
-void pyra_gl_30_sfunc(double sfvals[90])
+void pyra_gl_30_ncoords(double natcoords[90])
 {
   static const double dv[90]{-1.0,
                              1.0,
@@ -30923,7 +30923,7 @@ void pyra_gl_30_sfunc(double sfvals[90])
                              0.33333333333333331,
                              0.33333333333333331,
                              0.39371980676328511};
-  std::copy(&dv[0], &dv[90], &sfvals[0]);
+  std::copy(&dv[0], &dv[90], &natcoords[0]);
 }
 
 // pyra_gl_30_sfunc - Compute shape functions and their derivatives of
@@ -32469,7 +32469,7 @@ void pyra_gl_30_sfunc(double xi, double eta, double zeta, double sfvals[30],
       6.909807936635147;
 }
 
-void pyra_gl_55_sfunc(double sfvals[165])
+void pyra_gl_55_ncoords(double natcoords[165])
 {
   static const double dv[165]{-1.0,
                               1.0,
@@ -32636,7 +32636,7 @@ void pyra_gl_55_sfunc(double sfvals[165])
                               0.18503488185862371,
                               0.18503488185862371,
                               0.52557206442931081};
-  std::copy(&dv[0], &dv[165], &sfvals[0]);
+  std::copy(&dv[0], &dv[165], &natcoords[0]);
 }
 
 // pyra_gl_55_sfunc - Compute shape functions and their derivatives of
@@ -38471,14 +38471,14 @@ void pyra_gl_55_sfunc(double xi, double eta, double zeta, double sfvals[55],
        4.5932098587042214);
 }
 
-// quad_16_sfunc - Bicubic quadrilateral element with equidistant points
-void quad_16_sfunc(double sfvals[32])
+// quad_16_ncoords - Obtain nodal coordinates in master element for quad_16
+void quad_16_ncoords(double natcoords[32])
 {
   double xis[4];
-  ::sfe_sfuncs::bar_4_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_4_ncoords(&xis[0]);
   for (int m{0}; m < 16; m++) {
-    sfvals[m] = xis[iv20[m] - 1];
-    sfvals[m + 16] = xis[iv21[m] - 1];
+    natcoords[m] = xis[iv20[m] - 1];
+    natcoords[m + 16] = xis[iv21[m] - 1];
   }
 }
 
@@ -38518,14 +38518,14 @@ void quad_16_sfunc(double xi, double eta, double sfvals[16], double sdvals[32])
   }
 }
 
-// quad_25_sfunc - Biquartic quadrilateral element with equidistant points
-void quad_25_sfunc(double sfvals[50])
+// quad_25_ncoords - Obtain nodal coordinates in master element for quad_25
+void quad_25_ncoords(double natcoords[50])
 {
   double xis[5];
-  ::sfe_sfuncs::bar_5_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_5_ncoords(&xis[0]);
   for (int m{0}; m < 25; m++) {
-    sfvals[m] = xis[iv22[m] - 1];
-    sfvals[m + 25] = xis[iv23[m] - 1];
+    natcoords[m] = xis[iv22[m] - 1];
+    natcoords[m + 25] = xis[iv23[m] - 1];
   }
 }
 
@@ -38565,14 +38565,14 @@ void quad_25_sfunc(double xi, double eta, double sfvals[25], double sdvals[50])
   }
 }
 
-// quad_36_sfunc   Biquintic quadrilateral element with equidistant points
-void quad_36_sfunc(double sfvals[72])
+// quad_36_ncoords - Obtain nodal coordinates in master element for quad_36
+void quad_36_ncoords(double natcoords[72])
 {
   double xis[6];
-  ::sfe_sfuncs::bar_6_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_6_ncoords(&xis[0]);
   for (int m{0}; m < 36; m++) {
-    sfvals[m] = xis[iv24[m] - 1];
-    sfvals[m + 36] = xis[iv25[m] - 1];
+    natcoords[m] = xis[iv24[m] - 1];
+    natcoords[m + 36] = xis[iv25[m] - 1];
   }
 }
 
@@ -38612,14 +38612,14 @@ void quad_36_sfunc(double xi, double eta, double sfvals[36], double sdvals[72])
   }
 }
 
-// quad_49_sfunc - Bisextic quadrilateral element with equidistant points
-void quad_49_sfunc(double sfvals[98])
+// quad_49_ncoords - Obtain nodal coordinates in master element for quad_49
+void quad_49_ncoords(double natcoords[98])
 {
   double xis[7];
-  ::sfe_sfuncs::bar_7_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_7_ncoords(&xis[0]);
   for (int m{0}; m < 49; m++) {
-    sfvals[m] = xis[iv26[m] - 1];
-    sfvals[m + 49] = xis[iv27[m] - 1];
+    natcoords[m] = xis[iv26[m] - 1];
+    natcoords[m + 49] = xis[iv27[m] - 1];
   }
 }
 
@@ -38659,19 +38659,19 @@ void quad_49_sfunc(double xi, double eta, double sfvals[49], double sdvals[98])
   }
 }
 
-// quad_4_sfunc_sfunc - Bilinear quadrilateral element
-void quad_4_sfunc(double sfvals[8])
+// quad_4_ncoords - Obtain nodal coordinates in master element for quad_4
+void quad_4_ncoords(double natcoords[8])
 {
   double xis[2];
-  ::sfe_sfuncs::bar_2_sfunc(&xis[0]);
-  sfvals[0] = xis[0];
-  sfvals[4] = xis[0];
-  sfvals[1] = xis[1];
-  sfvals[5] = xis[0];
-  sfvals[2] = xis[1];
-  sfvals[6] = xis[1];
-  sfvals[3] = xis[0];
-  sfvals[7] = xis[1];
+  ::sfe_sfuncs::bar_2_ncoords(&xis[0]);
+  natcoords[0] = xis[0];
+  natcoords[4] = xis[0];
+  natcoords[1] = xis[1];
+  natcoords[5] = xis[0];
+  natcoords[2] = xis[1];
+  natcoords[6] = xis[1];
+  natcoords[3] = xis[0];
+  natcoords[7] = xis[1];
 }
 
 // quad_4_sfunc_sfunc - Bilinear quadrilateral element
@@ -38710,14 +38710,14 @@ void quad_4_sfunc(double xi, double eta, double sfvals[4], double sdvals[8])
   sdvals[7] = N_xi[0] * sdvals_eta[1];
 }
 
-// quad_9_sfunc - Bilinear quadrilateral element
-void quad_9_sfunc(double sfvals[18])
+// quad_9_ncoords - Obtain nodal coordinates in master element for quad_9
+void quad_9_ncoords(double natcoords[18])
 {
   double xis[3];
-  ::sfe_sfuncs::bar_3_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_3_ncoords(&xis[0]);
   for (int m{0}; m < 9; m++) {
-    sfvals[m] = xis[iv28[m] - 1];
-    sfvals[m + 9] = xis[iv29[m] - 1];
+    natcoords[m] = xis[iv28[m] - 1];
+    natcoords[m + 9] = xis[iv29[m] - 1];
   }
 }
 
@@ -38757,14 +38757,14 @@ void quad_9_sfunc(double xi, double eta, double sfvals[9], double sdvals[18])
   }
 }
 
-// quad_gl_16_sfunc - Bicubic quadrilateral element with Gauss-Lobatto points
-void quad_gl_16_sfunc(double sfvals[32])
+// quad_gl_16_ncoords - Obtain nodal coordinates in master element for
+void quad_gl_16_ncoords(double natcoords[32])
 {
   double xis[4];
-  ::sfe_sfuncs::bar_gl_4_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_gl_4_ncoords(&xis[0]);
   for (int m{0}; m < 16; m++) {
-    sfvals[m] = xis[iv20[m] - 1];
-    sfvals[m + 16] = xis[iv21[m] - 1];
+    natcoords[m] = xis[iv20[m] - 1];
+    natcoords[m + 16] = xis[iv21[m] - 1];
   }
 }
 
@@ -38805,14 +38805,14 @@ void quad_gl_16_sfunc(double xi, double eta, double sfvals[16],
   }
 }
 
-// quad_gl_25_sfunc - Biquartic quadrilateral element with Gauss-Lobatto
-void quad_gl_25_sfunc(double sfvals[50])
+// quad_gl_25_ncoords - Obtain nodal coordinates in master element for
+void quad_gl_25_ncoords(double natcoords[50])
 {
   double xis[5];
-  ::sfe_sfuncs::bar_gl_5_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_gl_5_ncoords(&xis[0]);
   for (int m{0}; m < 25; m++) {
-    sfvals[m] = xis[iv22[m] - 1];
-    sfvals[m + 25] = xis[iv23[m] - 1];
+    natcoords[m] = xis[iv22[m] - 1];
+    natcoords[m + 25] = xis[iv23[m] - 1];
   }
 }
 
@@ -38853,14 +38853,14 @@ void quad_gl_25_sfunc(double xi, double eta, double sfvals[25],
   }
 }
 
-// quad_gl_36_sfunc - Biquintic quadrilateral element with equidistant points
-void quad_gl_36_sfunc(double sfvals[72])
+// quad_gl_36_ncoords - Obtain nodal coordinates in master element for
+void quad_gl_36_ncoords(double natcoords[72])
 {
   double xis[6];
-  ::sfe_sfuncs::bar_gl_6_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_gl_6_ncoords(&xis[0]);
   for (int m{0}; m < 36; m++) {
-    sfvals[m] = xis[iv24[m] - 1];
-    sfvals[m + 36] = xis[iv25[m] - 1];
+    natcoords[m] = xis[iv24[m] - 1];
+    natcoords[m + 36] = xis[iv25[m] - 1];
   }
 }
 
@@ -38901,14 +38901,14 @@ void quad_gl_36_sfunc(double xi, double eta, double sfvals[36],
   }
 }
 
-// quad_gl_49_sfunc - Bisextic quadrilateral element with equidistant points
-void quad_gl_49_sfunc(double sfvals[98])
+// quad_gl_49_ncoords - Obtain nodal coordinates in master element for
+void quad_gl_49_ncoords(double natcoords[98])
 {
   double xis[7];
-  ::sfe_sfuncs::bar_gl_7_sfunc(&xis[0]);
+  ::sfe_sfuncs::bar_gl_7_ncoords(&xis[0]);
   for (int m{0}; m < 49; m++) {
-    sfvals[m] = xis[iv26[m] - 1];
-    sfvals[m + 49] = xis[iv27[m] - 1];
+    natcoords[m] = xis[iv26[m] - 1];
+    natcoords[m + 49] = xis[iv27[m] - 1];
   }
 }
 
@@ -38949,13 +38949,13 @@ void quad_gl_49_sfunc(double xi, double eta, double sfvals[49],
   }
 }
 
-// tet_10_sfunc - Compute shape functions and their derivatives of tet_10
-void tet_10_sfunc(double sfvals[30])
+// tet_10_ncoords - Obtain nodal coordinates in master element for tet_10
+void tet_10_ncoords(double natcoords[30])
 {
   static const double dv[30]{0.0, 1.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.5, 0.0,
                              0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.5,
                              0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5};
-  std::copy(&dv[0], &dv[30], &sfvals[0]);
+  std::copy(&dv[0], &dv[30], &natcoords[0]);
 }
 
 // tet_10_sfunc - Compute shape functions and their derivatives of tet_10
@@ -39076,8 +39076,8 @@ void tet_10_sfunc(double xi, double eta, double zeta, double sfvals[10],
   sdvals[29] = eta * 4.0;
 }
 
-// tet_20_sfunc - Compute shape functions and their derivatives of tet_20
-void tet_20_sfunc(double sfvals[60])
+// tet_20_ncoords - Obtain nodal coordinates in master element for tet_20
+void tet_20_ncoords(double natcoords[60])
 {
   static const double dv[60]{0.0,
                              1.0,
@@ -39139,7 +39139,7 @@ void tet_20_sfunc(double sfvals[60])
                              0.33333333333333331,
                              0.33333333333333331,
                              0.33333333333333331};
-  std::copy(&dv[0], &dv[60], &sfvals[0]);
+  std::copy(&dv[0], &dv[60], &natcoords[0]);
 }
 
 // tet_20_sfunc - Compute shape functions and their derivatives of tet_20
@@ -39510,8 +39510,8 @@ void tet_20_sfunc(double xi, double eta, double zeta, double sfvals[20],
   sdvals[59] = ((t10 + t26) - t22) + t41;
 }
 
-// tet_35_sfunc - Compute shape functions and their derivatives of tet_35
-void tet_35_sfunc(double sfvals[105])
+// tet_35_ncoords - Obtain nodal coordinates in master element for tet_35
+void tet_35_ncoords(double natcoords[105])
 {
   static const double dv[105]{
       0.0,  1.0,  0.0,  0.0,  0.25, 0.5,  0.75, 0.75, 0.5,  0.25, 0.0,  0.0,
@@ -39523,7 +39523,7 @@ void tet_35_sfunc(double sfvals[105])
       0.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.25,
       0.5,  0.75, 0.25, 0.5,  0.75, 0.25, 0.5,  0.75, 0.0,  0.0,  0.0,  0.25,
       0.25, 0.5,  0.25, 0.25, 0.5,  0.25, 0.25, 0.5,  0.25};
-  std::copy(&dv[0], &dv[105], &sfvals[0]);
+  std::copy(&dv[0], &dv[105], &natcoords[0]);
 }
 
 // tet_35_sfunc - Compute shape functions and their derivatives of tet_35
@@ -40501,12 +40501,12 @@ void tet_35_sfunc(double xi, double eta, double zeta, double sfvals[35],
   sdvals[104] = t199_tmp * -256.0 - xi * ((-t29 + t93) + t117);
 }
 
-// tet_4_sfunc - Compute shape functions and their derivatives of tet_4
-void tet_4_sfunc(double sfvals[12])
+// tet_4_ncoords - Obtain nodal coordinates in master element for tet_4
+void tet_4_ncoords(double natcoords[12])
 {
   static const signed char b_iv[12]{0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
   for (int i{0}; i < 12; i++) {
-    sfvals[i] = b_iv[i];
+    natcoords[i] = b_iv[i];
   }
 }
 
@@ -40534,8 +40534,8 @@ void tet_4_sfunc(double xi, double eta, double zeta, double sfvals[4],
   }
 }
 
-// tet_56_sfunc - Compute shape functions and their derivatives of tet_56
-void tet_56_sfunc(double sfvals[168])
+// tet_56_ncoords - Obtain nodal coordinates in master element for tet_56
+void tet_56_ncoords(double natcoords[168])
 {
   static const double dv[168]{
       0.0, 1.0, 0.0, 0.0, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.0, 0.0,
@@ -40550,7 +40550,7 @@ void tet_56_sfunc(double sfvals[168])
       0.0, 0.0, 0.2, 0.4, 0.6, 0.8, 0.2, 0.4, 0.6, 0.8, 0.2, 0.4, 0.6, 0.8,
       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.2, 0.2, 0.4, 0.6, 0.4, 0.2, 0.2,
       0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.2, 0.4};
-  std::copy(&dv[0], &dv[168], &sfvals[0]);
+  std::copy(&dv[0], &dv[168], &natcoords[0]);
 }
 
 // tet_56_sfunc - Compute shape functions and their derivatives of tet_56
@@ -43117,8 +43117,8 @@ void tet_56_sfunc(double xi, double eta, double zeta, double sfvals[56],
       t6 * (t105 + t113) - xi * ((((-t58 + t113) + t200) - t251) + t531);
 }
 
-// tet_fek_35_sfunc - Compute shape functions and their derivatives of
-void tet_fek_35_sfunc(double sfvals[105])
+// tet_fek_35_ncoords - Obtain nodal coordinates in master element for
+void tet_fek_35_ncoords(double natcoords[105])
 {
   static const double dv[105]{0.0,
                               1.0,
@@ -43225,7 +43225,7 @@ void tet_fek_35_sfunc(double sfvals[105])
                               0.2165423575799505,
                               0.56691527366422811,
                               0.25};
-  std::copy(&dv[0], &dv[105], &sfvals[0]);
+  std::copy(&dv[0], &dv[105], &natcoords[0]);
 }
 
 // tet_fek_35_sfunc - Compute shape functions and their derivatives of
@@ -45172,8 +45172,8 @@ void tet_fek_35_sfunc(double xi, double eta, double zeta, double sfvals[35],
       xi * ((eta * -256.00000858306919 + t2 * 256.00001144409231) + t53);
 }
 
-// tet_gl_20_sfunc - Compute shape functions and their derivatives of
-void tet_gl_20_sfunc(double sfvals[60])
+// tet_gl_20_ncoords - Obtain nodal coordinates in master element for
+void tet_gl_20_ncoords(double natcoords[60])
 {
   static const double dv[60]{0.0,
                              1.0,
@@ -45235,7 +45235,7 @@ void tet_gl_20_sfunc(double sfvals[60])
                              0.33333333333333331,
                              0.33333333333333331,
                              0.33333333333333331};
-  std::copy(&dv[0], &dv[60], &sfvals[0]);
+  std::copy(&dv[0], &dv[60], &natcoords[0]);
 }
 
 // tet_gl_20_sfunc - Compute shape functions and their derivatives of
@@ -45743,8 +45743,8 @@ void tet_gl_20_sfunc(double xi, double eta, double zeta, double sfvals[20],
   sdvals[59] = ((t19 - t39) - t52) + t71;
 }
 
-// tet_gl_35_sfunc - Compute shape functions and their derivatives of
-void tet_gl_35_sfunc(double sfvals[105])
+// tet_gl_35_ncoords - Obtain nodal coordinates in master element for
+void tet_gl_35_ncoords(double natcoords[105])
 {
   static const double dv[105]{0.0,
                               1.0,
@@ -45851,7 +45851,7 @@ void tet_gl_35_sfunc(double sfvals[105])
                               0.2073451756635909,
                               0.58530964867281821,
                               0.25};
-  std::copy(&dv[0], &dv[105], &sfvals[0]);
+  std::copy(&dv[0], &dv[105], &natcoords[0]);
 }
 
 // tet_gl_35_sfunc - Compute shape functions and their derivatives of
@@ -47737,8 +47737,8 @@ void tet_gl_35_sfunc(double xi, double eta, double zeta, double sfvals[35],
   sdvals[104] = t549_tmp * -256.0 - xi * ((t2 * 256.0 - t12) + t25);
 }
 
-// tri_10_sfunc - Compute shape functions and their derivatives of tri_10
-void tri_10_sfunc(double sfvals[20])
+// tri_10_ncoords - Obtain nodal coordinates in master element for tri_10
+void tri_10_ncoords(double natcoords[20])
 {
   static const double dv[20]{0.0,
                              1.0,
@@ -47760,7 +47760,7 @@ void tri_10_sfunc(double sfvals[20])
                              0.66666666666666663,
                              0.33333333333333331,
                              0.33333333333333331};
-  std::copy(&dv[0], &dv[20], &sfvals[0]);
+  std::copy(&dv[0], &dv[20], &natcoords[0]);
 }
 
 // tri_10_sfunc - Compute shape functions and their derivatives of tri_10
@@ -47909,14 +47909,14 @@ void tri_10_sfunc(double xi, double eta, double sfvals[10], double sdvals[20])
   sdvals[19] = -t13 - xi * (t9 - 27.0);
 }
 
-// tri_15_sfunc - Compute shape functions and their derivatives of tri_15
-void tri_15_sfunc(double sfvals[30])
+// tri_15_ncoords - Obtain nodal coordinates in master element for tri_15
+void tri_15_ncoords(double natcoords[30])
 {
   static const double dv[30]{0.0,  1.0, 0.0,  0.25, 0.5,  0.75, 0.75, 0.5,
                              0.25, 0.0, 0.0,  0.0,  0.25, 0.5,  0.25, 0.0,
                              0.0,  1.0, 0.0,  0.0,  0.0,  0.25, 0.5,  0.75,
                              0.75, 0.5, 0.25, 0.25, 0.25, 0.5};
-  std::copy(&dv[0], &dv[30], &sfvals[0]);
+  std::copy(&dv[0], &dv[30], &natcoords[0]);
 }
 
 // tri_15_sfunc - Compute shape functions and their derivatives of tri_15
@@ -48215,14 +48215,14 @@ void tri_15_sfunc(double xi, double eta, double sfvals[15], double sdvals[30])
   sdvals[29] = -xi * ((-t21 + t48) + 32.0) - t6 * (t19 - 32.0);
 }
 
-// tri_21_sfunc - Compute shape functions and their derivatives of tri_21
-void tri_21_sfunc(double sfvals[42])
+// tri_21_ncoords - Obtain nodal coordinates in master element for tri_21
+void tri_21_ncoords(double natcoords[42])
 {
   static const double dv[42]{
       0.0, 1.0, 0.0, 0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.0, 0.0, 0.0,
       0.0, 0.2, 0.4, 0.6, 0.4, 0.2, 0.2, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
       0.2, 0.4, 0.6, 0.8, 0.8, 0.6, 0.4, 0.2, 0.2, 0.2, 0.2, 0.4, 0.6, 0.4};
-  std::copy(&dv[0], &dv[42], &sfvals[0]);
+  std::copy(&dv[0], &dv[42], &natcoords[0]);
 }
 
 // tri_21_sfunc - Compute shape functions and their derivatives of tri_21
@@ -48848,8 +48848,8 @@ void tri_21_sfunc(double xi, double eta, double sfvals[21], double sdvals[42])
                xi * (((-t51 - t37) + t150) + 125.0);
 }
 
-// tri_28_sfunc - Compute shape functions and their derivatives of tri_28
-void tri_28_sfunc(double sfvals[56])
+// tri_28_ncoords - Obtain nodal coordinates in master element for tri_28
+void tri_28_ncoords(double natcoords[56])
 {
   static const double dv[56]{0.0,
                              1.0,
@@ -48907,7 +48907,7 @@ void tri_28_sfunc(double sfvals[56])
                              0.5,
                              0.33333333333333331,
                              0.33333333333333331};
-  std::copy(&dv[0], &dv[56], &sfvals[0]);
+  std::copy(&dv[0], &dv[56], &natcoords[0]);
 }
 
 // tri_28_sfunc - Compute shape functions and their derivatives of tri_28
@@ -49888,12 +49888,12 @@ void tri_28_sfunc(double xi, double eta, double sfvals[28], double sdvals[56])
                t8 * (((eta * 17496.0 + t274) - t281) - 1107.0);
 }
 
-// tri_3_sfunc - Compute shape functions and their derivatives of tri_3
-void tri_3_sfunc(double sfvals[6])
+// tri_3_ncoords - Obtain nodal coordinates in master element for tri_3
+void tri_3_ncoords(double natcoords[6])
 {
   static const signed char b_iv[6]{0, 1, 0, 0, 0, 1};
   for (int i{0}; i < 6; i++) {
-    sfvals[i] = b_iv[i];
+    natcoords[i] = b_iv[i];
   }
 }
 
@@ -49917,12 +49917,12 @@ void tri_3_sfunc(double xi, double eta, double sfvals[3], double sdvals[6])
   }
 }
 
-// tri_6_sfunc - Compute shape functions and their derivatives of tri_6
-void tri_6_sfunc(double sfvals[12])
+// tri_6_ncoords - Obtain nodal coordinates in master element for tri_6
+void tri_6_ncoords(double natcoords[12])
 {
   static const double dv[12]{0.0, 1.0, 0.0, 0.5, 0.5, 0.0,
                              0.0, 0.0, 1.0, 0.0, 0.5, 0.5};
-  std::copy(&dv[0], &dv[12], &sfvals[0]);
+  std::copy(&dv[0], &dv[12], &natcoords[0]);
 }
 
 // tri_6_sfunc - Compute shape functions and their derivatives of tri_6
@@ -49986,8 +49986,8 @@ void tri_6_sfunc(double xi, double eta, double sfvals[6], double sdvals[12])
   sdvals[11] = (eta * -8.0 - t4) + 4.0;
 }
 
-// tri_fek_15_sfunc - Compute shape functions and their derivatives of
-void tri_fek_15_sfunc(double sfvals[30])
+// tri_fek_15_ncoords - Obtain nodal coordinates in master element for
+void tri_fek_15_ncoords(double natcoords[30])
 {
   static const double dv[30]{0.0,
                              1.0,
@@ -50019,7 +50019,7 @@ void tri_fek_15_sfunc(double sfvals[30])
                              0.21654236130524079,
                              0.21654236503053109,
                              0.56691527366422811};
-  std::copy(&dv[0], &dv[30], &sfvals[0]);
+  std::copy(&dv[0], &dv[30], &natcoords[0]);
 }
 
 // tri_fek_15_sfunc - Compute shape functions and their derivatives of
@@ -50410,8 +50410,8 @@ void tri_fek_15_sfunc(double xi, double eta, double sfvals[15],
                       23.249222765165111);
 }
 
-// tri_fek_21_sfunc - Compute shape functions and their derivatives of
-void tri_fek_21_sfunc(double sfvals[42])
+// tri_fek_21_ncoords - Obtain nodal coordinates in master element for
+void tri_fek_21_ncoords(double natcoords[42])
 {
   static const double dv[42]{0.0,
                              1.0,
@@ -50455,7 +50455,7 @@ void tri_fek_21_sfunc(double sfvals[42])
                              0.42082552725652977,
                              0.703961065410696,
                              0.42082554725652971};
-  std::copy(&dv[0], &dv[42], &sfvals[0]);
+  std::copy(&dv[0], &dv[42], &natcoords[0]);
 }
 
 // tri_fek_21_sfunc - Compute shape functions and their derivatives of
@@ -51244,8 +51244,8 @@ void tri_fek_21_sfunc(double xi, double eta, double sfvals[21],
                 t7 * (eta * 925.89947173787368 - 38.656861355602437));
 }
 
-// tri_fek_28_sfunc - Compute shape functions and their derivatives of
-void tri_fek_28_sfunc(double sfvals[56])
+// tri_fek_28_ncoords - Obtain nodal coordinates in master element for
+void tri_fek_28_ncoords(double natcoords[56])
 {
   static const double dv[56]{0.0,
                              1.0,
@@ -51303,7 +51303,7 @@ void tri_fek_28_sfunc(double sfvals[56])
                              0.56654929788943942,
                              0.31626979882180323,
                              0.33333332875823662};
-  std::copy(&dv[0], &dv[56], &sfvals[0]);
+  std::copy(&dv[0], &dv[56], &natcoords[0]);
 }
 
 // tri_fek_28_sfunc - Compute shape functions and their derivatives of
@@ -52845,8 +52845,8 @@ void tri_fek_28_sfunc(double xi, double eta, double sfvals[28],
                      620.15132246143378);
 }
 
-// tri_gl_10_sfunc - Compute shape functions and their derivatives of
-void tri_gl_10_sfunc(double sfvals[20])
+// tri_gl_10_ncoords - Obtain nodal coordinates in master element for
+void tri_gl_10_ncoords(double natcoords[20])
 {
   static const double dv[20]{0.0,
                              1.0,
@@ -52868,7 +52868,7 @@ void tri_gl_10_sfunc(double sfvals[20])
                              0.72360679774997894,
                              0.276393202250021,
                              0.33333333333333331};
-  std::copy(&dv[0], &dv[20], &sfvals[0]);
+  std::copy(&dv[0], &dv[20], &natcoords[0]);
 }
 
 // tri_gl_10_sfunc - Compute shape functions and their derivatives of
@@ -53053,8 +53053,8 @@ void tri_gl_10_sfunc(double xi, double eta, double sfvals[10],
   sdvals[19] = t6 * -27.0 - xi * (t14 - 27.0);
 }
 
-// tri_gl_15_sfunc - Compute shape functions and their derivatives of
-void tri_gl_15_sfunc(double sfvals[30])
+// tri_gl_15_ncoords - Obtain nodal coordinates in master element for
+void tri_gl_15_ncoords(double natcoords[30])
 {
   static const double dv[30]{0.0,
                              1.0,
@@ -53086,7 +53086,7 @@ void tri_gl_15_sfunc(double sfvals[30])
                              0.2073451756635909,
                              0.2073451756635909,
                              0.58530964867281821};
-  std::copy(&dv[0], &dv[30], &sfvals[0]);
+  std::copy(&dv[0], &dv[30], &natcoords[0]);
 }
 
 // tri_gl_15_sfunc - Compute shape functions and their derivatives of
@@ -53517,8 +53517,8 @@ void tri_gl_15_sfunc(double xi, double eta, double sfvals[15],
                t5 * (t45 - 21.800647943630331);
 }
 
-// tri_gl_21_sfunc - Compute shape functions and their derivatives of
-void tri_gl_21_sfunc(double sfvals[42])
+// tri_gl_21_ncoords - Obtain nodal coordinates in master element for
+void tri_gl_21_ncoords(double natcoords[42])
 {
   static const double dv[42]{0.0,
                              1.0,
@@ -53562,7 +53562,7 @@ void tri_gl_21_sfunc(double sfvals[42])
                              0.42441597651968271,
                              0.718342745528042,
                              0.42441597651968271};
-  std::copy(&dv[0], &dv[42], &sfvals[0]);
+  std::copy(&dv[0], &dv[42], &natcoords[0]);
 }
 
 // tri_gl_21_sfunc - Compute shape functions and their derivatives of
@@ -54501,8 +54501,8 @@ void tri_gl_21_sfunc(double xi, double eta, double sfvals[21],
                xi * (((t45 - t89) + t114) - 53.765587766506627);
 }
 
-// tri_leb_15_sfunc - Compute shape functions and their derivatives of
-void tri_leb_15_sfunc(double sfvals[30])
+// tri_leb_15_ncoords - Obtain nodal coordinates in master element for
+void tri_leb_15_ncoords(double natcoords[30])
 {
   static const double dv[30]{0.0,
                              1.0,
@@ -54534,7 +54534,7 @@ void tri_leb_15_sfunc(double sfvals[30])
                              0.22206512551486521,
                              0.250420352808094,
                              0.527018976287263};
-  std::copy(&dv[0], &dv[30], &sfvals[0]);
+  std::copy(&dv[0], &dv[30], &natcoords[0]);
 }
 
 // tri_leb_15_sfunc - Compute shape functions and their derivatives of
@@ -54930,8 +54930,8 @@ void tri_leb_15_sfunc(double xi, double eta, double sfvals[15],
                       21.718223449996369);
 }
 
-// tri_leb_21_sfunc - Compute shape functions and their derivatives of
-void tri_leb_21_sfunc(double sfvals[42])
+// tri_leb_21_ncoords - Obtain nodal coordinates in master element for
+void tri_leb_21_ncoords(double natcoords[42])
 {
   static const double dv[42]{0.0,
                              1.0,
@@ -54975,7 +54975,7 @@ void tri_leb_21_sfunc(double sfvals[42])
                              0.41115982426654851,
                              0.65072062351987736,
                              0.41519137386566818};
-  std::copy(&dv[0], &dv[42], &sfvals[0]);
+  std::copy(&dv[0], &dv[42], &natcoords[0]);
 }
 
 // tri_leb_21_sfunc - Compute shape functions and their derivatives of
@@ -55764,8 +55764,8 @@ void tri_leb_21_sfunc(double xi, double eta, double sfvals[21],
                      87.339132313882786);
 }
 
-// tri_leb_28_sfunc - Compute shape functions and their derivatives of
-void tri_leb_28_sfunc(double sfvals[56])
+// tri_leb_28_ncoords - Obtain nodal coordinates in master element for
+void tri_leb_28_ncoords(double natcoords[56])
 {
   static const double dv[56]{0.0,
                              1.0,
@@ -55823,7 +55823,7 @@ void tri_leb_28_sfunc(double sfvals[56])
                              0.53869622819612584,
                              0.326198455394284,
                              0.33335513526117649};
-  std::copy(&dv[0], &dv[56], &sfvals[0]);
+  std::copy(&dv[0], &dv[56], &natcoords[0]);
 }
 
 // tri_leb_28_sfunc - Compute shape functions and their derivatives of
