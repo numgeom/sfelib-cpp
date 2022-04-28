@@ -11,7 +11,6 @@
 // Include files
 #include "coder_array.h"
 #include "m2c_lib.h"
-#include "omp.h"
 #include "rtwtypes.h"
 #include "sfe_internal_types.h"
 #include <cstddef>
@@ -26,6 +25,33 @@ struct SfeObject;
 // Function Declarations
 namespace sfe {
 static inline coder::SizeType obtain_elemdegree(coder::SizeType etype);
+
+static inline coder::SizeType obtain_elemdim(coder::SizeType etype);
+
+static inline coder::SizeType obtain_elemnodepos(coder::SizeType etype);
+
+static inline coder::SizeType obtain_elemshape(coder::SizeType etype);
+
+static inline unsigned char obtain_facets(coder::SizeType etype);
+
+static inline void obtain_facets(coder::SizeType etype, signed char facetid,
+                                 unsigned char *ret, short lids_data[],
+                                 coder::SizeType lids_size[1]);
+
+static inline void obtain_natcoords(coder::SizeType etype,
+                                    ::coder::array<double, 2U> &natcoords);
+
+static inline void obtain_natcoords1d(coder::SizeType etype,
+                                      double natcoords_data[],
+                                      coder::SizeType natcoords_size[1]);
+
+static inline void obtain_natcoords2d(coder::SizeType etype,
+                                      ::coder::array<double, 2U> &natcoords);
+
+static inline void obtain_natcoords3d(coder::SizeType etype,
+                                      ::coder::array<double, 2U> &natcoords);
+
+static inline coder::SizeType obtain_nnodes(coder::SizeType etype);
 
 static inline void sfe_bnd_init(SfeObject *b_sfe, const int etypes_data[],
                                 const coder::SizeType etypes_size[1],
@@ -153,7 +179,28 @@ static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
                             const ::coder::array<double, 2U> &xs,
                             const ::coder::array<double, 2U> &qd_or_natcoords);
 
-static inline void sfe_init_grad1(SfeObject *b_sfe, coder::SizeType q);
+static inline void sfe_init_grad(SfeObject *b_sfe, coder::SizeType q);
+
+static inline void tabulate_quadratures(coder::SizeType etype,
+                                        coder::SizeType qd,
+                                        ::coder::array<double, 2U> &cs,
+                                        ::coder::array<double, 1U> &ws);
+
+static inline void tabulate_shapefuncs(coder::SizeType etype,
+                                       const ::coder::array<double, 2U> &cs,
+                                       ::coder::array<double, 2U> &sfvals,
+                                       ::coder::array<double, 3U> &sdvals);
+
+static inline void tabulate_shapefuncs(coder::SizeType etype,
+                                       const ::coder::array<double, 2U> &cs,
+                                       coder::SizeType varargin_2,
+                                       ::coder::array<double, 2U> &sfvals,
+                                       ::coder::array<double, 3U> &sdvals);
+
+static inline void tabulate_shapefuncs3(coder::SizeType etype,
+                                        const ::coder::array<double, 2U> &cs,
+                                        ::coder::array<double, 2U> &sfvals,
+                                        ::coder::array<double, 3U> &sdvals);
 
 } // namespace sfe
 
