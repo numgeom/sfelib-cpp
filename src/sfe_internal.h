@@ -51,31 +51,62 @@ static inline void obtain_natcoords2d(coder::SizeType etype,
 static inline void obtain_natcoords3d(coder::SizeType etype,
                                       ::coder::array<double, 2U> &natcoords);
 
-static inline coder::SizeType obtain_nnodes(coder::SizeType etype);
-
-static inline void sfe_bnd_init(SfeObject *b_sfe, const int etypes_data[],
-                                const coder::SizeType etypes_size[1],
+static inline void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes,
                                 signed char facetid,
                                 const ::coder::array<double, 2U> &xs,
                                 coder::SizeType qd_or_natcoords,
                                 const ::coder::array<double, 2U> &userquad);
 
-static inline void sfe_bnd_init(SfeObject *b_sfe, const int etypes_data[],
-                                const coder::SizeType etypes_size[1],
+static inline void sfe_bnd_init(SfeObject *b_sfe, signed char facetid,
+                                const ::coder::array<double, 2U> &xs,
+                                int qd_or_natcoords);
+
+static inline void sfe_bnd_init(SfeObject *b_sfe, signed char facetid,
+                                const ::coder::array<double, 2U> &xs);
+
+static inline void
+sfe_bnd_init(SfeObject *b_sfe, signed char facetid,
+             const ::coder::array<double, 2U> &xs,
+             const ::coder::array<double, 2U> &qd_or_natcoords);
+
+static inline void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes,
                                 signed char facetid,
                                 const ::coder::array<double, 2U> &xs,
                                 coder::SizeType qd_or_natcoords);
 
-static inline void sfe_bnd_init(SfeObject *b_sfe, const int etypes_data[],
-                                const coder::SizeType etypes_size[1],
+static inline void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes,
                                 signed char facetid,
                                 const ::coder::array<double, 2U> &xs);
 
 static inline void
-sfe_bnd_init(SfeObject *b_sfe, const int etypes_data[],
-             const coder::SizeType etypes_size[1], signed char facetid,
+sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, signed char facetid,
              const ::coder::array<double, 2U> &xs,
              const ::coder::array<double, 2U> &qd_or_natcoords);
+
+static inline void sfe_bnd_init(SfeObject *b_sfe, const int etypes[2],
+                                signed char facetid,
+                                const ::coder::array<double, 2U> &xs,
+                                coder::SizeType qd_or_natcoords,
+                                const ::coder::array<double, 2U> &userquad);
+
+static inline void sfe_bnd_init(SfeObject *b_sfe, const int etypes[2],
+                                signed char facetid,
+                                const ::coder::array<double, 2U> &xs,
+                                coder::SizeType qd_or_natcoords);
+
+static inline void sfe_bnd_init(SfeObject *b_sfe, const int etypes[2],
+                                signed char facetid,
+                                const ::coder::array<double, 2U> &xs);
+
+static inline void
+sfe_bnd_init(SfeObject *b_sfe, const int etypes[2], signed char facetid,
+             const ::coder::array<double, 2U> &xs,
+             const ::coder::array<double, 2U> &qd_or_natcoords);
+
+static inline void sfe_bnd_init(SfeObject *b_sfe, signed char facetid,
+                                const ::coder::array<double, 2U> &xs,
+                                int qd_or_natcoords,
+                                const ::coder::array<double, 2U> &userquad);
 
 static inline void sfe_elem_dbc(::coder::array<double, 2U> &elemmat,
                                 ::coder::array<double, 1U> &load,
@@ -159,25 +190,53 @@ static inline void sfe_eval_grads(const SfeObject *b_sfe,
                                   const ::coder::array<double, 2U> &fs,
                                   ::coder::array<double, 2U> &grads);
 
-static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
-                            const coder::SizeType etypes_size[1],
+static inline void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
                             const ::coder::array<double, 2U> &xs,
                             coder::SizeType qd_or_natcoords,
                             const ::coder::array<double, 2U> &userquad);
 
-static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
-                            const coder::SizeType etypes_size[1],
+static inline void sfe_init(SfeObject *b_sfe,
+                            const ::coder::array<double, 2U> &xs,
+                            int qd_or_natcoords);
+
+static inline void sfe_init11(SfeObject *b_sfe,
+                              const ::coder::array<double, 2U> &xs);
+
+static inline void sfe_init(SfeObject *b_sfe,
+                            const ::coder::array<double, 2U> &xs,
+                            const ::coder::array<double, 2U> &qd_or_natcoords);
+
+static inline void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
                             const ::coder::array<double, 2U> &xs,
                             coder::SizeType qd_or_natcoords);
 
-static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
-                            const coder::SizeType etypes_size[1],
+static inline void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
                             const ::coder::array<double, 2U> &xs);
 
-static inline void sfe_init(SfeObject *b_sfe, const int etypes_data[],
-                            const coder::SizeType etypes_size[1],
+static inline void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
                             const ::coder::array<double, 2U> &xs,
                             const ::coder::array<double, 2U> &qd_or_natcoords);
+
+static inline void sfe_init(SfeObject *b_sfe, const int etypes[2],
+                            const ::coder::array<double, 2U> &xs,
+                            coder::SizeType qd_or_natcoords,
+                            const ::coder::array<double, 2U> &userquad);
+
+static inline void sfe_init(SfeObject *b_sfe, const int etypes[2],
+                            const ::coder::array<double, 2U> &xs,
+                            coder::SizeType qd_or_natcoords);
+
+static inline void sfe_init(SfeObject *b_sfe, const int etypes[2],
+                            const ::coder::array<double, 2U> &xs);
+
+static inline void sfe_init(SfeObject *b_sfe, const int etypes[2],
+                            const ::coder::array<double, 2U> &xs,
+                            const ::coder::array<double, 2U> &qd_or_natcoords);
+
+static inline void sfe_init(SfeObject *b_sfe,
+                            const ::coder::array<double, 2U> &xs,
+                            int qd_or_natcoords,
+                            const ::coder::array<double, 2U> &userquad);
 
 static inline void sfe_init_grad(SfeObject *b_sfe, coder::SizeType q);
 

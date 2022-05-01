@@ -104,6 +104,14 @@ static inline void hexa_27_sfunc(double xi, double eta, double zeta,
 static inline void hexa_27_sfunc(double xi, double eta, double zeta,
                                  double sfvals[27], double sdvals[81]);
 
+static inline void hexa_343_ncoords(double natcoords[1029]);
+
+static inline void hexa_343_sfunc(double xi, double eta, double zeta,
+                                  double sfvals[343]);
+
+static inline void hexa_343_sfunc(double xi, double eta, double zeta,
+                                  double sfvals[343], double sdvals[1029]);
+
 static inline void hexa_64_ncoords(double natcoords[192]);
 
 static inline void hexa_64_sfunc(double xi, double eta, double zeta,
@@ -136,6 +144,14 @@ static inline void hexa_gl_216_sfunc(double xi, double eta, double zeta,
 static inline void hexa_gl_216_sfunc(double xi, double eta, double zeta,
                                      double sfvals[216], double sdvals[648]);
 
+static inline void hexa_gl_343_ncoords(double natcoords[1029]);
+
+static inline void hexa_gl_343_sfunc(double xi, double eta, double zeta,
+                                     double sfvals[343]);
+
+static inline void hexa_gl_343_sfunc(double xi, double eta, double zeta,
+                                     double sfvals[343], double sdvals[1029]);
+
 static inline void hexa_gl_64_ncoords(double natcoords[192]);
 
 static inline void hexa_gl_64_sfunc(double xi, double eta, double zeta,
@@ -159,6 +175,14 @@ static inline void prism_18_sfunc(double xi, double eta, double zeta,
 
 static inline void prism_18_sfunc(double xi, double eta, double zeta,
                                   double sfvals[18], double sdvals[54]);
+
+static inline void prism_196_ncoords(double natcoords[588]);
+
+static inline void prism_196_sfunc(double xi, double eta, double zeta,
+                                   double sfvals[196]);
+
+static inline void prism_196_sfunc(double xi, double eta, double zeta,
+                                   double sfvals[196], double sdvals[588]);
 
 static inline void prism_40_ncoords(double natcoords[120]);
 
@@ -389,6 +413,14 @@ static inline void tet_56_sfunc(double xi, double eta, double zeta,
 
 static inline void tet_56_sfunc(double xi, double eta, double zeta,
                                 double sfvals[56], double sdvals[168]);
+
+static inline void tet_84_ncoords(double natcoords[252]);
+
+static inline void tet_84_sfunc(double xi, double eta, double zeta,
+                                double sfvals[84]);
+
+static inline void tet_84_sfunc(double xi, double eta, double zeta,
+                                double sfvals[84], double sdvals[252]);
 
 static inline void tet_fek_35_ncoords(double natcoords[105]);
 
