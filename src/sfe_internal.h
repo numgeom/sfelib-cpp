@@ -55,7 +55,7 @@ static inline void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes,
                                 int8_T facetid,
                                 const ::coder::array<real_T, 2U> &xs,
                                 coder::SizeType qd_or_natcoords,
-                                const ::coder::array<real_T, 2U> &userquad);
+                                const ::coder::array<real_T, 2U> &varargin_1);
 
 static inline void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
                                 const ::coder::array<real_T, 2U> &xs,
@@ -87,7 +87,7 @@ static inline void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2],
                                 int8_T facetid,
                                 const ::coder::array<real_T, 2U> &xs,
                                 coder::SizeType qd_or_natcoords,
-                                const ::coder::array<real_T, 2U> &userquad);
+                                const ::coder::array<real_T, 2U> &varargin_1);
 
 static inline void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2],
                                 int8_T facetid,
@@ -106,7 +106,7 @@ sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
 static inline void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
                                 const ::coder::array<real_T, 2U> &xs,
                                 int32_T qd_or_natcoords,
-                                const ::coder::array<real_T, 2U> &userquad);
+                                const ::coder::array<real_T, 2U> &varargin_1);
 
 static inline void sfe_elem_dbc(::coder::array<real_T, 2U> &elemmat,
                                 ::coder::array<real_T, 1U> &load,

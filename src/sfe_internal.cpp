@@ -2,6 +2,7 @@
 // Main developers:
 //     sfelib: Xiangmin Jiao, Qiao Chen, Jacob Jones
 //     momp2cpp: Xiangmin Jiao, Qiao Chen
+//     ahmesh: Qiao Chen, Xiangmin Jiao, Jacob Jones, Vladimir Dedov
 //
 // sfe_internal.cpp
 //
@@ -208,23 +209,23 @@ static inline void sfe1_tabulate_shapefuncs(
 
 static inline void sfe2_tabulate_equi_quad(coder::SizeType etype,
                                            const ::coder::array<real_T, 2U> &cs,
-                                           coder::SizeType varargin_2,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe2_tabulate_equi_quad(coder::SizeType etype,
                                            const ::coder::array<real_T, 2U> &cs,
+                                           coder::SizeType varargin_2,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe2_tabulate_equi_tri(coder::SizeType etype,
                                           const ::coder::array<real_T, 2U> &cs,
-                                          coder::SizeType varargin_2,
                                           ::coder::array<real_T, 2U> &sfvals,
                                           ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe2_tabulate_equi_tri(coder::SizeType etype,
                                           const ::coder::array<real_T, 2U> &cs,
+                                          coder::SizeType varargin_2,
                                           ::coder::array<real_T, 2U> &sfvals,
                                           ::coder::array<real_T, 3U> &sdvals);
 
@@ -241,14 +242,19 @@ static inline void sfe2_tabulate_fek_tri(coder::SizeType etype,
 
 static inline void sfe2_tabulate_gl_quad(coder::SizeType etype,
                                          const ::coder::array<real_T, 2U> &cs,
-                                         coder::SizeType varargin_2,
                                          ::coder::array<real_T, 2U> &sfvals,
                                          ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe2_tabulate_gl_quad(coder::SizeType etype,
                                          const ::coder::array<real_T, 2U> &cs,
+                                         coder::SizeType varargin_2,
                                          ::coder::array<real_T, 2U> &sfvals,
                                          ::coder::array<real_T, 3U> &sdvals);
+
+static inline void sfe2_tabulate_gl_tri(coder::SizeType etype,
+                                        const ::coder::array<real_T, 2U> &cs,
+                                        ::coder::array<real_T, 2U> &sfvals,
+                                        ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe2_tabulate_gl_tri(coder::SizeType etype,
                                         const ::coder::array<real_T, 2U> &cs,
@@ -256,11 +262,6 @@ static inline void sfe2_tabulate_gl_tri(coder::SizeType etype,
                                         ::coder::array<real_T, 2U> &sfvals,
                                         ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_gl_tri(coder::SizeType etype,
-                                        const ::coder::array<real_T, 2U> &cs,
-                                        ::coder::array<real_T, 2U> &sfvals,
-                                        ::coder::array<real_T, 3U> &sdvals);
-
 static inline void sfe2_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
     coder::SizeType varargin_2, ::coder::array<real_T, 2U> &sfvals,
@@ -272,32 +273,32 @@ static inline void sfe2_tabulate_shapefuncs(
 
 static inline void sfe3_tabulate_equi_hexa(coder::SizeType etype,
                                            const ::coder::array<real_T, 2U> &cs,
+                                           coder::SizeType varargin_2,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_hexa(coder::SizeType etype,
                                            const ::coder::array<real_T, 2U> &cs,
-                                           coder::SizeType varargin_2,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_equi_prism(
-    coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_prism(
     coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
     coder::SizeType varargin_2, ::coder::array<real_T, 2U> &sfvals,
     ::coder::array<real_T, 3U> &sdvals);
 
+static inline void sfe3_tabulate_equi_prism(
+    coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
+    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
+
 static inline void sfe3_tabulate_equi_pyra(coder::SizeType etype,
                                            const ::coder::array<real_T, 2U> &cs,
-                                           coder::SizeType varargin_2,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_pyra(coder::SizeType etype,
                                            const ::coder::array<real_T, 2U> &cs,
+                                           coder::SizeType varargin_2,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
 
@@ -314,19 +315,14 @@ static inline void sfe3_tabulate_equi_tet(coder::SizeType etype,
 
 static inline void sfe3_tabulate_gl_hexa(coder::SizeType etype,
                                          const ::coder::array<real_T, 2U> &cs,
+                                         coder::SizeType varargin_2,
                                          ::coder::array<real_T, 2U> &sfvals,
                                          ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_gl_hexa(coder::SizeType etype,
                                          const ::coder::array<real_T, 2U> &cs,
-                                         coder::SizeType varargin_2,
                                          ::coder::array<real_T, 2U> &sfvals,
                                          ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_gl_prism(coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_gl_prism(coder::SizeType etype,
                                           const ::coder::array<real_T, 2U> &cs,
@@ -334,16 +330,26 @@ static inline void sfe3_tabulate_gl_prism(coder::SizeType etype,
                                           ::coder::array<real_T, 2U> &sfvals,
                                           ::coder::array<real_T, 3U> &sdvals);
 
+static inline void sfe3_tabulate_gl_prism(coder::SizeType etype,
+                                          const ::coder::array<real_T, 2U> &cs,
+                                          ::coder::array<real_T, 2U> &sfvals,
+                                          ::coder::array<real_T, 3U> &sdvals);
+
+static inline void sfe3_tabulate_gl_pyra(coder::SizeType etype,
+                                         const ::coder::array<real_T, 2U> &cs,
+                                         ::coder::array<real_T, 2U> &sfvals,
+                                         ::coder::array<real_T, 3U> &sdvals);
+
 static inline void sfe3_tabulate_gl_pyra(coder::SizeType etype,
                                          const ::coder::array<real_T, 2U> &cs,
                                          coder::SizeType varargin_2,
                                          ::coder::array<real_T, 2U> &sfvals,
                                          ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_gl_pyra(coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
+static inline void sfe3_tabulate_gl_tet(coder::SizeType etype,
+                                        const ::coder::array<real_T, 2U> &cs,
+                                        ::coder::array<real_T, 2U> &sfvals,
+                                        ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_gl_tet(coder::SizeType etype,
                                         const ::coder::array<real_T, 2U> &cs,
@@ -351,27 +357,26 @@ static inline void sfe3_tabulate_gl_tet(coder::SizeType etype,
                                         ::coder::array<real_T, 2U> &sfvals,
                                         ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_gl_tet(coder::SizeType etype,
-                                        const ::coder::array<real_T, 2U> &cs,
-                                        ::coder::array<real_T, 2U> &sfvals,
-                                        ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_shapefuncs(
-    coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
 static inline void sfe3_tabulate_shapefuncs(
     coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
     coder::SizeType varargin_2, ::coder::array<real_T, 2U> &sfvals,
     ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                            const ::coder::array<real_T, 2U> &xs);
+static inline void sfe3_tabulate_shapefuncs(
+    coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
+    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
                             const ::coder::array<real_T, 2U> &xs,
                             coder::SizeType qd_or_natcoords,
                             const ::coder::array<real_T, 2U> &userquad);
+
+static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                            const ::coder::array<real_T, 2U> &xs,
+                            coder::SizeType qd_or_natcoords);
+
+static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                            const ::coder::array<real_T, 2U> &xs);
 
 static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
                             const ::coder::array<real_T, 2U> &xs,
@@ -10558,6 +10563,114 @@ static void sfe3_tabulate_gl_pyra(coder::SizeType etype,
 
 static void sfe3_tabulate_gl_tet(coder::SizeType etype,
                                  const ::coder::array<real_T, 2U> &cs,
+                                 ::coder::array<real_T, 2U> &sfvals,
+                                 ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T tmp_data[1029];
+  real_T dv2[105];
+  real_T dv[60];
+  real_T dv3[35];
+  real_T dv1[20];
+  coder::SizeType i;
+  coder::SizeType i1;
+  coder::SizeType i2;
+  coder::SizeType i3;
+  coder::SizeType loop_ub;
+  coder::SizeType tmp_size_idx_1;
+  coder::SizeType tmp_size_idx_2;
+  coder::SizeType ub_loop;
+  int16_T unnamed_idx_1;
+  int16_T unnamed_idx_2;
+  //  tet
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  if (etype == 141) {
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      tet_gl_20(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                cs[cs.size(1) * q + 2], dv1, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 19) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } else {
+    m2cAssert(
+        etype == 145,
+        "Gauss-Lobatto tetrahedral elements are supported only up to quartic");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (coder::SizeType q = 0; q <= ub_loop; q++) {
+      tet_gl_35(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                cs[cs.size(1) * q + 2], dv3, dv2);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 34) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  }
+}
+
+static void sfe3_tabulate_gl_tet(coder::SizeType etype,
+                                 const ::coder::array<real_T, 2U> &cs,
                                  coder::SizeType varargin_2,
                                  ::coder::array<real_T, 2U> &sfvals,
                                  ::coder::array<real_T, 3U> &sdvals)
@@ -10671,110 +10784,36 @@ static void sfe3_tabulate_gl_tet(coder::SizeType etype,
   }
 }
 
-static void sfe3_tabulate_gl_tet(coder::SizeType etype,
-                                 const ::coder::array<real_T, 2U> &cs,
-                                 ::coder::array<real_T, 2U> &sfvals,
-                                 ::coder::array<real_T, 3U> &sdvals)
+// sfe3_tabulate_shapefuncs - Tabulate shape functions and sdvals at qpoints
+static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     coder::SizeType varargin_2,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals)
 {
-  real_T tmp_data[1029];
-  real_T dv2[105];
-  real_T dv[60];
-  real_T dv3[35];
-  real_T dv1[20];
-  coder::SizeType i;
-  coder::SizeType i1;
-  coder::SizeType i2;
-  coder::SizeType i3;
-  coder::SizeType loop_ub;
-  coder::SizeType tmp_size_idx_1;
-  coder::SizeType tmp_size_idx_2;
-  coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  tet
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  if (etype == 141) {
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (coder::SizeType q = 0; q <= ub_loop; q++) {
-      tet_gl_20(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                cs[cs.size(1) * q + 2], dv1, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 19) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
+  coder::SizeType postype;
+  postype = obtain_elemnodepos(etype);
+  if (postype == 0) {
+    if (obtain_elemshape(etype) == 4) {
+      sfe3_tabulate_equi_tet(etype, cs, varargin_2, sfvals, sdvals);
+    } else if (obtain_elemshape(etype) == 5) {
+      sfe3_tabulate_equi_pyra(etype, cs, varargin_2, sfvals, sdvals);
+    } else if (obtain_elemshape(etype) == 6) {
+      sfe3_tabulate_equi_prism(etype, cs, varargin_2, sfvals, sdvals);
+    } else {
+      sfe3_tabulate_equi_hexa(etype, cs, varargin_2, sfvals, sdvals);
     }
   } else {
-    m2cAssert(
-        etype == 145,
-        "Gauss-Lobatto tetrahedral elements are supported only up to quartic");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (coder::SizeType q = 0; q <= ub_loop; q++) {
-      tet_gl_35(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                cs[cs.size(1) * q + 2], dv3, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 34) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
+    m2cAssert(postype == 1,
+              "Only supports Equidistant and Gauss-Lobatto points in 3D");
+    if (obtain_elemshape(etype) == 4) {
+      sfe3_tabulate_gl_tet(etype, cs, varargin_2, sfvals, sdvals);
+    } else if (obtain_elemshape(etype) == 5) {
+      sfe3_tabulate_gl_pyra(etype, cs, varargin_2, sfvals, sdvals);
+    } else if (obtain_elemshape(etype) == 6) {
+      sfe3_tabulate_gl_prism(etype, cs, varargin_2, sfvals, sdvals);
+    } else {
+      sfe3_tabulate_gl_hexa(etype, cs, varargin_2, sfvals, sdvals);
     }
   }
 }
@@ -10812,36 +10851,676 @@ static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
   }
 }
 
-// sfe3_tabulate_shapefuncs - Tabulate shape functions and sdvals at qpoints
-static void sfe3_tabulate_shapefuncs(coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     coder::SizeType varargin_2,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                     const ::coder::array<real_T, 2U> &xs,
+                     const ::coder::array<real_T, 2U> &qd_or_natcoords)
 {
-  coder::SizeType postype;
-  postype = obtain_elemnodepos(etype);
-  if (postype == 0) {
-    if (obtain_elemshape(etype) == 4) {
-      sfe3_tabulate_equi_tet(etype, cs, varargin_2, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 5) {
-      sfe3_tabulate_equi_pyra(etype, cs, varargin_2, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 6) {
-      sfe3_tabulate_equi_prism(etype, cs, varargin_2, sfvals, sdvals);
+  coder::SizeType i;
+  coder::SizeType loop_ub;
+  coder::SizeType topo_dim;
+  uint8_T c;
+  uint8_T geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag =
+        (static_cast<coder::SizeType>(static_cast<uint32_T>(etypes[0]) >> 5) ==
+         static_cast<coder::SizeType>(static_cast<uint32_T>(geom_etype) >> 5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<uint8_T>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  User-input natural coordinates
+  b_sfe->nqp = qd_or_natcoords.size(0);
+  b_sfe->ws.set_size(qd_or_natcoords.size(0));
+  loop_ub = qd_or_natcoords.size(0);
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->ws[i] = 1.0;
+  }
+  //  user ones for dummy quad weights
+  b_sfe->cs.set_size(qd_or_natcoords.size(0), topo_dim);
+  i = qd_or_natcoords.size(0);
+  for (coder::SizeType q{0}; q < i; q++) {
+    for (coder::SizeType k{0}; k < topo_dim; k++) {
+      b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+          qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
+    }
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  b_sfe->cs_phy.set_size(qd_or_natcoords.size(0), xs.size(1));
+  i = qd_or_natcoords.size(0);
+  for (coder::SizeType q{0}; q < i; q++) {
+    loop_ub = xs.size(1);
+    for (coder::SizeType k{0}; k < loop_ub; k++) {
+      real_T v;
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                     const ::coder::array<real_T, 2U> &xs,
+                     coder::SizeType qd_or_natcoords)
+{
+  real_T dv[9];
+  real_T v;
+  coder::SizeType a;
+  coder::SizeType i;
+  coder::SizeType sfe_idx_0_tmp_tmp;
+  coder::SizeType topo_dim;
+  uint8_T c;
+  uint8_T geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag =
+        (static_cast<coder::SizeType>(static_cast<uint32_T>(etypes[0]) >> 5) ==
+         static_cast<coder::SizeType>(static_cast<uint32_T>(geom_etype) >> 5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<uint8_T>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  Set up quadrature
+  if (qd_or_natcoords != -1) {
+    if (qd_or_natcoords == 0) {
+      //  trial+test+nonlinear_geom?1:0
+      a = obtain_elemdegree((etypes[0]));
+      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
+                        (xs.size(1) > topo_dim);
+    }
+    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+    b_sfe->nqp = b_sfe->ws.size(0);
+  } else {
+    m2cErrMsgIdAndTxt("sfe_init:missUserQuad", "missing user quadrature data");
+    m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                      "bad user quadrature data size");
+    b_sfe->nqp = 0;
+    b_sfe->ws.set_size(0);
+    b_sfe->cs.set_size(0, topo_dim);
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < a; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+      b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < a; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (coder::SizeType k{0}; k < i; k++) {
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    real_T d;
+    coder::SizeType geom_dim;
+    coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(real_T));
+    n = xs.size(0);
+    for (coder::SizeType k{0}; k < n; k++) {
+      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
     } else {
-      sfe3_tabulate_equi_hexa(etype, cs, varargin_2, sfvals, sdvals);
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
     }
   } else {
-    m2cAssert(postype == 1,
-              "Only supports Equidistant and Gauss-Lobatto points in 3D");
-    if (obtain_elemshape(etype) == 4) {
-      sfe3_tabulate_gl_tet(etype, cs, varargin_2, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 5) {
-      sfe3_tabulate_gl_pyra(etype, cs, varargin_2, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 6) {
-      sfe3_tabulate_gl_prism(etype, cs, varargin_2, sfvals, sdvals);
+    //  Super-parametric
+    a = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(a, 3);
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      coder::SizeType geom_dim;
+      coder::SizeType n;
+      coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(real_T));
+      n = xs.size(0);
+      for (coder::SizeType k{0}; k < n; k++) {
+        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        a = i + y;
+        b_sfe->jacTs[3 * a] = dv[3 * i];
+        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                     const ::coder::array<real_T, 2U> &xs,
+                     coder::SizeType qd_or_natcoords,
+                     const ::coder::array<real_T, 2U> &userquad)
+{
+  real_T dv[9];
+  real_T v;
+  coder::SizeType a;
+  coder::SizeType i;
+  coder::SizeType sfe_idx_0_tmp_tmp;
+  coder::SizeType topo_dim;
+  uint8_T c;
+  uint8_T geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag =
+        (static_cast<coder::SizeType>(static_cast<uint32_T>(etypes[0]) >> 5) ==
+         static_cast<coder::SizeType>(static_cast<uint32_T>(geom_etype) >> 5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<uint8_T>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  Set up quadrature
+  if (qd_or_natcoords != -1) {
+    if (qd_or_natcoords == 0) {
+      //  trial+test+nonlinear_geom?1:0
+      a = obtain_elemdegree((etypes[0]));
+      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
+                        (xs.size(1) > topo_dim);
+    }
+    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+    b_sfe->nqp = b_sfe->ws.size(0);
+  } else {
+    if ((userquad.size(0) == 0) || (userquad.size(1) == 0)) {
+      m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
+                        "missing user quadrature data");
+    }
+    if (userquad.size(1) != topo_dim + 1) {
+      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                        "bad user quadrature data size");
+    }
+    b_sfe->nqp = userquad.size(0);
+    b_sfe->ws.set_size(userquad.size(0));
+    b_sfe->cs.set_size(userquad.size(0), topo_dim);
+    i = userquad.size(0);
+    for (coder::SizeType q{0}; q < i; q++) {
+      b_sfe->ws[q] = userquad[userquad.size(1) * q];
+      for (coder::SizeType k{0}; k < topo_dim; k++) {
+        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+            userquad[(k + userquad.size(1) * q) + 1];
+      }
+    }
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < a; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+      b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < a; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (coder::SizeType k{0}; k < i; k++) {
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    real_T d;
+    coder::SizeType geom_dim;
+    coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(real_T));
+    n = xs.size(0);
+    for (coder::SizeType k{0}; k < n; k++) {
+      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
     } else {
-      sfe3_tabulate_gl_hexa(etype, cs, varargin_2, sfvals, sdvals);
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    //  Super-parametric
+    a = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(a, 3);
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      coder::SizeType geom_dim;
+      coder::SizeType n;
+      coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(real_T));
+      n = xs.size(0);
+      for (coder::SizeType k{0}; k < n; k++) {
+        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        a = i + y;
+        b_sfe->jacTs[3 * a] = dv[3 * i];
+        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const ::coder::array<real_T, 2U> &xs)
+{
+  real_T dv[9];
+  real_T v;
+  coder::SizeType i;
+  coder::SizeType sfe_idx_0_tmp_tmp;
+  boolean_T cond;
+  if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
+    cond = true;
+  } else {
+    cond = false;
+  }
+  m2cAssert(cond, "");
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (coder::SizeType k{0}; k < i; k++) {
+      coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((b_sfe->etypes[1] == 68) || (b_sfe->etypes[1] == 132) ||
+      (b_sfe->etypes[1] == 36)) {
+    real_T d;
+    coder::SizeType geom_dim;
+    coder::SizeType n;
+    coder::SizeType topo_dim;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(real_T));
+    n = xs.size(0);
+    for (coder::SizeType k{0}; k < n; k++) {
+      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    coder::SizeType sfe_idx_0;
+    //  Super-parametric
+    sfe_idx_0 = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(sfe_idx_0, 3);
+    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      coder::SizeType geom_dim;
+      coder::SizeType n;
+      coder::SizeType topo_dim;
+      coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(real_T));
+      n = xs.size(0);
+      for (coder::SizeType k{0}; k < n; k++) {
+        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        sfe_idx_0 = i + y;
+        b_sfe->jacTs[3 * sfe_idx_0] = dv[3 * i];
+        b_sfe->jacTs[3 * sfe_idx_0 + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * sfe_idx_0 + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
     }
   }
 }
@@ -11036,473 +11715,6 @@ static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
         b_sfe->jacTs[3 * a] = dv[3 * i];
         b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
         b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                     const ::coder::array<real_T, 2U> &xs,
-                     const ::coder::array<real_T, 2U> &qd_or_natcoords)
-{
-  coder::SizeType i;
-  coder::SizeType loop_ub;
-  coder::SizeType sfe_idx_0_tmp_tmp;
-  coder::SizeType topo_dim;
-  uint8_T c;
-  uint8_T geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag =
-        (static_cast<coder::SizeType>(static_cast<uint32_T>(etypes[0]) >> 5) ==
-         static_cast<coder::SizeType>(static_cast<uint32_T>(geom_etype) >> 5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<uint8_T>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  User-input natural coordinates
-  b_sfe->nqp = qd_or_natcoords.size(0);
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->ws.set_size(sfe_idx_0_tmp_tmp);
-  for (i = 0; i < sfe_idx_0_tmp_tmp; i++) {
-    b_sfe->ws[i] = 1.0;
-  }
-  //  user ones for dummy quad weights
-  b_sfe->cs.set_size(sfe_idx_0_tmp_tmp, topo_dim);
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    for (coder::SizeType k{0}; k < topo_dim; k++) {
-      b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-          qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
-    }
-  }
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-            b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
-      real_T v;
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const ::coder::array<real_T, 2U> &xs)
-{
-  real_T dv[9];
-  real_T v;
-  coder::SizeType i;
-  coder::SizeType sfe_idx_0_tmp_tmp;
-  boolean_T cond;
-  if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
-    cond = true;
-  } else {
-    cond = false;
-  }
-  m2cAssert(cond, "");
-  //  potentially skip re-tabulating
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((b_sfe->etypes[1] == 68) || (b_sfe->etypes[1] == 132) ||
-      (b_sfe->etypes[1] == 36)) {
-    real_T d;
-    coder::SizeType geom_dim;
-    coder::SizeType n;
-    coder::SizeType topo_dim;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(real_T));
-    n = xs.size(0);
-    for (coder::SizeType k{0}; k < n; k++) {
-      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    coder::SizeType sfe_idx_0;
-    //  Super-parametric
-    sfe_idx_0 = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(sfe_idx_0, 3);
-    for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      coder::SizeType geom_dim;
-      coder::SizeType n;
-      coder::SizeType topo_dim;
-      coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(real_T));
-      n = xs.size(0);
-      for (coder::SizeType k{0}; k < n; k++) {
-        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (coder::SizeType j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] *
-                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                        b_sfe->derivs_geom.size(2) *
-                                            b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i = 0; i < 3; i++) {
-        sfe_idx_0 = i + y;
-        b_sfe->jacTs[3 * sfe_idx_0] = dv[3 * i];
-        b_sfe->jacTs[3 * sfe_idx_0 + 1] = dv[3 * i + 1];
-        b_sfe->jacTs[3 * sfe_idx_0 + 2] = dv[3 * i + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                     const ::coder::array<real_T, 2U> &xs,
-                     coder::SizeType qd_or_natcoords,
-                     const ::coder::array<real_T, 2U> &userquad)
-{
-  real_T dv[9];
-  real_T v;
-  coder::SizeType a;
-  coder::SizeType i;
-  coder::SizeType i1;
-  coder::SizeType topo_dim;
-  uint8_T c;
-  uint8_T geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag =
-        (static_cast<coder::SizeType>(static_cast<uint32_T>(etypes[0]) >> 5) ==
-         static_cast<coder::SizeType>(static_cast<uint32_T>(geom_etype) >> 5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<uint8_T>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  Set up quadrature
-  if (qd_or_natcoords != -1) {
-    if (qd_or_natcoords == 0) {
-      //  trial+test+nonlinear_geom?1:0
-      a = obtain_elemdegree((etypes[0]));
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                        (xs.size(1) > topo_dim);
-    }
-    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
-    b_sfe->nqp = b_sfe->ws.size(0);
-  } else {
-    if ((userquad.size(0) == 0) || (userquad.size(1) == 0)) {
-      m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
-                        "missing user quadrature data");
-    }
-    if (userquad.size(1) != topo_dim + 1) {
-      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                        "bad user quadrature data size");
-    }
-    b_sfe->nqp = userquad.size(0);
-    b_sfe->ws.set_size(b_sfe->nqp);
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      b_sfe->ws[q] = userquad[userquad.size(1) * q];
-      for (coder::SizeType k{0}; k < topo_dim; k++) {
-        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-            userquad[(k + userquad.size(1) * q) + 1];
-      }
-    }
-  }
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  b_sfe->cs_phy.set_size(b_sfe->nqp, xs.size(1));
-  i = b_sfe->nqp;
-  for (coder::SizeType q{0}; q < i; q++) {
-    i1 = xs.size(1);
-    for (coder::SizeType k{0}; k < i1; k++) {
-      coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-    real_T d;
-    coder::SizeType geom_dim;
-    coder::SizeType n;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(real_T));
-    n = xs.size(0);
-    for (coder::SizeType k{0}; k < n; k++) {
-      for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
-    i = b_sfe->nqp;
-    for (coder::SizeType q{0}; q < i; q++) {
-      coder::SizeType geom_dim;
-      coder::SizeType n;
-      coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(real_T));
-      n = xs.size(0);
-      for (coder::SizeType k{0}; k < n; k++) {
-        for (coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (coder::SizeType j{0}; j < geom_dim; j++) {
-            i1 = j + 3 * b_i;
-            dv[i1] +=
-                xs[j + xs.size(1) * k] *
-                b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                   b_sfe->derivs_geom.size(2) *
-                                       b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i1 = 0; i1 < 3; i1++) {
-        a = i1 + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i1];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
       }
       b_sfe->wdetJ[q] = v;
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
@@ -13008,230 +13220,211 @@ void obtain_natcoords2d(coder::SizeType etype,
   switch (etype) {
   case 68: {
     real_T g_sfvals[6];
-    coder::SizeType ret;
-    ret = 3;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(3, 2);
     ::sfe_sfuncs::tri_3_ncoords(&g_sfvals[0]);
     for (coder::SizeType i{0}; i < 3; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = g_sfvals[ret];
-      natcoords[2 * i + 1] = g_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = g_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = g_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 72: {
     real_T h_sfvals[12];
-    coder::SizeType ret;
-    ret = 6;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(6, 2);
     ::sfe_sfuncs::tri_6_ncoords(&h_sfvals[0]);
     for (coder::SizeType i{0}; i < 6; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = h_sfvals[ret];
-      natcoords[2 * i + 1] = h_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = h_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = h_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 76: {
     real_T i_sfvals[20];
-    coder::SizeType ret;
-    ret = 10;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(10, 2);
     ::sfe_sfuncs::tri_10_ncoords(&i_sfvals[0]);
     for (coder::SizeType i{0}; i < 10; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = i_sfvals[ret];
-      natcoords[2 * i + 1] = i_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = i_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = i_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 77: {
     real_T i_sfvals[20];
-    coder::SizeType ret;
-    ret = 10;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(10, 2);
     ::sfe_sfuncs::tri_gl_10_ncoords(&i_sfvals[0]);
     for (coder::SizeType i{0}; i < 10; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = i_sfvals[ret];
-      natcoords[2 * i + 1] = i_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = i_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = i_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 80: {
     real_T j_sfvals[30];
-    coder::SizeType ret;
-    ret = 15;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(15, 2);
     ::sfe_sfuncs::tri_15_ncoords(&j_sfvals[0]);
     for (coder::SizeType i{0}; i < 15; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = j_sfvals[ret];
-      natcoords[2 * i + 1] = j_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = j_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = j_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 81: {
     real_T j_sfvals[30];
-    coder::SizeType ret;
-    ret = 15;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(15, 2);
     ::sfe_sfuncs::tri_gl_15_ncoords(&j_sfvals[0]);
     for (coder::SizeType i{0}; i < 15; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = j_sfvals[ret];
-      natcoords[2 * i + 1] = j_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = j_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = j_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 84: {
     real_T k_sfvals[42];
-    coder::SizeType ret;
-    ret = 21;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(21, 2);
     ::sfe_sfuncs::tri_21_ncoords(&k_sfvals[0]);
     for (coder::SizeType i{0}; i < 21; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = k_sfvals[ret];
-      natcoords[2 * i + 1] = k_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = k_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = k_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 85: {
     real_T k_sfvals[42];
-    coder::SizeType ret;
-    ret = 21;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(21, 2);
     ::sfe_sfuncs::tri_gl_21_ncoords(&k_sfvals[0]);
     for (coder::SizeType i{0}; i < 21; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = k_sfvals[ret];
-      natcoords[2 * i + 1] = k_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = k_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = k_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 88: {
     real_T l_sfvals[56];
-    coder::SizeType ret;
-    ret = 28;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(28, 2);
     ::sfe_sfuncs::tri_28_ncoords(&l_sfvals[0]);
     for (coder::SizeType i{0}; i < 28; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = l_sfvals[ret];
-      natcoords[2 * i + 1] = l_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = l_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = l_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 100: {
     real_T b_sfvals[8];
-    coder::SizeType ret;
-    ret = 4;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(4, 2);
     ::sfe_sfuncs::quad_4_ncoords(&b_sfvals[0]);
     for (coder::SizeType i{0}; i < 4; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = b_sfvals[ret];
-      natcoords[2 * i + 1] = b_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = b_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = b_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 104: {
     real_T c_sfvals[18];
-    coder::SizeType ret;
-    ret = 9;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(9, 2);
     ::sfe_sfuncs::quad_9_ncoords(&c_sfvals[0]);
     for (coder::SizeType i{0}; i < 9; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = c_sfvals[ret];
-      natcoords[2 * i + 1] = c_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = c_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = c_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 108: {
     real_T d_sfvals[32];
-    coder::SizeType ret;
-    ret = 16;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(16, 2);
     ::sfe_sfuncs::quad_16_ncoords(&d_sfvals[0]);
     for (coder::SizeType i{0}; i < 16; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = d_sfvals[ret];
-      natcoords[2 * i + 1] = d_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = d_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = d_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 109: {
     real_T d_sfvals[32];
-    coder::SizeType ret;
-    ret = 16;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(16, 2);
     ::sfe_sfuncs::quad_gl_16_ncoords(&d_sfvals[0]);
     for (coder::SizeType i{0}; i < 16; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = d_sfvals[ret];
-      natcoords[2 * i + 1] = d_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = d_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = d_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 112: {
     real_T e_sfvals[50];
-    coder::SizeType ret;
-    ret = 25;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(25, 2);
     ::sfe_sfuncs::quad_25_ncoords(&e_sfvals[0]);
     for (coder::SizeType i{0}; i < 25; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = e_sfvals[ret];
-      natcoords[2 * i + 1] = e_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = e_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = e_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 113: {
     real_T e_sfvals[50];
-    coder::SizeType ret;
-    ret = 25;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(25, 2);
     ::sfe_sfuncs::quad_gl_25_ncoords(&e_sfvals[0]);
     for (coder::SizeType i{0}; i < 25; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = e_sfvals[ret];
-      natcoords[2 * i + 1] = e_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = e_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = e_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 116: {
     real_T f_sfvals[72];
-    coder::SizeType ret;
-    ret = 36;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(36, 2);
     ::sfe_sfuncs::quad_36_ncoords(&f_sfvals[0]);
     for (coder::SizeType i{0}; i < 36; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = f_sfvals[ret];
-      natcoords[2 * i + 1] = f_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = f_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = f_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 117: {
     real_T f_sfvals[72];
-    coder::SizeType ret;
-    ret = 36;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(36, 2);
     ::sfe_sfuncs::quad_gl_36_ncoords(&f_sfvals[0]);
     for (coder::SizeType i{0}; i < 36; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = f_sfvals[ret];
-      natcoords[2 * i + 1] = f_sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = f_sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = f_sfvals[natcoords_tmp + 1];
     }
   } break;
   case 120: {
     real_T sfvals[98];
-    coder::SizeType ret;
-    ret = 49;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(49, 2);
     ::sfe_sfuncs::quad_49_ncoords(&sfvals[0]);
     for (coder::SizeType i{0}; i < 49; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = sfvals[ret];
-      natcoords[2 * i + 1] = sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = sfvals[natcoords_tmp + 1];
     }
   } break;
   default: {
     real_T sfvals[98];
-    coder::SizeType ret;
-    ret = 49;
-    natcoords.set_size(ret, 2);
+    natcoords.set_size(49, 2);
     ::sfe_sfuncs::quad_gl_49_ncoords(&sfvals[0]);
     for (coder::SizeType i{0}; i < 49; i++) {
-      ret = i << 1;
-      natcoords[2 * i] = sfvals[ret];
-      natcoords[2 * i + 1] = sfvals[ret + 1];
+      coder::SizeType natcoords_tmp;
+      natcoords_tmp = i << 1;
+      natcoords[2 * i] = sfvals[natcoords_tmp];
+      natcoords[2 * i + 1] = sfvals[natcoords_tmp + 1];
     }
   } break;
   }
@@ -13244,410 +13437,342 @@ void obtain_natcoords3d(coder::SizeType etype,
   switch (etype) {
   case 132: {
     real_T m_sfvals[12];
-    coder::SizeType ret;
-    ret = 4;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(4, 3);
     ::sfe_sfuncs::tet_4_ncoords(&m_sfvals[0]);
-    for (ret = 0; ret < 4; ret++) {
-      natcoords[3 * ret] = m_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = m_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = m_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 4; i++) {
+      natcoords[3 * i] = m_sfvals[3 * i];
+      natcoords[3 * i + 1] = m_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = m_sfvals[3 * i + 2];
     }
   } break;
   case 136: {
     real_T n_sfvals[30];
-    coder::SizeType ret;
-    ret = 10;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(10, 3);
     ::sfe_sfuncs::tet_10_ncoords(&n_sfvals[0]);
-    for (ret = 0; ret < 10; ret++) {
-      natcoords[3 * ret] = n_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = n_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = n_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 10; i++) {
+      natcoords[3 * i] = n_sfvals[3 * i];
+      natcoords[3 * i + 1] = n_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = n_sfvals[3 * i + 2];
     }
   } break;
   case 140: {
     real_T o_sfvals[60];
-    coder::SizeType ret;
-    ret = 20;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(20, 3);
     ::sfe_sfuncs::tet_20_ncoords(&o_sfvals[0]);
-    for (ret = 0; ret < 20; ret++) {
-      natcoords[3 * ret] = o_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = o_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = o_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 20; i++) {
+      natcoords[3 * i] = o_sfvals[3 * i];
+      natcoords[3 * i + 1] = o_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = o_sfvals[3 * i + 2];
     }
   } break;
   case 141: {
     real_T o_sfvals[60];
-    coder::SizeType ret;
-    ret = 20;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(20, 3);
     ::sfe_sfuncs::tet_gl_20_ncoords(&o_sfvals[0]);
-    for (ret = 0; ret < 20; ret++) {
-      natcoords[3 * ret] = o_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = o_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = o_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 20; i++) {
+      natcoords[3 * i] = o_sfvals[3 * i];
+      natcoords[3 * i + 1] = o_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = o_sfvals[3 * i + 2];
     }
   } break;
   case 144: {
     real_T p_sfvals[105];
-    coder::SizeType ret;
-    ret = 35;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(35, 3);
     ::sfe_sfuncs::tet_35_ncoords(&p_sfvals[0]);
-    for (ret = 0; ret < 35; ret++) {
-      natcoords[3 * ret] = p_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = p_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = p_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 35; i++) {
+      natcoords[3 * i] = p_sfvals[3 * i];
+      natcoords[3 * i + 1] = p_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = p_sfvals[3 * i + 2];
     }
   } break;
   case 145: {
     real_T p_sfvals[105];
-    coder::SizeType ret;
-    ret = 35;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(35, 3);
     ::sfe_sfuncs::tet_gl_35_ncoords(&p_sfvals[0]);
-    for (ret = 0; ret < 35; ret++) {
-      natcoords[3 * ret] = p_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = p_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = p_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 35; i++) {
+      natcoords[3 * i] = p_sfvals[3 * i];
+      natcoords[3 * i + 1] = p_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = p_sfvals[3 * i + 2];
     }
   } break;
   case 148: {
     real_T q_sfvals[168];
-    coder::SizeType ret;
-    ret = 56;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(56, 3);
     ::sfe_sfuncs::tet_56_ncoords(&q_sfvals[0]);
-    for (ret = 0; ret < 56; ret++) {
-      natcoords[3 * ret] = q_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = q_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = q_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 56; i++) {
+      natcoords[3 * i] = q_sfvals[3 * i];
+      natcoords[3 * i + 1] = q_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = q_sfvals[3 * i + 2];
     }
   } break;
   case 152: {
     real_T r_sfvals[252];
-    coder::SizeType ret;
-    ret = 84;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(84, 3);
     ::sfe_sfuncs::tet_84_ncoords(&r_sfvals[0]);
-    for (ret = 0; ret < 84; ret++) {
-      natcoords[3 * ret] = r_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = r_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = r_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 84; i++) {
+      natcoords[3 * i] = r_sfvals[3 * i];
+      natcoords[3 * i + 1] = r_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = r_sfvals[3 * i + 2];
     }
   } break;
   case 164: {
     real_T s_sfvals[15];
-    coder::SizeType ret;
-    ret = 5;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(5, 3);
     ::sfe_sfuncs::pyra_5_ncoords(&s_sfvals[0]);
-    for (ret = 0; ret < 5; ret++) {
-      natcoords[3 * ret] = s_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = s_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = s_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 5; i++) {
+      natcoords[3 * i] = s_sfvals[3 * i];
+      natcoords[3 * i + 1] = s_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = s_sfvals[3 * i + 2];
     }
   } break;
   case 168: {
     real_T t_sfvals[42];
-    coder::SizeType ret;
-    ret = 14;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(14, 3);
     ::sfe_sfuncs::pyra_14_ncoords(&t_sfvals[0]);
-    for (ret = 0; ret < 14; ret++) {
-      natcoords[3 * ret] = t_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = t_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = t_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 14; i++) {
+      natcoords[3 * i] = t_sfvals[3 * i];
+      natcoords[3 * i + 1] = t_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = t_sfvals[3 * i + 2];
     }
   } break;
   case 172: {
     real_T u_sfvals[90];
-    coder::SizeType ret;
-    ret = 30;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(30, 3);
     ::sfe_sfuncs::pyra_30_ncoords(&u_sfvals[0]);
-    for (ret = 0; ret < 30; ret++) {
-      natcoords[3 * ret] = u_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = u_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = u_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 30; i++) {
+      natcoords[3 * i] = u_sfvals[3 * i];
+      natcoords[3 * i + 1] = u_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = u_sfvals[3 * i + 2];
     }
   } break;
   case 173: {
     real_T u_sfvals[90];
-    coder::SizeType ret;
-    ret = 30;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(30, 3);
     ::sfe_sfuncs::pyra_gl_30_ncoords(&u_sfvals[0]);
-    for (ret = 0; ret < 30; ret++) {
-      natcoords[3 * ret] = u_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = u_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = u_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 30; i++) {
+      natcoords[3 * i] = u_sfvals[3 * i];
+      natcoords[3 * i + 1] = u_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = u_sfvals[3 * i + 2];
     }
   } break;
   case 176: {
     real_T v_sfvals[165];
-    coder::SizeType ret;
-    ret = 55;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(55, 3);
     ::sfe_sfuncs::pyra_55_ncoords(&v_sfvals[0]);
-    for (ret = 0; ret < 55; ret++) {
-      natcoords[3 * ret] = v_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = v_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = v_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 55; i++) {
+      natcoords[3 * i] = v_sfvals[3 * i];
+      natcoords[3 * i + 1] = v_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = v_sfvals[3 * i + 2];
     }
   } break;
   case 177: {
     real_T v_sfvals[165];
-    coder::SizeType ret;
-    ret = 55;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(55, 3);
     ::sfe_sfuncs::pyra_gl_55_ncoords(&v_sfvals[0]);
-    for (ret = 0; ret < 55; ret++) {
-      natcoords[3 * ret] = v_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = v_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = v_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 55; i++) {
+      natcoords[3 * i] = v_sfvals[3 * i];
+      natcoords[3 * i + 1] = v_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = v_sfvals[3 * i + 2];
     }
   } break;
   case 180: {
     real_T w_sfvals[273];
-    coder::SizeType ret;
-    ret = 91;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(91, 3);
     ::sfe_sfuncs::pyra_91_ncoords(&w_sfvals[0]);
-    for (ret = 0; ret < 91; ret++) {
-      natcoords[3 * ret] = w_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = w_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = w_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 91; i++) {
+      natcoords[3 * i] = w_sfvals[3 * i];
+      natcoords[3 * i + 1] = w_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = w_sfvals[3 * i + 2];
     }
   } break;
   case 196: {
     real_T sfvals[18];
-    coder::SizeType ret;
-    ret = 6;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(6, 3);
     ::sfe_sfuncs::prism_6_ncoords(&sfvals[0]);
-    for (ret = 0; ret < 6; ret++) {
-      natcoords[3 * ret] = sfvals[3 * ret];
-      natcoords[3 * ret + 1] = sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 6; i++) {
+      natcoords[3 * i] = sfvals[3 * i];
+      natcoords[3 * i + 1] = sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = sfvals[3 * i + 2];
     }
   } break;
   case 200: {
     real_T b_sfvals[54];
-    coder::SizeType ret;
-    ret = 18;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(18, 3);
     ::sfe_sfuncs::prism_18_ncoords(&b_sfvals[0]);
-    for (ret = 0; ret < 18; ret++) {
-      natcoords[3 * ret] = b_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = b_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = b_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 18; i++) {
+      natcoords[3 * i] = b_sfvals[3 * i];
+      natcoords[3 * i + 1] = b_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = b_sfvals[3 * i + 2];
     }
   } break;
   case 204: {
     real_T c_sfvals[120];
-    coder::SizeType ret;
-    ret = 40;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(40, 3);
     ::sfe_sfuncs::prism_40_ncoords(&c_sfvals[0]);
-    for (ret = 0; ret < 40; ret++) {
-      natcoords[3 * ret] = c_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = c_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = c_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 40; i++) {
+      natcoords[3 * i] = c_sfvals[3 * i];
+      natcoords[3 * i + 1] = c_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = c_sfvals[3 * i + 2];
     }
   } break;
   case 205: {
     real_T c_sfvals[120];
-    coder::SizeType ret;
-    ret = 40;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(40, 3);
     ::sfe_sfuncs::prism_gl_40_ncoords(&c_sfvals[0]);
-    for (ret = 0; ret < 40; ret++) {
-      natcoords[3 * ret] = c_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = c_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = c_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 40; i++) {
+      natcoords[3 * i] = c_sfvals[3 * i];
+      natcoords[3 * i + 1] = c_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = c_sfvals[3 * i + 2];
     }
   } break;
   case 208: {
     real_T d_sfvals[225];
-    coder::SizeType ret;
-    ret = 75;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(75, 3);
     ::sfe_sfuncs::prism_75_ncoords(&d_sfvals[0]);
-    for (ret = 0; ret < 75; ret++) {
-      natcoords[3 * ret] = d_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = d_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = d_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 75; i++) {
+      natcoords[3 * i] = d_sfvals[3 * i];
+      natcoords[3 * i + 1] = d_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = d_sfvals[3 * i + 2];
     }
   } break;
   case 209: {
     real_T d_sfvals[225];
-    coder::SizeType ret;
-    ret = 75;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(75, 3);
     ::sfe_sfuncs::prism_gl_75_ncoords(&d_sfvals[0]);
-    for (ret = 0; ret < 75; ret++) {
-      natcoords[3 * ret] = d_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = d_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = d_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 75; i++) {
+      natcoords[3 * i] = d_sfvals[3 * i];
+      natcoords[3 * i + 1] = d_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = d_sfvals[3 * i + 2];
     }
   } break;
   case 210: {
     real_T d_sfvals[225];
-    coder::SizeType ret;
-    ret = 75;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(75, 3);
     ::sfe_sfuncs::prism_fek_75_ncoords(&d_sfvals[0]);
-    for (ret = 0; ret < 75; ret++) {
-      natcoords[3 * ret] = d_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = d_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = d_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 75; i++) {
+      natcoords[3 * i] = d_sfvals[3 * i];
+      natcoords[3 * i + 1] = d_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = d_sfvals[3 * i + 2];
     }
   } break;
   case 212: {
     real_T j_sfvals[378];
-    coder::SizeType ret;
-    ret = 126;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(126, 3);
     ::sfe_sfuncs::prism_126_ncoords(&j_sfvals[0]);
-    for (ret = 0; ret < 126; ret++) {
-      natcoords[3 * ret] = j_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = j_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = j_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 126; i++) {
+      natcoords[3 * i] = j_sfvals[3 * i];
+      natcoords[3 * i + 1] = j_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = j_sfvals[3 * i + 2];
     }
   } break;
   case 216: {
     real_T k_sfvals[588];
-    coder::SizeType ret;
-    ret = 196;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(196, 3);
     ::sfe_sfuncs::prism_196_ncoords(&k_sfvals[0]);
-    for (ret = 0; ret < 196; ret++) {
-      natcoords[3 * ret] = k_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = k_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = k_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 196; i++) {
+      natcoords[3 * i] = k_sfvals[3 * i];
+      natcoords[3 * i + 1] = k_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = k_sfvals[3 * i + 2];
     }
   } break;
   case 228: {
     real_T e_sfvals[24];
-    coder::SizeType ret;
-    ret = 8;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(8, 3);
     ::sfe_sfuncs::hexa_8_ncoords(&e_sfvals[0]);
-    for (ret = 0; ret < 8; ret++) {
-      natcoords[3 * ret] = e_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = e_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = e_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 8; i++) {
+      natcoords[3 * i] = e_sfvals[3 * i];
+      natcoords[3 * i + 1] = e_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = e_sfvals[3 * i + 2];
     }
   } break;
   case 232: {
     real_T f_sfvals[81];
-    coder::SizeType ret;
-    ret = 27;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(27, 3);
     ::sfe_sfuncs::hexa_27_ncoords(&f_sfvals[0]);
-    for (ret = 0; ret < 27; ret++) {
-      natcoords[3 * ret] = f_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = f_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = f_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 27; i++) {
+      natcoords[3 * i] = f_sfvals[3 * i];
+      natcoords[3 * i + 1] = f_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = f_sfvals[3 * i + 2];
     }
   } break;
   case 236: {
     real_T g_sfvals[192];
-    coder::SizeType ret;
-    ret = 64;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(64, 3);
     ::sfe_sfuncs::hexa_64_ncoords(&g_sfvals[0]);
-    for (ret = 0; ret < 64; ret++) {
-      natcoords[3 * ret] = g_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = g_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = g_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 64; i++) {
+      natcoords[3 * i] = g_sfvals[3 * i];
+      natcoords[3 * i + 1] = g_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = g_sfvals[3 * i + 2];
     }
   } break;
   case 237: {
     real_T g_sfvals[192];
-    coder::SizeType ret;
-    ret = 64;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(64, 3);
     ::sfe_sfuncs::hexa_gl_64_ncoords(&g_sfvals[0]);
-    for (ret = 0; ret < 64; ret++) {
-      natcoords[3 * ret] = g_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = g_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = g_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 64; i++) {
+      natcoords[3 * i] = g_sfvals[3 * i];
+      natcoords[3 * i + 1] = g_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = g_sfvals[3 * i + 2];
     }
   } break;
   case 240: {
     real_T h_sfvals[375];
-    coder::SizeType ret;
-    ret = 125;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(125, 3);
     ::sfe_sfuncs::hexa_125_ncoords(&h_sfvals[0]);
-    for (ret = 0; ret < 125; ret++) {
-      natcoords[3 * ret] = h_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = h_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = h_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 125; i++) {
+      natcoords[3 * i] = h_sfvals[3 * i];
+      natcoords[3 * i + 1] = h_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = h_sfvals[3 * i + 2];
     }
   } break;
   case 241: {
     real_T h_sfvals[375];
-    coder::SizeType ret;
-    ret = 125;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(125, 3);
     ::sfe_sfuncs::hexa_gl_125_ncoords(&h_sfvals[0]);
-    for (ret = 0; ret < 125; ret++) {
-      natcoords[3 * ret] = h_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = h_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = h_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 125; i++) {
+      natcoords[3 * i] = h_sfvals[3 * i];
+      natcoords[3 * i + 1] = h_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = h_sfvals[3 * i + 2];
     }
   } break;
   case 244: {
     real_T l_sfvals[648];
-    coder::SizeType ret;
-    ret = 216;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(216, 3);
     ::sfe_sfuncs::hexa_216_ncoords(&l_sfvals[0]);
-    for (ret = 0; ret < 216; ret++) {
-      natcoords[3 * ret] = l_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = l_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = l_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 216; i++) {
+      natcoords[3 * i] = l_sfvals[3 * i];
+      natcoords[3 * i + 1] = l_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = l_sfvals[3 * i + 2];
     }
   } break;
   case 245: {
     real_T l_sfvals[648];
-    coder::SizeType ret;
-    ret = 216;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(216, 3);
     ::sfe_sfuncs::hexa_gl_216_ncoords(&l_sfvals[0]);
-    for (ret = 0; ret < 216; ret++) {
-      natcoords[3 * ret] = l_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = l_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = l_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 216; i++) {
+      natcoords[3 * i] = l_sfvals[3 * i];
+      natcoords[3 * i + 1] = l_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = l_sfvals[3 * i + 2];
     }
   } break;
   case 248: {
     real_T i_sfvals[1029];
-    coder::SizeType ret;
-    ret = 343;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(343, 3);
     ::sfe_sfuncs::hexa_343_ncoords(&i_sfvals[0]);
-    for (ret = 0; ret < 343; ret++) {
-      natcoords[3 * ret] = i_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = i_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = i_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 343; i++) {
+      natcoords[3 * i] = i_sfvals[3 * i];
+      natcoords[3 * i + 1] = i_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = i_sfvals[3 * i + 2];
     }
   } break;
   default: {
     real_T i_sfvals[1029];
-    coder::SizeType ret;
-    ret = 343;
-    natcoords.set_size(ret, 3);
+    natcoords.set_size(343, 3);
     ::sfe_sfuncs::hexa_gl_343_ncoords(&i_sfvals[0]);
-    for (ret = 0; ret < 343; ret++) {
-      natcoords[3 * ret] = i_sfvals[3 * ret];
-      natcoords[3 * ret + 1] = i_sfvals[3 * ret + 1];
-      natcoords[3 * ret + 2] = i_sfvals[3 * ret + 2];
+    for (coder::SizeType i{0}; i < 343; i++) {
+      natcoords[3 * i] = i_sfvals[3 * i];
+      natcoords[3 * i + 1] = i_sfvals[3 * i + 1];
+      natcoords[3 * i + 2] = i_sfvals[3 * i + 2];
     }
   } break;
   }
@@ -13657,10 +13782,9 @@ void obtain_natcoords3d(coder::SizeType etype,
 void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
                   const ::coder::array<real_T, 2U> &xs,
                   coder::SizeType qd_or_natcoords,
-                  const ::coder::array<real_T, 2U> &userquad)
+                  const ::coder::array<real_T, 2U> &varargin_1)
 {
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T cond;
@@ -13672,8 +13796,7 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
   m2cAssert(cond, "facet ID out of range");
   m2cAssert(xs.size(0) == iv[etypes - 1], "unmatched nnodes");
   obtain_facets(etypes, facetid, &geom_bnd_etype, lids_data, &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -13688,7 +13811,8 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
   trial_bnd_etype = obtain_facets(etypes, facetid);
   b_trial_bnd_etype[0] = trial_bnd_etype;
   b_trial_bnd_etype[1] = geom_bnd_etype;
-  sfe_init(b_sfe, b_trial_bnd_etype, b_sfe->xswork, qd_or_natcoords, userquad);
+  sfe_init(b_sfe, b_trial_bnd_etype, b_sfe->xswork, qd_or_natcoords,
+           varargin_1);
   //  reset to volume cell types
   b_sfe->etypes[0] = etypes;
   b_sfe->etypes[1] = etypes;
@@ -13699,7 +13823,6 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
                   const ::coder::array<real_T, 2U> &xs, int32_T)
 {
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T flag;
@@ -13720,8 +13843,7 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
   m2cAssert(xs.size(0) == iv[b_sfe->etypes[1] - 1], "unmatched nnodes");
   obtain_facets(b_sfe->etypes[1], facetid, &geom_bnd_etype, lids_data,
                 &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -13739,7 +13861,6 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
                   const ::coder::array<real_T, 2U> &xs)
 {
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T flag;
@@ -13760,8 +13881,7 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
   m2cAssert(xs.size(0) == iv[b_sfe->etypes[1] - 1], "unmatched nnodes");
   obtain_facets(b_sfe->etypes[1], facetid, &geom_bnd_etype, lids_data,
                 &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -13780,7 +13900,6 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
                   const ::coder::array<real_T, 2U> &)
 {
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T flag;
@@ -13801,8 +13920,7 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
   m2cAssert(xs.size(0) == iv[b_sfe->etypes[1] - 1], "unmatched nnodes");
   obtain_facets(b_sfe->etypes[1], facetid, &geom_bnd_etype, lids_data,
                 &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -13821,9 +13939,7 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
                   const ::coder::array<real_T, 2U> &xs,
                   coder::SizeType qd_or_natcoords)
 {
-  ::coder::array<real_T, 2U> tmp_data;
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T cond;
@@ -13835,8 +13951,7 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
   m2cAssert(cond, "facet ID out of range");
   m2cAssert(xs.size(0) == iv[etypes - 1], "unmatched nnodes");
   obtain_facets(etypes, facetid, &geom_bnd_etype, lids_data, &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -13851,8 +13966,7 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
   trial_bnd_etype = obtain_facets(etypes, facetid);
   b_trial_bnd_etype[0] = trial_bnd_etype;
   b_trial_bnd_etype[1] = geom_bnd_etype;
-  tmp_data.set(nullptr, 0, 0);
-  sfe_init(b_sfe, b_trial_bnd_etype, b_sfe->xswork, qd_or_natcoords, tmp_data);
+  sfe_init(b_sfe, b_trial_bnd_etype, b_sfe->xswork, qd_or_natcoords);
   //  reset to volume cell types
   b_sfe->etypes[0] = etypes;
   b_sfe->etypes[1] = etypes;
@@ -13864,7 +13978,6 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
                   const ::coder::array<real_T, 2U> &xs)
 {
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T cond;
@@ -13876,8 +13989,7 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
   m2cAssert(cond, "facet ID out of range");
   m2cAssert(xs.size(0) == iv[etypes - 1], "unmatched nnodes");
   obtain_facets(etypes, facetid, &geom_bnd_etype, lids_data, &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -13905,7 +14017,6 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
                   const ::coder::array<real_T, 2U> &qd_or_natcoords)
 {
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T cond;
@@ -13917,8 +14028,7 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
   m2cAssert(cond, "facet ID out of range");
   m2cAssert(xs.size(0) == iv[etypes - 1], "unmatched nnodes");
   obtain_facets(etypes, facetid, &geom_bnd_etype, lids_data, &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -13944,11 +14054,10 @@ void sfe_bnd_init(SfeObject *b_sfe, coder::SizeType etypes, int8_T facetid,
 void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
                   const ::coder::array<real_T, 2U> &xs,
                   coder::SizeType qd_or_natcoords,
-                  const ::coder::array<real_T, 2U> &userquad)
+                  const ::coder::array<real_T, 2U> &varargin_1)
 {
   coder::SizeType geom_etype;
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T flag;
@@ -13974,8 +14083,7 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   m2cAssert(flag, "facet ID out of range");
   m2cAssert(xs.size(0) == iv[geom_etype - 1], "unmatched nnodes");
   obtain_facets(geom_etype, facetid, &geom_bnd_etype, lids_data, &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -13990,7 +14098,8 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   trial_bnd_etype = obtain_facets(etypes[0], facetid);
   b_trial_bnd_etype[0] = trial_bnd_etype;
   b_trial_bnd_etype[1] = geom_bnd_etype;
-  sfe_init(b_sfe, b_trial_bnd_etype, b_sfe->xswork, qd_or_natcoords, userquad);
+  sfe_init(b_sfe, b_trial_bnd_etype, b_sfe->xswork, qd_or_natcoords,
+           varargin_1);
   //  reset to volume cell types
   b_sfe->etypes[0] = etypes[0];
   b_sfe->etypes[1] = geom_etype;
@@ -14002,10 +14111,8 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
                   const ::coder::array<real_T, 2U> &xs,
                   coder::SizeType qd_or_natcoords)
 {
-  ::coder::array<real_T, 2U> tmp_data;
   coder::SizeType geom_etype;
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T flag;
@@ -14031,8 +14138,7 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   m2cAssert(flag, "facet ID out of range");
   m2cAssert(xs.size(0) == iv[geom_etype - 1], "unmatched nnodes");
   obtain_facets(geom_etype, facetid, &geom_bnd_etype, lids_data, &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -14047,8 +14153,7 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   trial_bnd_etype = obtain_facets(etypes[0], facetid);
   b_trial_bnd_etype[0] = trial_bnd_etype;
   b_trial_bnd_etype[1] = geom_bnd_etype;
-  tmp_data.set(nullptr, 0, 0);
-  sfe_init(b_sfe, b_trial_bnd_etype, b_sfe->xswork, qd_or_natcoords, tmp_data);
+  sfe_init(b_sfe, b_trial_bnd_etype, b_sfe->xswork, qd_or_natcoords);
   //  reset to volume cell types
   b_sfe->etypes[0] = etypes[0];
   b_sfe->etypes[1] = geom_etype;
@@ -14061,7 +14166,6 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
 {
   coder::SizeType geom_etype;
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T flag;
@@ -14087,8 +14191,7 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   m2cAssert(flag, "facet ID out of range");
   m2cAssert(xs.size(0) == iv[geom_etype - 1], "unmatched nnodes");
   obtain_facets(geom_etype, facetid, &geom_bnd_etype, lids_data, &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -14117,7 +14220,6 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
 {
   coder::SizeType geom_etype;
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T flag;
@@ -14143,8 +14245,7 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   m2cAssert(flag, "facet ID out of range");
   m2cAssert(xs.size(0) == iv[geom_etype - 1], "unmatched nnodes");
   obtain_facets(geom_etype, facetid, &geom_bnd_etype, lids_data, &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -14172,7 +14273,6 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
                   const ::coder::array<real_T, 2U> &)
 {
   coder::SizeType lids_size;
-  coder::SizeType nfnodes;
   int16_T lids_data[50];
   uint8_T geom_bnd_etype;
   boolean_T flag;
@@ -14193,8 +14293,7 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
   m2cAssert(xs.size(0) == iv[b_sfe->etypes[1] - 1], "unmatched nnodes");
   obtain_facets(b_sfe->etypes[1], facetid, &geom_bnd_etype, lids_data,
                 &lids_size);
-  nfnodes = lids_size;
-  b_sfe->xswork.set_size(nfnodes, xs.size(1));
+  b_sfe->xswork.set_size(lids_size, xs.size(1));
   for (coder::SizeType i{0}; i < lids_size; i++) {
     coder::SizeType b_i;
     b_i = xs.size(1);
@@ -15379,9 +15478,9 @@ void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
                         "bad user quadrature data size");
     }
     b_sfe->nqp = userquad.size(0);
-    b_sfe->ws.set_size(b_sfe->nqp);
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-    i = b_sfe->nqp;
+    b_sfe->ws.set_size(userquad.size(0));
+    b_sfe->cs.set_size(userquad.size(0), topo_dim);
+    i = userquad.size(0);
     for (coder::SizeType q{0}; q < i; q++) {
       b_sfe->ws[q] = userquad[userquad.size(1) * q];
       for (coder::SizeType k{0}; k < topo_dim; k++) {
@@ -15896,11 +15995,13 @@ void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
     b_sfe->nqp = b_sfe->ws.size(0);
   } else {
     m2cErrMsgIdAndTxt("sfe_init:missUserQuad", "missing user quadrature data");
-    m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                      "bad user quadrature data size");
+    if (topo_dim + 1 != 0) {
+      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                        "bad user quadrature data size");
+    }
     b_sfe->nqp = 0;
-    b_sfe->ws.set_size(b_sfe->nqp);
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
+    b_sfe->ws.set_size(0);
+    b_sfe->cs.set_size(0, topo_dim);
   }
   //  Solution space shape functions & derivs
   tabulate_shapefuncs(etypes, b_sfe->cs, b_sfe->shapes_sol, b_sfe->derivs_sol);
@@ -16231,7 +16332,6 @@ void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
 {
   coder::SizeType i;
   coder::SizeType loop_ub;
-  coder::SizeType sfe_idx_0_tmp_tmp;
   coder::SizeType topo_dim;
   topo_dim = obtain_elemdim(etypes);
   //  Geometric dimension
@@ -16252,14 +16352,15 @@ void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
   b_sfe->nnodes[1] = i;
   //  User-input natural coordinates
   b_sfe->nqp = qd_or_natcoords.size(0);
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->ws.set_size(sfe_idx_0_tmp_tmp);
-  for (i = 0; i < sfe_idx_0_tmp_tmp; i++) {
+  b_sfe->ws.set_size(qd_or_natcoords.size(0));
+  loop_ub = qd_or_natcoords.size(0);
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->ws[i] = 1.0;
   }
   //  user ones for dummy quad weights
-  b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+  b_sfe->cs.set_size(qd_or_natcoords.size(0), topo_dim);
+  i = qd_or_natcoords.size(0);
+  for (coder::SizeType q{0}; q < i; q++) {
     for (coder::SizeType k{0}; k < topo_dim; k++) {
       b_sfe->cs[k + b_sfe->cs.size(1) * q] =
           qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
@@ -16283,10 +16384,11 @@ void sfe_init(SfeObject *b_sfe, coder::SizeType etypes,
     b_sfe->derivs_geom[i] = b_sfe->derivs_sol[i];
   }
   //  potentially skip re-tabulating
-  b_sfe->cs_phy.set_size(b_sfe->nqp, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
+  b_sfe->cs_phy.set_size(qd_or_natcoords.size(0), xs.size(1));
+  i = qd_or_natcoords.size(0);
+  for (coder::SizeType q{0}; q < i; q++) {
+    loop_ub = xs.size(1);
+    for (coder::SizeType k{0}; k < loop_ub; k++) {
       real_T v;
       coder::SizeType m;
       m = b_sfe->shapes_sol.size(1);
@@ -16364,9 +16466,9 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
                         "bad user quadrature data size");
     }
     b_sfe->nqp = userquad.size(0);
-    b_sfe->ws.set_size(b_sfe->nqp);
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-    i = b_sfe->nqp;
+    b_sfe->ws.set_size(userquad.size(0));
+    b_sfe->cs.set_size(userquad.size(0), topo_dim);
+    i = userquad.size(0);
     for (coder::SizeType q{0}; q < i; q++) {
       b_sfe->ws[q] = userquad[userquad.size(1) * q];
       for (coder::SizeType k{0}; k < topo_dim; k++) {
@@ -16579,11 +16681,13 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
     b_sfe->nqp = b_sfe->ws.size(0);
   } else {
     m2cErrMsgIdAndTxt("sfe_init:missUserQuad", "missing user quadrature data");
-    m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                      "bad user quadrature data size");
+    if (topo_dim + 1 != 0) {
+      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                        "bad user quadrature data size");
+    }
     b_sfe->nqp = 0;
-    b_sfe->ws.set_size(b_sfe->nqp);
-    b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
+    b_sfe->ws.set_size(0);
+    b_sfe->cs.set_size(0, topo_dim);
   }
   //  Solution space shape functions & derivs
   tabulate_shapefuncs(etypes[0], b_sfe->cs, b_sfe->shapes_geom,
@@ -16941,7 +17045,6 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   coder::SizeType geom_etype;
   coder::SizeType i;
   coder::SizeType loop_ub;
-  coder::SizeType sfe_idx_0_tmp_tmp;
   coder::SizeType topo_dim;
   boolean_T flag;
   if (etypes[1] == 0) {
@@ -16975,14 +17078,15 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   b_sfe->nnodes[1] = iv[geom_etype - 1];
   //  User-input natural coordinates
   b_sfe->nqp = qd_or_natcoords.size(0);
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->ws.set_size(sfe_idx_0_tmp_tmp);
-  for (i = 0; i < sfe_idx_0_tmp_tmp; i++) {
+  b_sfe->ws.set_size(qd_or_natcoords.size(0));
+  loop_ub = qd_or_natcoords.size(0);
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->ws[i] = 1.0;
   }
   //  user ones for dummy quad weights
-  b_sfe->cs.set_size(b_sfe->nqp, topo_dim);
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+  b_sfe->cs.set_size(qd_or_natcoords.size(0), topo_dim);
+  i = qd_or_natcoords.size(0);
+  for (coder::SizeType q{0}; q < i; q++) {
     for (coder::SizeType k{0}; k < topo_dim; k++) {
       b_sfe->cs[k + b_sfe->cs.size(1) * q] =
           qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
@@ -17011,10 +17115,11 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
                         b_sfe->derivs_geom);
   }
   //  potentially skip re-tabulating
-  b_sfe->cs_phy.set_size(b_sfe->nqp, xs.size(1));
-  for (coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (coder::SizeType k{0}; k < i; k++) {
+  b_sfe->cs_phy.set_size(qd_or_natcoords.size(0), xs.size(1));
+  i = qd_or_natcoords.size(0);
+  for (coder::SizeType q{0}; q < i; q++) {
+    loop_ub = xs.size(1);
+    for (coder::SizeType k{0}; k < loop_ub; k++) {
       real_T v;
       coder::SizeType m;
       m = b_sfe->shapes_geom.size(1);
