@@ -2,6 +2,9 @@
 // Main developers:
 //     sfelib: Xiangmin Jiao, Qiao Chen, Jacob Jones
 //     momp2cpp: Xiangmin Jiao, Qiao Chen
+// Main developers:
+//     sfelib: Xiangmin Jiao, Qiao Chen, Jacob Jones
+//     momp2cpp: Xiangmin Jiao, Qiao Chen
 //
 // sfe_internal.cpp
 //
@@ -48,72 +51,6 @@ static const int16_T iv[250]{
 
 // Function Declarations
 namespace sfe {
-static inline void b_sfe2_tabulate_equi_quad(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe2_tabulate_equi_tri(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe2_tabulate_fek_tri(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe2_tabulate_gl_quad(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe2_tabulate_gl_tri(::coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe2_tabulate_shapefuncs(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_equi_hexa(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_equi_prism(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_equi_pyra(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_equi_tet(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_gl_hexa(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_gl_prism(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_gl_pyra(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_gl_tet(::coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
-
-static inline void b_sfe3_tabulate_shapefuncs(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
 static inline void b_sfe_init(SfeObject *b_sfe,
                               const ::coder::array<real_T, 2U> &xs);
 
@@ -144,6 +81,12 @@ static inline void hexa_gl_343(real_T xi, real_T eta, real_T zeta,
 
 static inline void hexa_gl_64(real_T xi, real_T eta, real_T zeta,
                               real_T sfvals[64], real_T sdvals[192]);
+
+static inline uint8_T obtain_facets(::coder::SizeType etype);
+
+static inline void obtain_facets(::coder::SizeType etype, int8_T facetid,
+                                 uint8_T *ret, int16_T lids_data[],
+                                 ::coder::SizeType *lids_size);
 
 static inline uint8_T obtain_facets(::coder::SizeType etype, int8_T facetid);
 
@@ -211,37 +154,13 @@ static inline void sfe2_tabulate_equi_quad(::coder::SizeType etype,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_equi_quad(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::SizeType varargin_2,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
-
 static inline void sfe2_tabulate_equi_tri(::coder::SizeType etype,
                                           const ::coder::array<real_T, 2U> &cs,
                                           ::coder::array<real_T, 2U> &sfvals,
                                           ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_equi_tri(::coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::SizeType varargin_2,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
-
 static inline void sfe2_tabulate_fek_tri(::coder::SizeType etype,
                                          const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe2_tabulate_fek_tri(::coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::SizeType varargin_2,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe2_tabulate_gl_quad(::coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::SizeType varargin_2,
                                          ::coder::array<real_T, 2U> &sfvals,
                                          ::coder::array<real_T, 3U> &sdvals);
 
@@ -255,36 +174,14 @@ static inline void sfe2_tabulate_gl_tri(::coder::SizeType etype,
                                         ::coder::array<real_T, 2U> &sfvals,
                                         ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_gl_tri(::coder::SizeType etype,
-                                        const ::coder::array<real_T, 2U> &cs,
-                                        ::coder::SizeType varargin_2,
-                                        ::coder::array<real_T, 2U> &sfvals,
-                                        ::coder::array<real_T, 3U> &sdvals);
-
 static inline void sfe2_tabulate_shapefuncs(
     ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
     ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe2_tabulate_shapefuncs(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::SizeType varargin_2, ::coder::array<real_T, 2U> &sfvals,
-    ::coder::array<real_T, 3U> &sdvals);
-
 static inline void sfe3_tabulate_equi_hexa(::coder::SizeType etype,
                                            const ::coder::array<real_T, 2U> &cs,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_equi_hexa(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::SizeType varargin_2,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_equi_prism(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::SizeType varargin_2, ::coder::array<real_T, 2U> &sfvals,
-    ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_prism(
     ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
@@ -292,20 +189,8 @@ static inline void sfe3_tabulate_equi_prism(
 
 static inline void sfe3_tabulate_equi_pyra(::coder::SizeType etype,
                                            const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::SizeType varargin_2,
                                            ::coder::array<real_T, 2U> &sfvals,
                                            ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_equi_pyra(::coder::SizeType etype,
-                                           const ::coder::array<real_T, 2U> &cs,
-                                           ::coder::array<real_T, 2U> &sfvals,
-                                           ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_equi_tet(::coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::SizeType varargin_2,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_equi_tet(::coder::SizeType etype,
                                           const ::coder::array<real_T, 2U> &cs,
@@ -317,20 +202,8 @@ static inline void sfe3_tabulate_gl_hexa(::coder::SizeType etype,
                                          ::coder::array<real_T, 2U> &sfvals,
                                          ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_gl_hexa(::coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::SizeType varargin_2,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
-
 static inline void sfe3_tabulate_gl_prism(::coder::SizeType etype,
                                           const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::array<real_T, 2U> &sfvals,
-                                          ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_gl_prism(::coder::SizeType etype,
-                                          const ::coder::array<real_T, 2U> &cs,
-                                          ::coder::SizeType varargin_2,
                                           ::coder::array<real_T, 2U> &sfvals,
                                           ::coder::array<real_T, 3U> &sdvals);
 
@@ -339,41 +212,14 @@ static inline void sfe3_tabulate_gl_pyra(::coder::SizeType etype,
                                          ::coder::array<real_T, 2U> &sfvals,
                                          ::coder::array<real_T, 3U> &sdvals);
 
-static inline void sfe3_tabulate_gl_pyra(::coder::SizeType etype,
-                                         const ::coder::array<real_T, 2U> &cs,
-                                         ::coder::SizeType varargin_2,
-                                         ::coder::array<real_T, 2U> &sfvals,
-                                         ::coder::array<real_T, 3U> &sdvals);
-
 static inline void sfe3_tabulate_gl_tet(::coder::SizeType etype,
                                         const ::coder::array<real_T, 2U> &cs,
                                         ::coder::array<real_T, 2U> &sfvals,
                                         ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_gl_tet(::coder::SizeType etype,
-                                        const ::coder::array<real_T, 2U> &cs,
-                                        ::coder::SizeType varargin_2,
-                                        ::coder::array<real_T, 2U> &sfvals,
-                                        ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe3_tabulate_shapefuncs(
-    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
-    ::coder::SizeType varargin_2, ::coder::array<real_T, 2U> &sfvals,
-    ::coder::array<real_T, 3U> &sdvals);
 
 static inline void sfe3_tabulate_shapefuncs(
     ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
     ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals);
-
-static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                            const ::coder::array<real_T, 2U> &xs,
-                            const ::coder::array<real_T, 2U> &qd_or_natcoords);
-
-static inline void sfe_init(SfeObject *b_sfe,
-                            const ::coder::array<real_T, 2U> &xs);
-
-static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                            const ::coder::array<real_T, 2U> &xs);
 
 static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
                             const ::coder::array<real_T, 2U> &xs,
@@ -384,12 +230,32 @@ static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
                             ::coder::SizeType qd_or_natcoords,
                             const ::coder::array<real_T, 2U> &userquad);
 
+static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                            const ::coder::array<real_T, 2U> &xs);
+
+static inline void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                            const ::coder::array<real_T, 2U> &xs,
+                            const ::coder::array<real_T, 2U> &qd_or_natcoords);
+
+static inline void sfe_init(SfeObject *b_sfe,
+                            const ::coder::array<real_T, 2U> &xs);
+
 static inline boolean_T solve_sq(real_T J[9], ::coder::SizeType n,
                                  ::coder::array<real_T, 2U> &b1);
+
+static inline void tabulate_quadratures(::coder::SizeType etype,
+                                        ::coder::SizeType qd,
+                                        ::coder::array<real_T, 2U> &cs,
+                                        ::coder::array<real_T, 1U> &ws);
 
 static inline void tabulate_quadratures_deg_1(::coder::SizeType etype,
                                               ::coder::array<real_T, 2U> &cs,
                                               ::coder::array<real_T, 1U> &ws);
+
+static inline void tabulate_shapefuncs(::coder::SizeType etype,
+                                       const ::coder::array<real_T, 2U> &cs,
+                                       ::coder::array<real_T, 2U> &sfvals,
+                                       ::coder::array<real_T, 3U> &sdvals);
 
 static inline void tabulate_shapefuncs_deg_1(
     ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
@@ -439,2967 +305,6 @@ static inline void tri_quadrules(::coder::SizeType degree,
 
 // Function Definitions
 namespace sfe {
-static void b_sfe2_tabulate_equi_quad(::coder::SizeType etype,
-                                      const ::coder::array<real_T, 2U> &cs,
-                                      ::coder::array<real_T, 2U> &sfvals,
-                                      ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv10[98];
-  real_T dv7[72];
-  real_T dv6[50];
-  real_T dv11[49];
-  real_T dv9[36];
-  real_T dv8[25];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 100: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[8];
-      real_T dv[4];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 3) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 104: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv4[18];
-      real_T dv1[9];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_9_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv1[0], &dv4[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 8) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 108: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv5[32];
-      real_T dv2[16];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  &dv2[0], &dv5[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 15) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 112: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv6, dv8, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 24) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 116: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv7, dv9, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv9, dv7);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv7[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 35) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 120, "Only supports up to sextic.");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv10, dv11, loop_ub, i4, b_unnamed_idx_1,              \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 48) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void b_sfe2_tabulate_equi_tri(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv9[56];
-  real_T dv7[42];
-  real_T dv10[28];
-  real_T dv8[21];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 68: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv1[6];
-      real_T dv[3];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 2) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 72: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv4[12];
-      real_T dv1[6];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &dv1[0], &dv4[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 5) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 76: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv5[20];
-      real_T dv2[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv2[0], &dv5[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 80: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv6[30];
-      real_T dv3[15];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv3[0], &dv6[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 14) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 84: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv7, dv8, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv7);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv7[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 88, "Only support up to sextic.");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv9, dv10, loop_ub, i4, b_unnamed_idx_1,               \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv10, dv9);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv10[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv9[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void b_sfe2_tabulate_fek_tri(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv4[56];
-  real_T dv1[42];
-  real_T dv[30];
-  real_T dv5[28];
-  real_T dv3[21];
-  real_T dv2[15];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  triangular
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 82:
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv, dv2, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, \
-                        i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_15(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv2, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 14) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 86:
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv1, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_21(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv3, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 90, "Only supports up to sextic.");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv4, dv5, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_28(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void b_sfe2_tabulate_gl_quad(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[98];
-  real_T dv3[72];
-  real_T dv2[50];
-  real_T dv7[49];
-  real_T dv5[36];
-  real_T dv4[25];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  quad
-  nqp = cs.size(0);
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 109: {
-    for (::coder::SizeType q{0}; q < nqp; q++) {
-      real_T dv1[32];
-      real_T dv[16];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_gl_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                     &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 15) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 113: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv2, dv4, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv4, dv2);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv4[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv2[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 24) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 117: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv3, dv5, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv3);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 35) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 121, "Only supports up to sextic.");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv6, dv7, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 48) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void b_sfe2_tabulate_gl_tri(::coder::SizeType etype,
-                                   const ::coder::array<real_T, 2U> &cs,
-                                   ::coder::array<real_T, 2U> &sfvals,
-                                   ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[56];
-  real_T dv4[42];
-  real_T dv7[28];
-  real_T dv5[21];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 77: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[20];
-      real_T dv[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_gl_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                    &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 81: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[30];
-      real_T dv1[15];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_gl_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                    &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 14) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 85: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv4, dv5, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_gl_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 85, "Only support up to sextic");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv6, dv7, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_fek_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void b_sfe2_tabulate_shapefuncs(::coder::SizeType etype,
-                                       const ::coder::array<real_T, 2U> &cs,
-                                       ::coder::array<real_T, 2U> &sfvals,
-                                       ::coder::array<real_T, 3U> &sdvals)
-{
-  ::coder::SizeType postype;
-  postype = obtain_elemnodepos(etype);
-  switch (postype) {
-  case 0:
-    //  equi kernel
-    if (obtain_elemshape(etype) == 2) {
-      b_sfe2_tabulate_equi_tri(etype, cs, sfvals, sdvals);
-    } else {
-      b_sfe2_tabulate_equi_quad(etype, cs, sfvals, sdvals);
-    }
-    break;
-  case 1:
-    //  GL kernel
-    if (obtain_elemshape(etype) == 2) {
-      b_sfe2_tabulate_gl_tri(etype, cs, sfvals, sdvals);
-    } else {
-      b_sfe2_tabulate_gl_quad(etype, cs, sfvals, sdvals);
-    }
-    break;
-  default:
-    //  FEK kernel
-    b_sfe2_tabulate_fek_tri(etype, cs, sfvals, sdvals);
-    break;
-  }
-}
-
-static void b_sfe3_tabulate_equi_hexa(::coder::SizeType etype,
-                                      const ::coder::array<real_T, 2U> &cs,
-                                      ::coder::array<real_T, 2U> &sfvals,
-                                      ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T dv10[1029];
-  real_T tmp_data[1029];
-  real_T dv6[648];
-  real_T dv5[375];
-  real_T dv11[343];
-  real_T dv9[216];
-  real_T dv4[192];
-  real_T dv8[125];
-  real_T dv7[64];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  hex
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 228: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[24];
-      real_T dv[8];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::hexa_8_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 7) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 232: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[81];
-      real_T dv1[27];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::hexa_27_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 26) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 236: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv4, dv7, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_64(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 63) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 240: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv5, dv8, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_125(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 124) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 244: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv6, dv9, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_216(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv9, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 215) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 248, "Hex elements supports up to sextic.");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv10, dv11, loop_ub, i4, b_unnamed_idx_1,              \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_343(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 342) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void b_sfe3_tabulate_equi_prism(::coder::SizeType etype,
-                                       const ::coder::array<real_T, 2U> &cs,
-                                       ::coder::array<real_T, 2U> &sfvals,
-                                       ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv9[588];
-  real_T dv5[378];
-  real_T dv4[225];
-  real_T dv10[196];
-  real_T dv8[126];
-  real_T dv3[120];
-  real_T dv7[75];
-  real_T dv6[40];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  prisms
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 196: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv1[18];
-      real_T dv[6];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::prism_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 5) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 200: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[54];
-      real_T dv1[18];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::prism_18_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                   cs[cs.size(1) * q + 2], &dv1[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 17) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 204: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv3, dv6, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_40(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv6, dv3);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv6[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 39) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 208: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv4, dv7, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_75(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 74) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 212: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv5, dv8, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_126(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-                cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 125) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 216, "prismatic elements supports up to sextic.");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv9, dv10, loop_ub, i4, b_unnamed_idx_1,               \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_196(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-                cs[cs.size(1) * b_q + 2], dv10, dv9);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv10[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv9[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 195) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void b_sfe3_tabulate_equi_pyra(::coder::SizeType etype,
-                                      const ::coder::array<real_T, 2U> &cs,
-                                      ::coder::array<real_T, 2U> &sfvals,
-                                      ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[165];
-  real_T dv4[90];
-  real_T dv7[55];
-  real_T dv5[30];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  pyra
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 164: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[15];
-      real_T dv[5];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::pyra_5_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 4) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 168: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[42];
-      real_T dv1[14];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::pyra_14_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 13) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 172: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv4, dv5, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      pyra_30(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 29) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 176, "Pyramid only support up to quartic");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv6, dv7, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      pyra_55(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 54) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void b_sfe3_tabulate_equi_tet(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv10[252];
-  real_T dv6[168];
-  real_T dv5[105];
-  real_T dv11[84];
-  real_T dv4[60];
-  real_T dv9[56];
-  real_T dv8[35];
-  real_T dv7[20];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  tet
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 132: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[12];
-      real_T dv[4];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tet_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 3) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 136: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[30];
-      real_T dv1[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tet_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 140: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv4, dv7, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_20(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 19) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 144: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv5, dv8, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_35(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 34) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 148: {
-    ::coder::SizeType ub_loop;
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv6, dv9, loop_ub, i4, b_unnamed_idx_1,                \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_56(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv9, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 55) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 152, "equidistant tets only supported up to sextic");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv10, dv11, loop_ub, i4, b_unnamed_idx_1,              \
-                        b_unnamed_idx_2, i5, i6, b_tmp_size_idx_2,             \
-                        b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_84(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 83) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void b_sfe3_tabulate_gl_hexa(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T dv6[1029];
-  real_T tmp_data[1029];
-  real_T dv2[648];
-  real_T dv1[375];
-  real_T dv7[343];
-  real_T dv5[216];
-  real_T dv[192];
-  real_T dv4[125];
-  real_T dv3[64];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  hex
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 237:
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, \
-                        i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_64(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv3, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 63) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 241:
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv1, dv4, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_125(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv4, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv4[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 124) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 245:
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv2, dv5, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_216(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv5, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 215) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 249, "Gauss-Lobatto only supports up to sextic.");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv6, dv7, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_343(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv7[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 342) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void b_sfe3_tabulate_gl_prism(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv4[378];
-  real_T dv1[225];
-  real_T dv5[126];
-  real_T dv[120];
-  real_T dv3[75];
-  real_T dv2[40];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  prisms
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 205:
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv, dv2, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, \
-                        i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_40(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv2, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 39) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 209:
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv1, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_75(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv3, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 74) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 213, "Gauss-Lobatto only supports up to quintic.");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv4, dv5, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_126(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                   cs[cs.size(1) * q + 2], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 125) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void b_sfe3_tabulate_gl_pyra(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv2[165];
-  real_T dv[90];
-  real_T dv3[55];
-  real_T dv1[30];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  pyra
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  if (etype == 173) {
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv, dv1, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, \
-                        i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      pyra_gl_30(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv1, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 29) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } else {
-    m2cAssert(etype == 177, "Pyramid only support up to quartic");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv2, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      pyra_gl_55(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv3, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 54) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  }
-}
-
-static void b_sfe3_tabulate_gl_tet(::coder::SizeType etype,
-                                   const ::coder::array<real_T, 2U> &cs,
-                                   ::coder::array<real_T, 2U> &sfvals,
-                                   ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv2[105];
-  real_T dv[60];
-  real_T dv3[35];
-  real_T dv1[20];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  tet
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  if (etype == 141) {
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv, dv1, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, \
-                        i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tet_gl_20(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                cs[cs.size(1) * q + 2], dv1, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 19) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } else {
-    m2cAssert(
-        etype == 145,
-        "Gauss-Lobatto tetrahedral elements are supported only up to quartic");
-    //  Advanced OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp for private(dv2, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2,    \
-                        i1, i2, tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tet_gl_35(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                cs[cs.size(1) * q + 2], dv3, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 34) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  }
-}
-
-static void b_sfe3_tabulate_shapefuncs(::coder::SizeType etype,
-                                       const ::coder::array<real_T, 2U> &cs,
-                                       ::coder::array<real_T, 2U> &sfvals,
-                                       ::coder::array<real_T, 3U> &sdvals)
-{
-  ::coder::SizeType postype;
-  postype = obtain_elemnodepos(etype);
-  if (postype == 0) {
-    if (obtain_elemshape(etype) == 4) {
-      b_sfe3_tabulate_equi_tet(etype, cs, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 5) {
-      b_sfe3_tabulate_equi_pyra(etype, cs, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 6) {
-      b_sfe3_tabulate_equi_prism(etype, cs, sfvals, sdvals);
-    } else {
-      b_sfe3_tabulate_equi_hexa(etype, cs, sfvals, sdvals);
-    }
-  } else {
-    m2cAssert(postype == 1,
-              "Only supports Equidistant and Gauss-Lobatto points in 3D");
-    if (obtain_elemshape(etype) == 4) {
-      b_sfe3_tabulate_gl_tet(etype, cs, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 5) {
-      b_sfe3_tabulate_gl_pyra(etype, cs, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 6) {
-      b_sfe3_tabulate_gl_prism(etype, cs, sfvals, sdvals);
-    } else {
-      b_sfe3_tabulate_gl_hexa(etype, cs, sfvals, sdvals);
-    }
-  }
-}
-
 static void b_sfe_init(SfeObject *b_sfe, const ::coder::array<real_T, 2U> &xs)
 {
   ::coder::SizeType sfe_idx_0_tmp_tmp;
@@ -4338,8377 +1243,9 @@ static uint8_T obtain_facets(::coder::SizeType etype, int8_T facetid)
   }(etype, static_cast<int8_T>(facetid - 1));
 }
 
-// prism_126 - Quintic prismatic element with equidistant nodes
-static inline void prism_126(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[126], real_T sdvals[378])
-{
-  ::sfe_sfuncs::prism_126_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// prism_196 - Sextic prismatic element with equidistant nodes
-static inline void prism_196(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[196], real_T sdvals[588])
-{
-  ::sfe_sfuncs::prism_196_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// prism_40 - Cubic prismatic element
-static inline void prism_40(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[40], real_T sdvals[120])
-{
-  ::sfe_sfuncs::prism_40_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// prism_75 - Quartic prismatic element with equidistant nodes
-static inline void prism_75(real_T xi, real_T eta, real_T zeta,
-                            real_T sfvals[75], real_T sdvals[225])
-{
-  ::sfe_sfuncs::prism_75_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// prism_gl_126 - Quintic prismatic element with equidistant nodes
-static inline void prism_gl_126(real_T xi, real_T eta, real_T zeta,
-                                real_T sfvals[126], real_T sdvals[378])
-{
-  ::sfe_sfuncs::prism_gl_126_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// prism_gl_40 - Quadratic prismatic element with Gauss-Lobatto nodes
-static inline void prism_gl_40(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[40], real_T sdvals[120])
-{
-  ::sfe_sfuncs::prism_gl_40_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// prism_gl_75 - Quartic prismatic element with Gauss-Lobatto nodes
-static inline void prism_gl_75(real_T xi, real_T eta, real_T zeta,
-                               real_T sfvals[75], real_T sdvals[225])
-{
-  ::sfe_sfuncs::prism_gl_75_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// pyra_30 - Compute shape functions and their derivatives of pyra_30
-static inline void pyra_30(real_T xi, real_T eta, real_T zeta,
-                           real_T sfvals[30], real_T sdvals[90])
-{
-  ::sfe_sfuncs::pyra_30_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// pyra_55 - Compute shape functions and their derivatives of pyra_55
-static inline void pyra_55(real_T xi, real_T eta, real_T zeta,
-                           real_T sfvals[55], real_T sdvals[165])
-{
-  ::sfe_sfuncs::pyra_55_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// pyra_gl_30 - Compute shape functions and their derivatives of pyra_gl_30
-static inline void pyra_gl_30(real_T xi, real_T eta, real_T zeta,
-                              real_T sfvals[30], real_T sdvals[90])
-{
-  ::sfe_sfuncs::pyra_gl_30_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// pyra_gl_55 - Compute shape functions and their derivatives of pyra_gl_55
-static inline void pyra_gl_55(real_T xi, real_T eta, real_T zeta,
-                              real_T sfvals[55], real_T sdvals[165])
-{
-  ::sfe_sfuncs::pyra_gl_55_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-//  pyra_quadrules - Obtain quadrature points and weights of a pyramidal
-static void pyra_quadrules(::coder::SizeType degree,
-                           ::coder::array<real_T, 2U> &cs,
-                           ::coder::array<real_T, 1U> &ws)
-{
-  if (degree <= 1) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::pyra_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 2) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::pyra_deg2_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg2_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 3) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::pyra_deg3_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg3_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 5) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::pyra_deg5_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg5_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 6) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::pyra_deg6_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg6_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 7) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::pyra_deg7_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg7_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 9) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::pyra_deg9_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg9_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 11) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::pyra_deg11_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg11_qrule(&cs[0], &(ws.data())[0]);
-  } else {
-    ::coder::SizeType nqp;
-    if (degree > 13) {
-      m2cWarnMsgIdAndTxt("pyra_quadrules:UnsupportedDegree",
-                         "Only support up to degree 13");
-    }
-    nqp = ::sfe_qrules::pyra_deg13_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg13_qrule(&cs[0], &(ws.data())[0]);
-  }
-}
-
-// quad_25 - Biquartic quadrilateral element with equidistant points
-static inline void quad_25(real_T xi, real_T eta, real_T sfvals[25],
-                           real_T sdvals[50])
-{
-  ::sfe_sfuncs::quad_25_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// quad_36   Biquintic quadrilateral element with equidistant points
-static inline void quad_36(real_T xi, real_T eta, real_T sfvals[36],
-                           real_T sdvals[72])
-{
-  ::sfe_sfuncs::quad_36_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// quad_49 - Bisextic quadrilateral element with equidistant points
-static inline void quad_49(real_T xi, real_T eta, real_T sfvals[49],
-                           real_T sdvals[98])
-{
-  ::sfe_sfuncs::quad_49_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// quad_gl_25 - Biquartic quadrilateral element with Gauss-Lobatto points
-static inline void quad_gl_25(real_T xi, real_T eta, real_T sfvals[25],
-                              real_T sdvals[50])
-{
-  ::sfe_sfuncs::quad_gl_25_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// quad_gl_36 - Biquintic quadrilateral element with equidistant points
-static inline void quad_gl_36(real_T xi, real_T eta, real_T sfvals[36],
-                              real_T sdvals[72])
-{
-  ::sfe_sfuncs::quad_gl_36_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// quad_gl_49 - Bisextic quadrilateral element with equidistant points
-static inline void quad_gl_49(real_T xi, real_T eta, real_T sfvals[49],
-                              real_T sdvals[98])
-{
-  ::sfe_sfuncs::quad_gl_49_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-static void sfe1_tabulate_shapefuncs(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  ::coder::SizeType i;
-  ::coder::SizeType nqp;
-  //  Tabulate shape functions and derivative at given points.
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  if (obtain_elemnodepos(etype) == 0) {
-    switch (etype) {
-    case 36: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T N[2];
-        real_T deriv[2];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_2_sfunc(cs[i1], &N[0], &deriv[0]);
-        sfvals[sfvals.size(1) * q] = N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[1];
-      }
-    } break;
-    case 40: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T b_N[3];
-        real_T b_deriv[3];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_3_sfunc(cs[i1], &b_N[0], &b_deriv[0]);
-        sfvals[sfvals.size(1) * q] = b_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = b_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            b_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = b_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            b_deriv[2];
-      }
-    } break;
-    case 44: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T c_N[4];
-        real_T c_deriv[4];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_4_sfunc(cs[i1], &c_N[0], &c_deriv[0]);
-        sfvals[sfvals.size(1) * q] = c_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = c_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            c_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = c_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            c_deriv[2];
-        sfvals[sfvals.size(1) * q + 3] = c_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            c_deriv[3];
-      }
-    } break;
-    case 48: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T d_N[5];
-        real_T d_deriv[5];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_5_sfunc(cs[i1], &d_N[0], &d_deriv[0]);
-        sfvals[sfvals.size(1) * q] = d_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = d_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = d_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[2];
-        sfvals[sfvals.size(1) * q + 3] = d_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[3];
-        sfvals[sfvals.size(1) * q + 4] = d_N[4];
-        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[4];
-      }
-    } break;
-    case 52: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T e_N[6];
-        real_T e_deriv[6];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_6_sfunc(cs[i1], &e_N[0], &e_deriv[0]);
-        sfvals[sfvals.size(1) * q] = e_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = e_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = e_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = e_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[2];
-        sfvals[sfvals.size(1) * q + 3] = e_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[3];
-        sfvals[sfvals.size(1) * q + 4] = e_N[4];
-        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[4];
-        sfvals[sfvals.size(1) * q + 5] = e_N[5];
-        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[5];
-      }
-    } break;
-    default: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      m2cAssert(etype == 56, "Only support up to sextic.");
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T f_N[7];
-        real_T f_deriv[7];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_7_sfunc(cs[i1], &f_N[0], &f_deriv[0]);
-        sfvals[sfvals.size(1) * q] = f_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = f_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = f_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = f_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[2];
-        sfvals[sfvals.size(1) * q + 3] = f_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[3];
-        sfvals[sfvals.size(1) * q + 4] = f_N[4];
-        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[4];
-        sfvals[sfvals.size(1) * q + 5] = f_N[5];
-        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[5];
-        sfvals[sfvals.size(1) * q + 6] = f_N[6];
-        sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[6];
-      }
-    } break;
-    }
-  } else {
-    //  GL
-    switch (etype) {
-    case 45: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T c_N[4];
-        real_T c_deriv[4];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_gl_4_sfunc(cs[i1], &c_N[0], &c_deriv[0]);
-        sfvals[sfvals.size(1) * q] = c_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = c_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            c_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = c_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            c_deriv[2];
-        sfvals[sfvals.size(1) * q + 3] = c_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            c_deriv[3];
-      }
-    } break;
-    case 49: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T d_N[5];
-        real_T d_deriv[5];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_gl_5_sfunc(cs[i1], &d_N[0], &d_deriv[0]);
-        sfvals[sfvals.size(1) * q] = d_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = d_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = d_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[2];
-        sfvals[sfvals.size(1) * q + 3] = d_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[3];
-        sfvals[sfvals.size(1) * q + 4] = d_N[4];
-        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-            d_deriv[4];
-      }
-    } break;
-    case 53: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T e_N[6];
-        real_T e_deriv[6];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_gl_6_sfunc(cs[i1], &e_N[0], &e_deriv[0]);
-        sfvals[sfvals.size(1) * q] = e_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = e_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = e_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = e_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[2];
-        sfvals[sfvals.size(1) * q + 3] = e_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[3];
-        sfvals[sfvals.size(1) * q + 4] = e_N[4];
-        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[4];
-        sfvals[sfvals.size(1) * q + 5] = e_N[5];
-        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-            e_deriv[5];
-      }
-    } break;
-    default: {
-      ::coder::SizeType i1;
-      boolean_T b;
-      boolean_T b1;
-      m2cAssert(etype == 57, "Only support up to sextic.");
-      b = true;
-      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-      i = cs.size(1) * cs.size(0);
-      i1 = 0;
-      for (::coder::SizeType q{0}; q <= nqp; q++) {
-        real_T f_N[7];
-        real_T f_deriv[7];
-        if (b1 || (q >= i)) {
-          i1 = 0;
-          b = true;
-        } else if (b) {
-          b = false;
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          ::coder::SizeType i2;
-          i2 = cs.size(1) * cs.size(0) - 1;
-          if (i1 > MAX_int32_T - cs.size(1)) {
-            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-          } else {
-            i1 += cs.size(1);
-            if (i1 > i2) {
-              i1 -= i2;
-            }
-          }
-        }
-        ::sfe_sfuncs::bar_gl_7_sfunc(cs[i1], &f_N[0], &f_deriv[0]);
-        sfvals[sfvals.size(1) * q] = f_N[0];
-        sdvals[sdvals.size(2) * sdvals.size(1) * q] = f_deriv[0];
-        sfvals[sfvals.size(1) * q + 1] = f_N[1];
-        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[1];
-        sfvals[sfvals.size(1) * q + 2] = f_N[2];
-        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[2];
-        sfvals[sfvals.size(1) * q + 3] = f_N[3];
-        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[3];
-        sfvals[sfvals.size(1) * q + 4] = f_N[4];
-        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[4];
-        sfvals[sfvals.size(1) * q + 5] = f_N[5];
-        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[5];
-        sfvals[sfvals.size(1) * q + 6] = f_N[6];
-        sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
-            f_deriv[6];
-      }
-    } break;
-    }
-  }
-}
-
-static void sfe2_tabulate_equi_quad(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv10[98];
-  real_T dv7[72];
-  real_T dv6[50];
-  real_T dv11[49];
-  real_T dv9[36];
-  real_T dv8[25];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 100: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[8];
-      real_T dv[4];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 3) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 104: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv4[18];
-      real_T dv1[9];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_9_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv1[0], &dv4[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 8) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 108: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv5[32];
-      real_T dv2[16];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  &dv2[0], &dv5[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 15) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 112: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 24) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 116: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv9, dv7);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv7[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 35) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 120, "Only supports up to sextic.");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 48) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe2_tabulate_equi_quad(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::SizeType varargin_2,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv10[98];
-  real_T dv7[72];
-  real_T dv6[50];
-  real_T dv11[49];
-  real_T dv9[36];
-  real_T dv8[25];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 100: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[8];
-      real_T dv[4];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 3) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 104: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv4[18];
-      real_T dv1[9];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_9_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv1[0], &dv4[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 8) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 108: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv5[32];
-      real_T dv2[16];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  &dv2[0], &dv5[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 15) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 112: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv6, dv8, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 24) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 116: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv7, dv9, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv9, dv7);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv7[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 35) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 120, "Only supports up to sextic.");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv10, dv11, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,         \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 48) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe2_tabulate_equi_tri(::coder::SizeType etype,
-                                   const ::coder::array<real_T, 2U> &cs,
-                                   ::coder::array<real_T, 2U> &sfvals,
-                                   ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv9[56];
-  real_T dv7[42];
-  real_T dv10[28];
-  real_T dv8[21];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i3;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 68: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv1[6];
-      real_T dv[3];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 2) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 72: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv4[12];
-      real_T dv1[6];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &dv1[0], &dv4[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 5) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 76: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv5[20];
-      real_T dv2[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv2[0], &dv5[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 80: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv6[30];
-      real_T dv3[15];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv3[0], &dv6[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 14) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 84: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv7);
-      loop_ub = sfvals.size(1);
-      for (i3 = 0; i3 < loop_ub; i3++) {
-        sfvals[i3 + sfvals.size(1) * b_q] = dv8[i3];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i3 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv7[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i3++;
-        if (i3 > b_tmp_size_idx_1 - 1) {
-          i3 = 0;
-          i5++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i3) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 88, "Only support up to sextic.");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv10, dv9);
-      loop_ub = sfvals.size(1);
-      for (i3 = 0; i3 < loop_ub; i3++) {
-        sfvals[i3 + sfvals.size(1) * b_q] = dv10[i3];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i3 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv9[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i3++;
-        if (i3 > b_tmp_size_idx_1 - 1) {
-          i3 = 0;
-          i5++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i3) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe2_tabulate_equi_tri(::coder::SizeType etype,
-                                   const ::coder::array<real_T, 2U> &cs,
-                                   ::coder::SizeType varargin_2,
-                                   ::coder::array<real_T, 2U> &sfvals,
-                                   ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv9[56];
-  real_T dv7[42];
-  real_T dv10[28];
-  real_T dv8[21];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 68: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv1[6];
-      real_T dv[3];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 2) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 72: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv4[12];
-      real_T dv1[6];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &dv1[0], &dv4[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 5) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 76: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv5[20];
-      real_T dv2[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv2[0], &dv5[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 80: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv6[30];
-      real_T dv3[15];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv3[0], &dv6[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 14) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 84: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv7, dv8, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv7);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv7[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 88, "Only support up to sextic.");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv9, dv10, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,          \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv10, dv9);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv10[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv9[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe2_tabulate_fek_tri(::coder::SizeType etype,
-                                  const ::coder::array<real_T, 2U> &cs,
-                                  ::coder::SizeType varargin_2,
-                                  ::coder::array<real_T, 2U> &sfvals,
-                                  ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv4[56];
-  real_T dv1[42];
-  real_T dv[30];
-  real_T dv5[28];
-  real_T dv3[21];
-  real_T dv2[15];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  triangular
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 82:
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv, dv2, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2, tmp_size_idx_2, \
-    tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_15(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv2, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 14) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 86:
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv1, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_21(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv3, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 90, "Only supports up to sextic.");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv4, dv5, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_28(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void sfe2_tabulate_fek_tri(::coder::SizeType etype,
-                                  const ::coder::array<real_T, 2U> &cs,
-                                  ::coder::array<real_T, 2U> &sfvals,
-                                  ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv4[56];
-  real_T dv1[42];
-  real_T dv[30];
-  real_T dv5[28];
-  real_T dv3[21];
-  real_T dv2[15];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  triangular
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 82:
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_15(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv2, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 14) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 86:
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_21(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv3, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 90, "Only supports up to sextic.");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tri_fek_28(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void sfe2_tabulate_gl_quad(::coder::SizeType etype,
-                                  const ::coder::array<real_T, 2U> &cs,
-                                  ::coder::array<real_T, 2U> &sfvals,
-                                  ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[98];
-  real_T dv3[72];
-  real_T dv2[50];
-  real_T dv7[49];
-  real_T dv5[36];
-  real_T dv4[25];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  quad
-  nqp = cs.size(0);
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 109: {
-    for (::coder::SizeType q{0}; q < nqp; q++) {
-      real_T dv1[32];
-      real_T dv[16];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_gl_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                     &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 15) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 113: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv4, dv2);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv4[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv2[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 24) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 117: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv3);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 35) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 121, "Only supports up to sextic.");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 48) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe2_tabulate_gl_quad(::coder::SizeType etype,
-                                  const ::coder::array<real_T, 2U> &cs,
-                                  ::coder::SizeType varargin_2,
-                                  ::coder::array<real_T, 2U> &sfvals,
-                                  ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[98];
-  real_T dv3[72];
-  real_T dv2[50];
-  real_T dv7[49];
-  real_T dv5[36];
-  real_T dv4[25];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  quad
-  nqp = cs.size(0);
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 109: {
-    for (::coder::SizeType q{0}; q < nqp; q++) {
-      real_T dv1[32];
-      real_T dv[16];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_gl_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                     &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 15) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 113: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv2, dv4, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv4, dv2);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv4[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv2[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 24) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 117: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv3, dv5, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv3);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 35) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 121, "Only supports up to sextic.");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv6, dv7, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      quad_gl_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 48) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe2_tabulate_gl_tri(::coder::SizeType etype,
-                                 const ::coder::array<real_T, 2U> &cs,
-                                 ::coder::array<real_T, 2U> &sfvals,
-                                 ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[56];
-  real_T dv4[42];
-  real_T dv7[28];
-  real_T dv5[21];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i3;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 77: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[20];
-      real_T dv[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_gl_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                    &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 81: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[30];
-      real_T dv1[15];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_gl_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                    &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 14) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 85: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_gl_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i3 = 0; i3 < loop_ub; i3++) {
-        sfvals[i3 + sfvals.size(1) * b_q] = dv5[i3];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i3 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv4[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i3++;
-        if (i3 > b_tmp_size_idx_1 - 1) {
-          i3 = 0;
-          i5++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i3) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 85, "Only support up to sextic");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_fek_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i3 = 0; i3 < loop_ub; i3++) {
-        sfvals[i3 + sfvals.size(1) * b_q] = dv7[i3];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i3 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i3++;
-        if (i3 > b_tmp_size_idx_1 - 1) {
-          i3 = 0;
-          i5++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i3) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe2_tabulate_gl_tri(::coder::SizeType etype,
-                                 const ::coder::array<real_T, 2U> &cs,
-                                 ::coder::SizeType varargin_2,
-                                 ::coder::array<real_T, 2U> &sfvals,
-                                 ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[56];
-  real_T dv4[42];
-  real_T dv7[28];
-  real_T dv5[21];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  triangular
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 77: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[20];
-      real_T dv[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_gl_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                    &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 81: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[30];
-      real_T dv1[15];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_gl_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                    &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 14) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 85: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv4, dv5, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_gl_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 20) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 85, "Only support up to sextic");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv6, dv7, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tri_fek_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 27) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-// sfe2_tabulate_shapefuncs - Tabulate shape functions and sdvals at given
-static void sfe2_tabulate_shapefuncs(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::SizeType varargin_2,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  ::coder::SizeType postype;
-  postype = obtain_elemnodepos(etype);
-  switch (postype) {
-  case 0:
-    //  equi kernel
-    if (obtain_elemshape(etype) == 2) {
-      sfe2_tabulate_equi_tri(etype, cs, varargin_2, sfvals, sdvals);
-    } else {
-      sfe2_tabulate_equi_quad(etype, cs, varargin_2, sfvals, sdvals);
-    }
-    break;
-  case 1:
-    //  GL kernel
-    if (obtain_elemshape(etype) == 2) {
-      sfe2_tabulate_gl_tri(etype, cs, varargin_2, sfvals, sdvals);
-    } else {
-      sfe2_tabulate_gl_quad(etype, cs, varargin_2, sfvals, sdvals);
-    }
-    break;
-  default:
-    //  FEK kernel
-    sfe2_tabulate_fek_tri(etype, cs, varargin_2, sfvals, sdvals);
-    break;
-  }
-}
-
-// sfe2_tabulate_shapefuncs - Tabulate shape functions and sdvals at given
-static void sfe2_tabulate_shapefuncs(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  ::coder::SizeType postype;
-  postype = obtain_elemnodepos(etype);
-  switch (postype) {
-  case 0:
-    //  equi kernel
-    if (obtain_elemshape(etype) == 2) {
-      sfe2_tabulate_equi_tri(etype, cs, sfvals, sdvals);
-    } else {
-      sfe2_tabulate_equi_quad(etype, cs, sfvals, sdvals);
-    }
-    break;
-  case 1:
-    //  GL kernel
-    if (obtain_elemshape(etype) == 2) {
-      sfe2_tabulate_gl_tri(etype, cs, sfvals, sdvals);
-    } else {
-      sfe2_tabulate_gl_quad(etype, cs, sfvals, sdvals);
-    }
-    break;
-  default:
-    //  FEK kernel
-    sfe2_tabulate_fek_tri(etype, cs, sfvals, sdvals);
-    break;
-  }
-}
-
-static void sfe3_tabulate_equi_hexa(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::SizeType varargin_2,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T dv10[1029];
-  real_T tmp_data[1029];
-  real_T dv6[648];
-  real_T dv5[375];
-  real_T dv11[343];
-  real_T dv9[216];
-  real_T dv4[192];
-  real_T dv8[125];
-  real_T dv7[64];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  hex
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 228: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[24];
-      real_T dv[8];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::hexa_8_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 7) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 232: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[81];
-      real_T dv1[27];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::hexa_27_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 26) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 236: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv4, dv7, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_64(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 63) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 240: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv5, dv8, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_125(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 124) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 244: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv6, dv9, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_216(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv9, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 215) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 248, "Hex elements supports up to sextic.");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv10, dv11, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,         \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_343(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 342) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe3_tabulate_equi_hexa(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T dv10[1029];
-  real_T tmp_data[1029];
-  real_T dv6[648];
-  real_T dv5[375];
-  real_T dv11[343];
-  real_T dv9[216];
-  real_T dv4[192];
-  real_T dv8[125];
-  real_T dv7[64];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  hex
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 228: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[24];
-      real_T dv[8];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::hexa_8_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 7) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 232: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[81];
-      real_T dv1[27];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::hexa_27_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 26) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 236: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_64(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 63) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 240: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_125(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 124) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 244: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_216(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv9, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 215) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 248, "Hex elements supports up to sextic.");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      hexa_343(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 342) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe3_tabulate_equi_prism(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv9[588];
-  real_T dv5[378];
-  real_T dv4[225];
-  real_T dv10[196];
-  real_T dv8[126];
-  real_T dv3[120];
-  real_T dv7[75];
-  real_T dv6[40];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  prisms
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 196: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv1[18];
-      real_T dv[6];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::prism_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 5) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 200: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[54];
-      real_T dv1[18];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::prism_18_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                   cs[cs.size(1) * q + 2], &dv1[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 17) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 204: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_40(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv6, dv3);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv6[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 39) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 208: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_75(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 74) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 212: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_126(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-                cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 125) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 216, "prismatic elements supports up to sextic.");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_196(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-                cs[cs.size(1) * b_q + 2], dv10, dv9);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv10[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv9[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 195) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe3_tabulate_equi_prism(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::SizeType varargin_2,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv9[588];
-  real_T dv5[378];
-  real_T dv4[225];
-  real_T dv10[196];
-  real_T dv8[126];
-  real_T dv3[120];
-  real_T dv7[75];
-  real_T dv6[40];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  prisms
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 196: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv1[18];
-      real_T dv[6];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::prism_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv[0], &dv1[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 5) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 200: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[54];
-      real_T dv1[18];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::prism_18_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                   cs[cs.size(1) * q + 2], &dv1[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 17) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 204: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv3, dv6, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_40(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv6, dv3);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv6[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 39) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 208: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv4, dv7, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_75(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-               cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 74) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 212: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv5, dv8, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_126(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-                cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 125) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 216, "prismatic elements supports up to sextic.");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv9, dv10, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,          \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      prism_196(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-                cs[cs.size(1) * b_q + 2], dv10, dv9);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv10[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv9[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 195) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe3_tabulate_equi_pyra(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[165];
-  real_T dv4[90];
-  real_T dv7[55];
-  real_T dv5[30];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i2;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  pyra
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 164: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[15];
-      real_T dv[5];
-      ::coder::SizeType i1;
-      ::coder::SizeType i3;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::pyra_5_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i3 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i3 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 4) {
-          ub_loop = 0;
-          i3++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 168: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[42];
-      real_T dv1[14];
-      ::coder::SizeType i1;
-      ::coder::SizeType i3;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::pyra_14_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i3 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i3 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 13) {
-          ub_loop = 0;
-          i3++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 172: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      pyra_30(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i2 = 0; i2 < loop_ub; i2++) {
-        sfvals[i2 + sfvals.size(1) * b_q] = dv5[i2];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i2 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i2] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i2++;
-        if (i2 > b_tmp_size_idx_1 - 1) {
-          i2 = 0;
-          i5++;
-        }
-        if (loop_ub > 29) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i2 = 0; i2 < b_tmp_size_idx_1; i2++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i2) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i2];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 176, "Pyramid only support up to quartic");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      pyra_55(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i2 = 0; i2 < loop_ub; i2++) {
-        sfvals[i2 + sfvals.size(1) * b_q] = dv7[i2];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i2 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i2] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i2++;
-        if (i2 > b_tmp_size_idx_1 - 1) {
-          i2 = 0;
-          i5++;
-        }
-        if (loop_ub > 54) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i2 = 0; i2 < b_tmp_size_idx_1; i2++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i2) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i2];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe3_tabulate_equi_pyra(::coder::SizeType etype,
-                                    const ::coder::array<real_T, 2U> &cs,
-                                    ::coder::SizeType varargin_2,
-                                    ::coder::array<real_T, 2U> &sfvals,
-                                    ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv6[165];
-  real_T dv4[90];
-  real_T dv7[55];
-  real_T dv5[30];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  pyra
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 164: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[15];
-      real_T dv[5];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::pyra_5_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 4) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 168: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[42];
-      real_T dv1[14];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::pyra_14_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 13) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 172: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv4, dv5, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      pyra_30(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 29) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 176, "Pyramid only support up to quartic");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv6, dv7, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      pyra_55(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-              cs[cs.size(1) * b_q + 2], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 54) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe3_tabulate_equi_tet(::coder::SizeType etype,
-                                   const ::coder::array<real_T, 2U> &cs,
-                                   ::coder::array<real_T, 2U> &sfvals,
-                                   ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv10[252];
-  real_T dv6[168];
-  real_T dv5[105];
-  real_T dv11[84];
-  real_T dv4[60];
-  real_T dv9[56];
-  real_T dv8[35];
-  real_T dv7[20];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i3;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  tet
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 132: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[12];
-      real_T dv[4];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tet_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 3) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 136: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[30];
-      real_T dv1[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tet_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 140: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_20(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i3 = 0; i3 < loop_ub; i3++) {
-        sfvals[i3 + sfvals.size(1) * b_q] = dv7[i3];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i3 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i3++;
-        if (i3 > b_tmp_size_idx_1 - 1) {
-          i3 = 0;
-          i5++;
-        }
-        if (loop_ub > 19) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i3) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
-        }
-      }
-    }
-  } break;
-  case 144: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_35(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i3 = 0; i3 < loop_ub; i3++) {
-        sfvals[i3 + sfvals.size(1) * b_q] = dv8[i3];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i3 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i3++;
-        if (i3 > b_tmp_size_idx_1 - 1) {
-          i3 = 0;
-          i5++;
-        }
-        if (loop_ub > 34) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i3) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
-        }
-      }
-    }
-  } break;
-  case 148: {
-    ::coder::SizeType ub_loop;
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_56(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv9, dv6);
-      loop_ub = sfvals.size(1);
-      for (i3 = 0; i3 < loop_ub; i3++) {
-        sfvals[i3 + sfvals.size(1) * b_q] = dv9[i3];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i3 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i3++;
-        if (i3 > b_tmp_size_idx_1 - 1) {
-          i3 = 0;
-          i5++;
-        }
-        if (loop_ub > 55) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i3) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 152, "equidistant tets only supported up to sextic");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_84(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i3 = 0; i3 < loop_ub; i3++) {
-        sfvals[i3 + sfvals.size(1) * b_q] = dv11[i3];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i3 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv10[i6 + 3 * loop_ub];
-        loop_ub++;
-        i3++;
-        if (i3 > b_tmp_size_idx_1 - 1) {
-          i3 = 0;
-          i5++;
-        }
-        if (loop_ub > 83) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i3) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe3_tabulate_equi_tet(::coder::SizeType etype,
-                                   const ::coder::array<real_T, 2U> &cs,
-                                   ::coder::SizeType varargin_2,
-                                   ::coder::array<real_T, 2U> &sfvals,
-                                   ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T b_tmp_data[1029];
-  real_T tmp_data[1029];
-  real_T dv10[252];
-  real_T dv6[168];
-  real_T dv5[105];
-  real_T dv11[84];
-  real_T dv4[60];
-  real_T dv9[56];
-  real_T dv8[35];
-  real_T dv7[20];
-  ::coder::SizeType b_tmp_size_idx_1;
-  ::coder::SizeType b_tmp_size_idx_2;
-  ::coder::SizeType i;
-  ::coder::SizeType i4;
-  ::coder::SizeType i5;
-  ::coder::SizeType i6;
-  ::coder::SizeType i7;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType nqp;
-  int16_T b_unnamed_idx_1;
-  int16_T b_unnamed_idx_2;
-  //  tet
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 132: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[12];
-      real_T dv[4];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tet_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 3) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 136: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[30];
-      real_T dv1[10];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      ::coder::SizeType ub_loop;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tet_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
-      ub_loop = sfvals.size(1);
-      for (i = 0; i < ub_loop; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      ub_loop = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
-        ub_loop++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (ub_loop > 9) {
-          ub_loop = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 140: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv4, dv7, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_20(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv7, dv4);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 19) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 144: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv5, dv8, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_35(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv8, dv5);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 34) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  case 148: {
-    ::coder::SizeType ub_loop;
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv6, dv9, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,           \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_56(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv9, dv6);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 55) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  default: {
-    ::coder::SizeType ub_loop;
-    m2cAssert(etype == 152, "equidistant tets only supported up to sextic");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv10, dv11, loop_ub, i4, b_unnamed_idx_1, b_unnamed_idx_2, i5, i6,         \
-    b_tmp_size_idx_2, b_tmp_size_idx_1, i7, b_tmp_data)
-    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
-      tet_84(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
-             cs[cs.size(1) * b_q + 2], dv11, dv10);
-      loop_ub = sfvals.size(1);
-      for (i4 = 0; i4 < loop_ub; i4++) {
-        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
-      }
-      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i4 = 0;
-      i5 = 0;
-      loop_ub = 0;
-      i6 = 0;
-      b_tmp_size_idx_2 = sdvals.size(2);
-      b_tmp_size_idx_1 = sdvals.size(1);
-      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
-        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + 3 * loop_ub];
-        loop_ub++;
-        i4++;
-        if (i4 > b_tmp_size_idx_1 - 1) {
-          i4 = 0;
-          i5++;
-        }
-        if (loop_ub > 83) {
-          loop_ub = 0;
-          i6++;
-        }
-      }
-      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
-        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
-          sdvals[(i5 + sdvals.size(2) * i4) +
-                 sdvals.size(2) * sdvals.size(1) * b_q] =
-              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-static void sfe3_tabulate_gl_hexa(::coder::SizeType etype,
-                                  const ::coder::array<real_T, 2U> &cs,
-                                  ::coder::array<real_T, 2U> &sfvals,
-                                  ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T dv6[1029];
-  real_T tmp_data[1029];
-  real_T dv2[648];
-  real_T dv1[375];
-  real_T dv7[343];
-  real_T dv5[216];
-  real_T dv[192];
-  real_T dv4[125];
-  real_T dv3[64];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  hex
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 237:
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_64(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv3, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 63) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 241:
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_125(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv4, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv4[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 124) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 245:
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_216(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv5, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 215) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 249, "Gauss-Lobatto only supports up to sextic.");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_343(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv7[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 342) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void sfe3_tabulate_gl_hexa(::coder::SizeType etype,
-                                  const ::coder::array<real_T, 2U> &cs,
-                                  ::coder::SizeType varargin_2,
-                                  ::coder::array<real_T, 2U> &sfvals,
-                                  ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T dv6[1029];
-  real_T tmp_data[1029];
-  real_T dv2[648];
-  real_T dv1[375];
-  real_T dv7[343];
-  real_T dv5[216];
-  real_T dv[192];
-  real_T dv4[125];
-  real_T dv3[64];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  hex
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 237:
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2, tmp_size_idx_2, \
-    tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_64(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv3, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 63) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 241:
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv1, dv4, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_125(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv4, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv4[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 124) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 245:
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv2, dv5, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_216(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv5, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 215) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 249, "Gauss-Lobatto only supports up to sextic.");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv6, dv7, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      hexa_gl_343(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv7, dv6);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv7[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 342) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void sfe3_tabulate_gl_prism(::coder::SizeType etype,
-                                   const ::coder::array<real_T, 2U> &cs,
-                                   ::coder::SizeType varargin_2,
-                                   ::coder::array<real_T, 2U> &sfvals,
-                                   ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv4[378];
-  real_T dv1[225];
-  real_T dv5[126];
-  real_T dv[120];
-  real_T dv3[75];
-  real_T dv2[40];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  prisms
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 205:
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv, dv2, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2, tmp_size_idx_2, \
-    tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_40(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv2, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 39) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 209:
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv1, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_75(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv3, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 74) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 213, "Gauss-Lobatto only supports up to quintic.");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv4, dv5, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_126(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                   cs[cs.size(1) * q + 2], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 125) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void sfe3_tabulate_gl_prism(::coder::SizeType etype,
-                                   const ::coder::array<real_T, 2U> &cs,
-                                   ::coder::array<real_T, 2U> &sfvals,
-                                   ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv4[378];
-  real_T dv1[225];
-  real_T dv5[126];
-  real_T dv[120];
-  real_T dv3[75];
-  real_T dv2[40];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  prisms
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  switch (etype) {
-  case 205:
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_40(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv2, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 39) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  case 209:
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_75(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                  cs[cs.size(1) * q + 2], dv3, dv1);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 74) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  default:
-    m2cAssert(etype == 213, "Gauss-Lobatto only supports up to quintic.");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      prism_gl_126(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                   cs[cs.size(1) * q + 2], dv5, dv4);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 125) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-    break;
-  }
-}
-
-static void sfe3_tabulate_gl_pyra(::coder::SizeType etype,
-                                  const ::coder::array<real_T, 2U> &cs,
-                                  ::coder::array<real_T, 2U> &sfvals,
-                                  ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv2[165];
-  real_T dv[90];
-  real_T dv3[55];
-  real_T dv1[30];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  pyra
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  if (etype == 173) {
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      pyra_gl_30(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv1, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 29) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } else {
-    m2cAssert(etype == 177, "Pyramid only support up to quartic");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      pyra_gl_55(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv3, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 54) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  }
-}
-
-static void sfe3_tabulate_gl_pyra(::coder::SizeType etype,
-                                  const ::coder::array<real_T, 2U> &cs,
-                                  ::coder::SizeType varargin_2,
-                                  ::coder::array<real_T, 2U> &sfvals,
-                                  ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv2[165];
-  real_T dv[90];
-  real_T dv3[55];
-  real_T dv1[30];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  pyra
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  if (etype == 173) {
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv, dv1, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2, tmp_size_idx_2, \
-    tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      pyra_gl_30(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv1, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 29) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } else {
-    m2cAssert(etype == 177, "Pyramid only support up to quartic");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv2, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      pyra_gl_55(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                 cs[cs.size(1) * q + 2], dv3, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 54) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  }
-}
-
-static void sfe3_tabulate_gl_tet(::coder::SizeType etype,
-                                 const ::coder::array<real_T, 2U> &cs,
-                                 ::coder::array<real_T, 2U> &sfvals,
-                                 ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv2[105];
-  real_T dv[60];
-  real_T dv3[35];
-  real_T dv1[20];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  tet
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  if (etype == 141) {
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tet_gl_20(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                cs[cs.size(1) * q + 2], dv1, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 19) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } else {
-    m2cAssert(
-        etype == 145,
-        "Gauss-Lobatto tetrahedral elements are supported only up to quartic");
-    //  Serial mode
-    ub_loop = cs.size(0) - 1;
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tet_gl_35(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                cs[cs.size(1) * q + 2], dv3, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 34) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  }
-}
-
-static void sfe3_tabulate_gl_tet(::coder::SizeType etype,
-                                 const ::coder::array<real_T, 2U> &cs,
-                                 ::coder::SizeType varargin_2,
-                                 ::coder::array<real_T, 2U> &sfvals,
-                                 ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  real_T dv2[105];
-  real_T dv[60];
-  real_T dv3[35];
-  real_T dv1[20];
-  ::coder::SizeType i;
-  ::coder::SizeType i1;
-  ::coder::SizeType i2;
-  ::coder::SizeType i3;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType tmp_size_idx_1;
-  ::coder::SizeType tmp_size_idx_2;
-  ::coder::SizeType ub_loop;
-  int16_T unnamed_idx_1;
-  int16_T unnamed_idx_2;
-  //  tet
-  ub_loop = iv[etype - 1];
-  sfvals.set_size(cs.size(0), ub_loop);
-  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
-  if (etype == 141) {
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv, dv1, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2, tmp_size_idx_2, \
-    tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tet_gl_20(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                cs[cs.size(1) * q + 2], dv1, dv);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 19) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } else {
-    m2cAssert(
-        etype == 145,
-        "Gauss-Lobatto tetrahedral elements are supported only up to quartic");
-    //  Basic OpenMP mode
-    ub_loop = cs.size(0) - 1;
-#pragma omp parallel for num_threads(varargin_2) private(                      \
-    dv2, dv3, loop_ub, i, unnamed_idx_1, unnamed_idx_2, i1, i2,                \
-    tmp_size_idx_2, tmp_size_idx_1, i3, tmp_data)
-    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
-      tet_gl_35(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                cs[cs.size(1) * q + 2], dv3, dv2);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv3[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 34) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  }
-}
-
-// sfe3_tabulate_shapefuncs - Tabulate shape functions and sdvals at qpoints
-static void sfe3_tabulate_shapefuncs(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  ::coder::SizeType postype;
-  postype = obtain_elemnodepos(etype);
-  if (postype == 0) {
-    if (obtain_elemshape(etype) == 4) {
-      sfe3_tabulate_equi_tet(etype, cs, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 5) {
-      sfe3_tabulate_equi_pyra(etype, cs, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 6) {
-      sfe3_tabulate_equi_prism(etype, cs, sfvals, sdvals);
-    } else {
-      sfe3_tabulate_equi_hexa(etype, cs, sfvals, sdvals);
-    }
-  } else {
-    m2cAssert(postype == 1,
-              "Only supports Equidistant and Gauss-Lobatto points in 3D");
-    if (obtain_elemshape(etype) == 4) {
-      sfe3_tabulate_gl_tet(etype, cs, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 5) {
-      sfe3_tabulate_gl_pyra(etype, cs, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 6) {
-      sfe3_tabulate_gl_prism(etype, cs, sfvals, sdvals);
-    } else {
-      sfe3_tabulate_gl_hexa(etype, cs, sfvals, sdvals);
-    }
-  }
-}
-
-// sfe3_tabulate_shapefuncs - Tabulate shape functions and sdvals at qpoints
-static void sfe3_tabulate_shapefuncs(::coder::SizeType etype,
-                                     const ::coder::array<real_T, 2U> &cs,
-                                     ::coder::SizeType varargin_2,
-                                     ::coder::array<real_T, 2U> &sfvals,
-                                     ::coder::array<real_T, 3U> &sdvals)
-{
-  ::coder::SizeType postype;
-  postype = obtain_elemnodepos(etype);
-  if (postype == 0) {
-    if (obtain_elemshape(etype) == 4) {
-      sfe3_tabulate_equi_tet(etype, cs, varargin_2, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 5) {
-      sfe3_tabulate_equi_pyra(etype, cs, varargin_2, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 6) {
-      sfe3_tabulate_equi_prism(etype, cs, varargin_2, sfvals, sdvals);
-    } else {
-      sfe3_tabulate_equi_hexa(etype, cs, varargin_2, sfvals, sdvals);
-    }
-  } else {
-    m2cAssert(postype == 1,
-              "Only supports Equidistant and Gauss-Lobatto points in 3D");
-    if (obtain_elemshape(etype) == 4) {
-      sfe3_tabulate_gl_tet(etype, cs, varargin_2, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 5) {
-      sfe3_tabulate_gl_pyra(etype, cs, varargin_2, sfvals, sdvals);
-    } else if (obtain_elemshape(etype) == 6) {
-      sfe3_tabulate_gl_prism(etype, cs, varargin_2, sfvals, sdvals);
-    } else {
-      sfe3_tabulate_gl_hexa(etype, cs, varargin_2, sfvals, sdvals);
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                     const ::coder::array<real_T, 2U> &xs,
-                     ::coder::SizeType qd_or_natcoords,
-                     const ::coder::array<real_T, 2U> &userquad)
-{
-  real_T dv[9];
-  real_T v;
-  ::coder::SizeType a;
-  ::coder::SizeType i;
-  ::coder::SizeType sfe_idx_0_tmp_tmp;
-  ::coder::SizeType topo_dim;
-  uint8_T c;
-  uint8_T geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (static_cast<::coder::SizeType>(static_cast<uint32_T>(etypes[0]) >>
-                                           5) ==
-            static_cast<::coder::SizeType>(static_cast<uint32_T>(geom_etype) >>
-                                           5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<uint8_T>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  Set up quadrature
-  if (qd_or_natcoords != -1) {
-    if (qd_or_natcoords == 0) {
-      //  trial+test+nonlinear_geom?1:0
-      a = obtain_elemdegree((etypes[0]));
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                        (xs.size(1) > topo_dim);
-    }
-    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
-    b_sfe->nqp = b_sfe->ws.size(0);
-  } else {
-    if ((userquad.size(0) == 0) || (userquad.size(1) == 0)) {
-      m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
-                        "missing user quadrature data");
-    }
-    if (userquad.size(1) != topo_dim + 1) {
-      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                        "bad user quadrature data size");
-    }
-    b_sfe->nqp = userquad.size(0);
-    b_sfe->ws.set_size(userquad.size(0));
-    b_sfe->cs.set_size(userquad.size(0), topo_dim);
-    i = userquad.size(0);
-    for (::coder::SizeType q{0}; q < i; q++) {
-      b_sfe->ws[q] = userquad[userquad.size(1) * q];
-      for (::coder::SizeType k{0}; k < topo_dim; k++) {
-        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-            userquad[(k + userquad.size(1) * q) + 1];
-      }
-    }
-  }
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (::coder::SizeType k{0}; k < i; k++) {
-      ::coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-    real_T d;
-    ::coder::SizeType geom_dim;
-    ::coder::SizeType n;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(real_T));
-    n = xs.size(0);
-    for (::coder::SizeType k{0}; k < n; k++) {
-      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (::coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      ::coder::SizeType geom_dim;
-      ::coder::SizeType n;
-      ::coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(real_T));
-      n = xs.size(0);
-      for (::coder::SizeType k{0}; k < n; k++) {
-        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (::coder::SizeType j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] *
-                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                        b_sfe->derivs_geom.size(2) *
-                                            b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i = 0; i < 3; i++) {
-        a = i + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const ::coder::array<real_T, 2U> &xs)
-{
-  real_T dv[9];
-  real_T v;
-  ::coder::SizeType i;
-  ::coder::SizeType sfe_idx_0_tmp_tmp;
-  boolean_T cond;
-  if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
-    cond = true;
-  } else {
-    cond = false;
-  }
-  m2cAssert(cond, "");
-  //  potentially skip re-tabulating
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (::coder::SizeType k{0}; k < i; k++) {
-      ::coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((b_sfe->etypes[1] == 68) || (b_sfe->etypes[1] == 132) ||
-      (b_sfe->etypes[1] == 36)) {
-    real_T d;
-    ::coder::SizeType geom_dim;
-    ::coder::SizeType n;
-    ::coder::SizeType topo_dim;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(real_T));
-    n = xs.size(0);
-    for (::coder::SizeType k{0}; k < n; k++) {
-      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (::coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    ::coder::SizeType sfe_idx_0;
-    //  Super-parametric
-    sfe_idx_0 = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(sfe_idx_0, 3);
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      ::coder::SizeType geom_dim;
-      ::coder::SizeType n;
-      ::coder::SizeType topo_dim;
-      ::coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(real_T));
-      n = xs.size(0);
-      for (::coder::SizeType k{0}; k < n; k++) {
-        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (::coder::SizeType j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] *
-                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                        b_sfe->derivs_geom.size(2) *
-                                            b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i = 0; i < 3; i++) {
-        sfe_idx_0 = i + y;
-        b_sfe->jacTs[3 * sfe_idx_0] = dv[3 * i];
-        b_sfe->jacTs[3 * sfe_idx_0 + 1] = dv[3 * i + 1];
-        b_sfe->jacTs[3 * sfe_idx_0 + 2] = dv[3 * i + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                     const ::coder::array<real_T, 2U> &xs,
-                     const ::coder::array<real_T, 2U> &qd_or_natcoords)
-{
-  ::coder::SizeType i;
-  ::coder::SizeType loop_ub;
-  ::coder::SizeType topo_dim;
-  uint8_T c;
-  uint8_T geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (static_cast<::coder::SizeType>(static_cast<uint32_T>(etypes[0]) >>
-                                           5) ==
-            static_cast<::coder::SizeType>(static_cast<uint32_T>(geom_etype) >>
-                                           5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<uint8_T>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  User-input natural coordinates
-  b_sfe->nqp = qd_or_natcoords.size(0);
-  b_sfe->ws.set_size(qd_or_natcoords.size(0));
-  loop_ub = qd_or_natcoords.size(0);
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->ws[i] = 1.0;
-  }
-  //  user ones for dummy quad weights
-  b_sfe->cs.set_size(qd_or_natcoords.size(0), topo_dim);
-  i = qd_or_natcoords.size(0);
-  for (::coder::SizeType q{0}; q < i; q++) {
-    for (::coder::SizeType k{0}; k < topo_dim; k++) {
-      b_sfe->cs[k + b_sfe->cs.size(1) * q] =
-          qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
-    }
-  }
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-            b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < loop_ub; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  b_sfe->cs_phy.set_size(qd_or_natcoords.size(0), xs.size(1));
-  i = qd_or_natcoords.size(0);
-  for (::coder::SizeType q{0}; q < i; q++) {
-    loop_ub = xs.size(1);
-    for (::coder::SizeType k{0}; k < loop_ub; k++) {
-      real_T v;
-      ::coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                     const ::coder::array<real_T, 2U> &xs)
-{
-  real_T dv[9];
-  real_T v;
-  ::coder::SizeType a;
-  ::coder::SizeType i;
-  ::coder::SizeType qd_or_natcoords;
-  ::coder::SizeType sfe_idx_0_tmp_tmp;
-  ::coder::SizeType topo_dim;
-  uint8_T c;
-  uint8_T geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (static_cast<::coder::SizeType>(static_cast<uint32_T>(etypes[0]) >>
-                                           5) ==
-            static_cast<::coder::SizeType>(static_cast<uint32_T>(geom_etype) >>
-                                           5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<uint8_T>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  Set up quadrature
-  a = obtain_elemdegree((etypes[0]));
-  qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                    (xs.size(1) > topo_dim);
-  tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
-  b_sfe->nqp = b_sfe->ws.size(0);
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (::coder::SizeType k{0}; k < i; k++) {
-      ::coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-    real_T d;
-    ::coder::SizeType geom_dim;
-    ::coder::SizeType n;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(real_T));
-    n = xs.size(0);
-    for (::coder::SizeType k{0}; k < n; k++) {
-      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (::coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      ::coder::SizeType geom_dim;
-      ::coder::SizeType n;
-      ::coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(real_T));
-      n = xs.size(0);
-      for (::coder::SizeType k{0}; k < n; k++) {
-        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (::coder::SizeType j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] *
-                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                        b_sfe->derivs_geom.size(2) *
-                                            b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i = 0; i < 3; i++) {
-        a = i + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
-static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
-                     const ::coder::array<real_T, 2U> &xs,
-                     ::coder::SizeType qd_or_natcoords)
-{
-  real_T dv[9];
-  real_T v;
-  ::coder::SizeType a;
-  ::coder::SizeType i;
-  ::coder::SizeType sfe_idx_0_tmp_tmp;
-  ::coder::SizeType topo_dim;
-  uint8_T c;
-  uint8_T geom_etype;
-  boolean_T flag;
-  if (etypes[1] == 0) {
-    geom_etype = etypes[0];
-  } else {
-    geom_etype = etypes[1];
-  }
-  flag = etypes[0] == geom_etype;
-  if (!flag) {
-    //  then the shapes must match
-    flag = (static_cast<::coder::SizeType>(static_cast<uint32_T>(etypes[0]) >>
-                                           5) ==
-            static_cast<::coder::SizeType>(static_cast<uint32_T>(geom_etype) >>
-                                           5));
-  }
-  m2cAssert(flag, "invalid element combinations");
-  c = static_cast<uint8_T>((etypes[0]) >> 5);
-  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
-  //  Geometric dimension
-  if (xs.size(1) < topo_dim) {
-    m2cErrMsgIdAndTxt("sfe_init:badDim",
-                      "geometric dim cannot be smaller than topo dim");
-  }
-  b_sfe->geom_dim = xs.size(1);
-  //  assign geom dimension
-  b_sfe->topo_dim = topo_dim;
-  //  assign topo dimension
-  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
-  b_sfe->etypes[0] = etypes[0];
-  b_sfe->etypes[1] = geom_etype;
-  //  Get number of nodes per element
-  b_sfe->nnodes[0] = iv[etypes[0] - 1];
-  b_sfe->nnodes[1] = iv[geom_etype - 1];
-  //  Set up quadrature
-  if (qd_or_natcoords != -1) {
-    if (qd_or_natcoords == 0) {
-      //  trial+test+nonlinear_geom?1:0
-      a = obtain_elemdegree((etypes[0]));
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                        (xs.size(1) > topo_dim);
-    }
-    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
-    b_sfe->nqp = b_sfe->ws.size(0);
-  } else {
-    m2cErrMsgIdAndTxt("sfe_init:missUserQuad", "missing user quadrature data");
-    m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                      "bad user quadrature data size");
-    b_sfe->nqp = 0;
-    b_sfe->ws.set_size(0);
-    b_sfe->cs.set_size(0, topo_dim);
-  }
-  //  Solution space shape functions & derivs
-  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
-                      b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
-  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
-                             b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
-    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
-  }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
-  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
-                             b_sfe->derivs_geom.size(1),
-                             b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
-    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
-  }
-  //  Geometry space shape functions & derivs
-  if (etypes[0] != geom_etype) {
-    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
-                        b_sfe->derivs_geom);
-  }
-  //  potentially skip re-tabulating
-  sfe_idx_0_tmp_tmp = b_sfe->nqp;
-  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
-  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-    i = xs.size(1);
-    for (::coder::SizeType k{0}; k < i; k++) {
-      ::coder::SizeType m;
-      m = b_sfe->shapes_geom.size(1);
-      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
-      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
-        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
-             xs[k + xs.size(1) * (b_i - 1)];
-      }
-      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
-    }
-  }
-  //  Compute Jacobian
-  b_sfe->wdetJ.set_size(b_sfe->nqp);
-  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
-    real_T d;
-    ::coder::SizeType geom_dim;
-    ::coder::SizeType n;
-    //  A single Jacobian matrix (transpose) is needed for simplex elements
-    geom_dim = xs.size(1);
-    topo_dim = b_sfe->derivs_geom.size(2);
-    std::memset(&dv[0], 0, 9U * sizeof(real_T));
-    n = xs.size(0);
-    for (::coder::SizeType k{0}; k < n; k++) {
-      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-        for (::coder::SizeType j{0}; j < geom_dim; j++) {
-          i = j + 3 * b_i;
-          dv[i] += xs[j + xs.size(1) * k] *
-                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
-        }
-      }
-    }
-    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-      if (xs.size(1) == 1) {
-        d = dv[0];
-      } else if (xs.size(1) == 2) {
-        d = dv[0] * dv[4] - dv[1] * dv[3];
-      } else {
-        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-      }
-    } else if (b_sfe->derivs_geom.size(2) == 1) {
-      d = dv[0] * dv[0] + dv[1] * dv[1];
-      if (xs.size(1) == 3) {
-        d += dv[2] * dv[2];
-      }
-      d = std::sqrt(d);
-    } else {
-      //  must be 2x3
-      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-    }
-    b_sfe->jacTs.set_size(3, 3);
-    for (i = 0; i < 9; i++) {
-      b_sfe->jacTs[i] = dv[i];
-    }
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
-    }
-  } else {
-    //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
-    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
-      ::coder::SizeType geom_dim;
-      ::coder::SizeType n;
-      ::coder::SizeType y;
-      y = q * 3;
-      geom_dim = xs.size(1);
-      topo_dim = b_sfe->derivs_geom.size(2);
-      std::memset(&dv[0], 0, 9U * sizeof(real_T));
-      n = xs.size(0);
-      for (::coder::SizeType k{0}; k < n; k++) {
-        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
-          for (::coder::SizeType j{0}; j < geom_dim; j++) {
-            i = j + 3 * b_i;
-            dv[i] += xs[j + xs.size(1) * k] *
-                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
-                                        b_sfe->derivs_geom.size(2) *
-                                            b_sfe->derivs_geom.size(1) * q];
-          }
-        }
-      }
-      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
-        if (xs.size(1) == 1) {
-          v = dv[0];
-        } else if (xs.size(1) == 2) {
-          v = dv[0] * dv[4] - dv[1] * dv[3];
-        } else {
-          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
-               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
-              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
-        }
-      } else if (b_sfe->derivs_geom.size(2) == 1) {
-        v = dv[0] * dv[0] + dv[1] * dv[1];
-        if (xs.size(1) == 3) {
-          v += dv[2] * dv[2];
-        }
-        v = std::sqrt(v);
-      } else {
-        //  must be 2x3
-        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
-        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
-        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
-        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
-      }
-      for (i = 0; i < 3; i++) {
-        a = i + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i + 2];
-      }
-      b_sfe->wdetJ[q] = v;
-      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
-    }
-  }
-}
-
-static boolean_T solve_sq(real_T J[9], ::coder::SizeType n,
-                          ::coder::array<real_T, 2U> &b1)
-{
-  ::coder::SizeType m1;
-  boolean_T info;
-  m1 = b1.size(0) - 1;
-  info = false;
-  if (n == 1) {
-    if (J[0] == 0.0) {
-      info = true;
-    } else {
-      real_T ji;
-      ji = 1.0 / J[0];
-      for (::coder::SizeType i{0}; i <= m1; i++) {
-        b1[b1.size(1) * i] = b1[b1.size(1) * i] * ji;
-      }
-    }
-  } else {
-    real_T pivot;
-    real_T t;
-    boolean_T guard1{false};
-    boolean_T guard2{false};
-    boolean_T guard3{false};
-    guard1 = false;
-    guard2 = false;
-    guard3 = false;
-    if (n == 2) {
-      if (std::abs(J[0]) >= std::abs(J[3])) {
-        pivot = J[0];
-        if (J[0] == 0.0) {
-          info = true;
-        } else {
-          guard2 = true;
-        }
-      } else {
-        pivot = J[3];
-        t = J[3];
-        J[3] = J[0];
-        J[0] = t;
-        t = J[4];
-        J[4] = J[1];
-        J[1] = t;
-        for (::coder::SizeType i{0}; i <= m1; i++) {
-          t = b1[b1.size(1) * i + 1];
-          b1[b1.size(1) * i + 1] = b1[b1.size(1) * i];
-          b1[b1.size(1) * i] = t;
-        }
-        guard2 = true;
-      }
-    } else {
-      real_T d;
-      real_T d1;
-      //  3x3
-      d = std::abs(J[0]);
-      d1 = std::abs(J[3]);
-      if ((d >= d1) && (d >= std::abs(J[6]))) {
-        pivot = J[0];
-        if (J[0] == 0.0) {
-          info = true;
-        } else {
-          guard3 = true;
-        }
-      } else if (d1 >= std::abs(J[6])) {
-        pivot = J[3];
-        if (J[3] == 0.0) {
-          info = true;
-        } else {
-          t = J[3];
-          J[3] = J[0];
-          J[0] = t;
-          t = J[4];
-          J[4] = J[1];
-          J[1] = t;
-          t = J[5];
-          J[5] = J[2];
-          J[2] = t;
-          for (::coder::SizeType i{0}; i <= m1; i++) {
-            t = b1[b1.size(1) * i + 1];
-            b1[b1.size(1) * i + 1] = b1[b1.size(1) * i];
-            b1[b1.size(1) * i] = t;
-          }
-          guard3 = true;
-        }
-      } else {
-        pivot = J[6];
-        t = J[6];
-        J[6] = J[0];
-        J[0] = t;
-        t = J[7];
-        J[7] = J[1];
-        J[1] = t;
-        t = J[8];
-        J[8] = J[2];
-        J[2] = t;
-        for (::coder::SizeType i{0}; i <= m1; i++) {
-          t = b1[b1.size(1) * i + 2];
-          b1[b1.size(1) * i + 2] = b1[b1.size(1) * i];
-          b1[b1.size(1) * i] = t;
-        }
-        guard3 = true;
-      }
-    }
-    if (guard3) {
-      J[3] /= pivot;
-      J[4] -= J[1] * J[3];
-      J[5] -= J[2] * J[3];
-      J[6] /= pivot;
-      J[7] -= J[1] * J[6];
-      J[8] -= J[2] * J[6];
-      for (::coder::SizeType i{0}; i <= m1; i++) {
-        b1[b1.size(1) * i + 1] =
-            b1[b1.size(1) * i + 1] - J[3] * b1[b1.size(1) * i];
-        b1[b1.size(1) * i + 2] =
-            b1[b1.size(1) * i + 2] - J[6] * b1[b1.size(1) * i];
-      }
-      if (std::abs(J[4]) >= std::abs(J[7])) {
-        pivot = J[4];
-        if (J[4] == 0.0) {
-          info = true;
-        } else {
-          guard1 = true;
-        }
-      } else {
-        pivot = J[7];
-        t = J[6];
-        J[6] = J[3];
-        J[3] = t;
-        t = J[7];
-        J[7] = J[4];
-        J[4] = t;
-        t = J[8];
-        J[8] = J[5];
-        J[5] = t;
-        for (::coder::SizeType i{0}; i <= m1; i++) {
-          t = b1[b1.size(1) * i + 2];
-          b1[b1.size(1) * i + 2] = b1[b1.size(1) * i + 1];
-          b1[b1.size(1) * i + 1] = t;
-        }
-        guard1 = true;
-      }
-    }
-    if (guard2) {
-      J[3] /= pivot;
-      J[4] -= J[1] * J[3];
-      if (J[4] == 0.0) {
-        info = true;
-      } else {
-        for (::coder::SizeType i{0}; i <= m1; i++) {
-          b1[b1.size(1) * i + 1] =
-              (b1[b1.size(1) * i + 1] - J[3] * b1[b1.size(1) * i]) / J[4];
-          b1[b1.size(1) * i] =
-              (b1[b1.size(1) * i] - J[1] * b1[b1.size(1) * i + 1]) / J[0];
-        }
-      }
-    }
-    if (guard1) {
-      J[7] /= pivot;
-      J[8] -= J[5] * J[7];
-      if (J[8] == 0.0) {
-        info = true;
-      } else {
-        for (::coder::SizeType i{0}; i <= m1; i++) {
-          b1[b1.size(1) * i + 2] =
-              (b1[b1.size(1) * i + 2] - J[7] * b1[b1.size(1) * i + 1]) / J[8];
-          b1[b1.size(1) * i + 1] =
-              (b1[b1.size(1) * i + 1] - J[5] * b1[b1.size(1) * i + 2]) / J[4];
-          b1[b1.size(1) * i] =
-              ((b1[b1.size(1) * i] - J[2] * b1[b1.size(1) * i + 2]) -
-               J[1] * b1[b1.size(1) * i + 1]) /
-              J[0];
-        }
-      }
-    }
-  }
-  return info;
-}
-
-// tabulate_quadratures_deg_1 - Tabulate quadrature rule for given element
-static void tabulate_quadratures_deg_1(::coder::SizeType etype,
-                                       ::coder::array<real_T, 2U> &cs,
-                                       ::coder::array<real_T, 1U> &ws)
-{
-  ::coder::SizeType shape;
-  shape = obtain_elemshape(etype);
-  switch (shape) {
-  case 1: {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::bar_deg1_qrule();
-    cs.set_size(nqp, 1);
-    ws.set_size(nqp);
-    ::sfe_qrules::bar_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } break;
-  case 2: {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg1_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } break;
-  case 3: {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::quad_deg1_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } break;
-  case 4: {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tet_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::tet_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } break;
-  case 7: {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::hexa_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::hexa_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } break;
-  case 6: {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::prism_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::prism_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } break;
-  default: {
-    ::coder::SizeType nqp;
-    m2cAssert(shape == 5, "Unsupported element type");
-    nqp = ::sfe_qrules::pyra_deg1_qrule();
-    cs.set_size(nqp, 3);
-    ws.set_size(nqp);
-    ::sfe_qrules::pyra_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } break;
-  }
-}
-
-// tabulate_shapefuncs - kernel for tabulating shape functions
-
-static void tabulate_shapefuncs_deg_1(::coder::SizeType etype,
-                                      const ::coder::array<real_T, 2U> &cs,
-                                      ::coder::array<real_T, 2U> &sfvals,
-                                      ::coder::array<real_T, 3U> &sdvals)
-{
-  real_T tmp_data[1029];
-  ::coder::SizeType i;
-  ::coder::SizeType nqp;
-  nqp = cs.size(0) - 1;
-  i = iv[etype - 1];
-  sfvals.set_size(cs.size(0), i);
-  sdvals.set_size(cs.size(0), i, cs.size(1));
-  switch (etype) {
-  case 36: {
-    ::coder::SizeType i1;
-    boolean_T b;
-    boolean_T b1;
-    b = true;
-    b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
-    i = cs.size(1) * cs.size(0);
-    i1 = 0;
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T N[2];
-      real_T deriv[2];
-      if (b1 || (q >= i)) {
-        i1 = 0;
-        b = true;
-      } else if (b) {
-        b = false;
-        i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-      } else {
-        ::coder::SizeType loop_ub;
-        loop_ub = cs.size(1) * cs.size(0) - 1;
-        if (i1 > MAX_int32_T - cs.size(1)) {
-          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
-        } else {
-          i1 += cs.size(1);
-          if (i1 > loop_ub) {
-            i1 -= loop_ub;
-          }
-        }
-      }
-      ::sfe_sfuncs::bar_2_sfunc(cs[i1], &N[0], &deriv[0]);
-      sfvals[sfvals.size(1) * q] = N[0];
-      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
-      sfvals[sfvals.size(1) * q + 1] = N[1];
-      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[1];
-    }
-  } break;
-  case 68: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv2[6];
-      real_T dv5[3];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType loop_ub;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                &dv5[0], &dv2[0]);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv5[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 2) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 100: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv[8];
-      real_T dv1[4];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType loop_ub;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 &dv1[0], &dv[0]);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + (loop_ub << 1)];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 3) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 132: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv6[12];
-      real_T dv1[4];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType loop_ub;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::tet_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                cs[cs.size(1) * q + 2], &dv1[0], &dv6[0]);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv1[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 3) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 164: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv8[15];
-      real_T dv7[5];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType loop_ub;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::pyra_5_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv7[0], &dv8[0]);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv7[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv8[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 4) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  case 196: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv4[18];
-      real_T dv2[6];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType loop_ub;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::prism_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                  cs[cs.size(1) * q + 2], &dv2[0], &dv4[0]);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv2[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 5) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  default: {
-    for (::coder::SizeType q{0}; q <= nqp; q++) {
-      real_T dv3[24];
-      real_T dv[8];
-      ::coder::SizeType i1;
-      ::coder::SizeType i2;
-      ::coder::SizeType loop_ub;
-      ::coder::SizeType tmp_size_idx_1;
-      ::coder::SizeType tmp_size_idx_2;
-      int16_T unnamed_idx_1;
-      int16_T unnamed_idx_2;
-      ::sfe_sfuncs::hexa_8_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
-                                 cs[cs.size(1) * q + 2], &dv[0], &dv3[0]);
-      loop_ub = sfvals.size(1);
-      for (i = 0; i < loop_ub; i++) {
-        sfvals[i + sfvals.size(1) * q] = dv[i];
-      }
-      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
-      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
-      i = 0;
-      i1 = 0;
-      loop_ub = 0;
-      i2 = 0;
-      tmp_size_idx_2 = sdvals.size(2);
-      tmp_size_idx_1 = sdvals.size(1);
-      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
-        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * loop_ub];
-        loop_ub++;
-        i++;
-        if (i > tmp_size_idx_1 - 1) {
-          i = 0;
-          i1++;
-        }
-        if (loop_ub > 7) {
-          loop_ub = 0;
-          i2++;
-        }
-      }
-      for (i = 0; i < tmp_size_idx_1; i++) {
-        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
-          sdvals[(i1 + sdvals.size(2) * i) +
-                 sdvals.size(2) * sdvals.size(1) * q] =
-              tmp_data[i1 + tmp_size_idx_2 * i];
-        }
-      }
-    }
-  } break;
-  }
-}
-
-// tet_20 - Compute shape functions and their derivatives of tet_20
-static inline void tet_20(real_T xi, real_T eta, real_T zeta, real_T sfvals[20],
-                          real_T sdvals[60])
-{
-  ::sfe_sfuncs::tet_20_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// tet_35 - Compute shape functions and their derivatives of tet_35
-static inline void tet_35(real_T xi, real_T eta, real_T zeta, real_T sfvals[35],
-                          real_T sdvals[105])
-{
-  ::sfe_sfuncs::tet_35_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// tet_56 - Compute shape functions and their derivatives of tet_56
-static inline void tet_56(real_T xi, real_T eta, real_T zeta, real_T sfvals[56],
-                          real_T sdvals[168])
-{
-  ::sfe_sfuncs::tet_56_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// tet_84 - Compute shape functions and their derivatives of tet_84
-static inline void tet_84(real_T xi, real_T eta, real_T zeta, real_T sfvals[84],
-                          real_T sdvals[252])
-{
-  ::sfe_sfuncs::tet_84_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// tet_gl_20 - Compute shape functions and their derivatives of tet_gl_20
-static inline void tet_gl_20(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[20], real_T sdvals[60])
-{
-  ::sfe_sfuncs::tet_gl_20_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// tet_gl_35 - Compute shape functions and their derivatives of tet_gl_35
-static inline void tet_gl_35(real_T xi, real_T eta, real_T zeta,
-                             real_T sfvals[35], real_T sdvals[105])
-{
-  ::sfe_sfuncs::tet_gl_35_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
-}
-
-// tri_21 - Compute shape functions and their derivatives of tri_21
-static inline void tri_21(real_T xi, real_T eta, real_T sfvals[21],
-                          real_T sdvals[42])
-{
-  ::sfe_sfuncs::tri_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// tri_28 - Compute shape functions and their derivatives of tri_28
-static inline void tri_28(real_T xi, real_T eta, real_T sfvals[28],
-                          real_T sdvals[56])
-{
-  ::sfe_sfuncs::tri_28_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// tri_fek_15 - Compute shape functions and their derivatives of tri_fek_15
-static inline void tri_fek_15(real_T xi, real_T eta, real_T sfvals[15],
-                              real_T sdvals[30])
-{
-  ::sfe_sfuncs::tri_fek_15_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// tri_fek_21 - Compute shape functions and their derivatives of tri_fek_21
-static inline void tri_fek_21(real_T xi, real_T eta, real_T sfvals[21],
-                              real_T sdvals[42])
-{
-  ::sfe_sfuncs::tri_fek_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// tri_fek_28 - Compute shape functions and their derivatives of tri_fek_28
-static inline void tri_fek_28(real_T xi, real_T eta, real_T sfvals[28],
-                              real_T sdvals[56])
-{
-  ::sfe_sfuncs::tri_fek_28_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-// tri_gl_21 - Compute shape functions and their derivatives of tri_gl_21
-static inline void tri_gl_21(real_T xi, real_T eta, real_T sfvals[21],
-                             real_T sdvals[42])
-{
-  ::sfe_sfuncs::tri_gl_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
-}
-
-//  tri_quadrules - Obtain quadrature points and weights of a triangular
-static void tri_quadrules(::coder::SizeType degree,
-                          ::coder::array<real_T, 2U> &cs,
-                          ::coder::array<real_T, 1U> &ws)
-{
-  if (degree <= 1) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg1_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg1_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 2) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg2_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg2_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 4) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg4_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg4_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 5) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg5_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg5_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 7) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg7_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg7_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 8) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg8_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg8_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 9) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg9_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg9_qrule(&cs[0], &(ws.data())[0]);
-  } else if (degree <= 11) {
-    ::coder::SizeType nqp;
-    nqp = ::sfe_qrules::tri_deg11_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg11_qrule(&cs[0], &(ws.data())[0]);
-  } else {
-    ::coder::SizeType nqp;
-    if (degree > 13) {
-      m2cWarnMsgIdAndTxt("tri_quadrules:UnsupportedDegree",
-                         "Only support up to degree 13");
-    }
-    nqp = ::sfe_qrules::tri_deg13_qrule();
-    cs.set_size(nqp, 2);
-    ws.set_size(nqp);
-    ::sfe_qrules::tri_deg13_qrule(&cs[0], &(ws.data())[0]);
-  }
-}
-
-// obtain_elemdegree - Decode the element degree from etype
-::coder::SizeType obtain_elemdegree(::coder::SizeType etype)
-{
-  return etype >> 2 & 7;
-}
-
-// obtain_elemdim - Obtain the dimension of an element
-::coder::SizeType obtain_elemdim(::coder::SizeType etype)
-{
-  ::coder::SizeType shape;
-  shape = obtain_elemshape(etype);
-  return ((shape > 0) + (shape > 1)) + (shape > 3);
-}
-
-// obtain_elemnodepos - Decode nodal position types, e.g., equidistance, GL
-::coder::SizeType obtain_elemnodepos(::coder::SizeType etype)
-{
-  return etype & 3;
-}
-
-// obtain_elemshape - Decode an element geometric shape from etype
-::coder::SizeType obtain_elemshape(::coder::SizeType etype)
-{
-  return etype >> 5 & 7;
-}
-
 // obtain_facets - Query facet information
-uint8_T obtain_facets(::coder::SizeType etype)
-{
-  const static std::vector<std::vector<uint8_T>> FACETS{
-      {1, 1},                         // SFE_BAR_2
-      {},                             // 37
-      {},                             // 38
-      {},                             // 39
-      {1, 1},                         // SFE_BAR_3
-      {},                             // 41
-      {},                             // 42
-      {},                             // 43
-      {1, 1},                         // SFE_BAR_4
-      {1, 1},                         // SFE_BAR_FEK_4
-      {},                             // 46
-      {},                             // 47
-      {1, 1},                         // SFE_BAR_5
-      {1, 1},                         // SFE_BAR_FEK_5
-      {},                             // 50
-      {},                             // 51
-      {1, 1},                         // SFE_BAR_6
-      {1, 1},                         // SFE_BAR_FEK_6
-      {},                             // 54
-      {},                             // 55
-      {1, 1},                         // SFE_BAR_7
-      {1, 1},                         // SFE_BAR_FEK_7
-      {},                             // 58
-      {},                             // 59
-      {},                             // 60
-      {},                             // 61
-      {},                             // 62
-      {},                             // 63
-      {},                             // 64
-      {},                             // 65
-      {},                             // 66
-      {},                             // 67
-      {36, 36, 36},                   // SFE_TRI_3
-      {},                             // 69
-      {},                             // 70
-      {},                             // 71
-      {40, 40, 40},                   // SFE_TRI_6
-      {},                             // 73
-      {},                             // 74
-      {},                             // 75
-      {44, 44, 44},                   // SFE_TRI_10
-      {45, 45, 45},                   // SFE_TRI_FEK_10
-      {},                             // 78
-      {},                             // 79
-      {48, 48, 48},                   // SFE_TRI_15
-      {49, 49, 49},                   // SFE_TRI_GL_15
-      {48, 48, 48},                   // SFE_TRI_FEK_15
-      {},                             // 83
-      {52, 52, 52},                   // SFE_TRI_21
-      {53, 53, 53},                   // SFE_TRI_GL_21
-      {52, 52, 52},                   // SFE_TRI_FEK_21
-      {},                             // 87
-      {56, 56, 56},                   // SFE_TRI_28
-      {57, 57, 57},                   // SFE_TRI_GL_28
-      {56, 56, 56},                   // SFE_TRI_FEK_28
-      {},                             // 91
-      {},                             // 92
-      {},                             // 93
-      {},                             // 94
-      {},                             // 95
-      {},                             // 96
-      {},                             // 97
-      {},                             // 98
-      {},                             // 99
-      {36, 36, 36, 36},               // SFE_QUAD_4
-      {},                             // 101
-      {},                             // 102
-      {},                             // 103
-      {40, 40, 40, 40},               // SFE_QUAD_9
-      {},                             // 105
-      {},                             // 106
-      {},                             // 107
-      {44, 44, 44, 44},               // SFE_QUAD_16
-      {45, 45, 45, 45},               // SFE_QUAD_FEK_16
-      {},                             // 110
-      {},                             // 111
-      {48, 48, 48, 48},               // SFE_QUAD_25
-      {49, 49, 49, 49},               // SFE_QUAD_FEK_25
-      {},                             // 114
-      {},                             // 115
-      {52, 52, 52, 52},               // SFE_QUAD_36
-      {53, 53, 53, 53},               // SFE_QUAD_FEK_36
-      {},                             // 118
-      {},                             // 119
-      {56, 56, 56, 56},               // SFE_QUAD_49
-      {57, 57, 57, 57},               // SFE_QUAD_FEK_49
-      {},                             // 122
-      {},                             // 123
-      {},                             // 124
-      {},                             // 125
-      {},                             // 126
-      {},                             // 127
-      {},                             // 128
-      {},                             // 129
-      {},                             // 130
-      {},                             // 131
-      {68, 68, 68, 68},               // SFE_TET_4
-      {},                             // 133
-      {},                             // 134
-      {},                             // 135
-      {72, 72, 72, 72},               // SFE_TET_10
-      {},                             // 137
-      {},                             // 138
-      {},                             // 139
-      {76, 76, 76, 76},               // SFE_TET_20
-      {77, 77, 77, 77},               // SFE_TET_FEK_20
-      {},                             // 142
-      {},                             // 143
-      {80, 80, 80, 80},               // SFE_TET_35
-      {81, 81, 81, 81},               // SFE_TET_GL_35
-      {82, 82, 82, 82},               // SFE_TET_FEK_35
-      {},                             // 147
-      {84, 84, 84, 84},               // SFE_TET_56
-      {85, 85, 85, 85},               // SFE_TET_GL_56
-      {86, 86, 86, 86},               // SFE_TET_FEK_56
-      {},                             // 151
-      {88, 88, 88, 88},               // SFE_TET_84
-      {89, 89, 89, 89},               // SFE_TET_GL_84
-      {90, 90, 90, 90},               // SFE_TET_FEK_84
-      {},                             // 155
-      {},                             // 156
-      {},                             // 157
-      {},                             // 158
-      {},                             // 159
-      {},                             // 160
-      {},                             // 161
-      {},                             // 162
-      {},                             // 163
-      {100, 68, 68, 68, 68},          // SFE_PYRA_5
-      {},                             // 165
-      {},                             // 166
-      {},                             // 167
-      {104, 72, 72, 72, 72},          // SFE_PYRA_14
-      {},                             // 169
-      {},                             // 170
-      {},                             // 171
-      {108, 76, 76, 76, 76},          // SFE_PYRA_30
-      {109, 77, 77, 77, 77},          // SFE_PYRA_FEK_30
-      {},                             // 174
-      {},                             // 175
-      {112, 80, 80, 80, 80},          // SFE_PYRA_55
-      {113, 81, 81, 81, 81},          // SFE_PYRA_GL_55
-      {112, 82, 82, 82, 82},          // SFE_PYRA_FEK_55
-      {},                             // 179
-      {116, 84, 84, 84, 84},          // SFE_PYRA_91
-      {},                             // 181
-      {},                             // 182
-      {},                             // 183
-      {},                             // 184
-      {},                             // 185
-      {},                             // 186
-      {},                             // 187
-      {},                             // 188
-      {},                             // 189
-      {},                             // 190
-      {},                             // 191
-      {},                             // 192
-      {},                             // 193
-      {},                             // 194
-      {},                             // 195
-      {100, 100, 100, 68, 68},        // SFE_PRISM_6
-      {},                             // 197
-      {},                             // 198
-      {},                             // 199
-      {104, 104, 104, 72, 72},        // SFE_PRISM_18
-      {},                             // 201
-      {},                             // 202
-      {},                             // 203
-      {108, 108, 108, 76, 76},        // SFE_PRISM_40
-      {109, 109, 109, 77, 77},        // SFE_PRISM_FEK_40
-      {},                             // 206
-      {},                             // 207
-      {112, 112, 112, 80, 80},        // SFE_PRISM_75
-      {113, 113, 113, 81, 81},        // SFE_PRISM_GL_75
-      {112, 112, 112, 82, 82},        // SFE_PRISM_FEK_75
-      {},                             // 211
-      {116, 116, 116, 84, 84},        // SFE_PRISM_126
-      {117, 117, 117, 85, 85},        // SFE_PRISM_GL_126
-      {},                             // 214
-      {},                             // 215
-      {120, 120, 120, 88, 88},        // SFE_PRISM_196
-      {},                             // 217
-      {},                             // 218
-      {},                             // 219
-      {},                             // 220
-      {},                             // 221
-      {},                             // 222
-      {},                             // 223
-      {},                             // 224
-      {},                             // 225
-      {},                             // 226
-      {},                             // 227
-      {100, 100, 100, 100, 100, 100}, // SFE_HEXA_8
-      {},                             // 229
-      {},                             // 230
-      {},                             // 231
-      {104, 104, 104, 104, 104, 104}, // SFE_HEXA_27
-      {},                             // 233
-      {},                             // 234
-      {},                             // 235
-      {108, 108, 108, 108, 108, 108}, // SFE_HEXA_64
-      {109, 109, 109, 109, 109, 109}, // SFE_HEXA_FEK_64
-      {},                             // 238
-      {},                             // 239
-      {112, 112, 112, 112, 112, 112}, // SFE_HEXA_125
-      {113, 113, 113, 113, 113, 113}, // SFE_HEXA_FEK_125
-      {},                             // 242
-      {},                             // 243
-      {116, 116, 116, 116, 116, 116}, // SFE_HEXA_216
-      {117, 117, 117, 117, 117, 117}, // SFE_HEXA_FEK_216
-      {},                             // 246
-      {},                             // 247
-      {120, 120, 120, 120, 120, 120}, // SFE_HEXA_343
-      {121, 121, 121, 121, 121, 121}, // SFE_HEXA_FEK_343
-  };
-  //  get the number of facets
-  return [&](uint8_T et) { return FACETS[et - 36].size(); }(etype);
-}
-
-// obtain_facets - Query facet information
-void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
-                   int16_T lids_data[], ::coder::SizeType lids_size[1])
+static void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
+                          int16_T lids_data[], ::coder::SizeType *lids_size)
 {
   ::coder::SizeType n;
   const static std::vector<std::vector<uint8_T>> FACETS{
@@ -13503,687 +2040,5615 @@ void obtain_facets(::coder::SizeType etype, int8_T facetid, uint8_T *ret,
       --n;
     return n;
   }(etype, static_cast<int8_T>(facetid - 1));
-  lids_size[0] = n;
+  *lids_size = n;
   [&](int et, uint8_T fid, int n, std::int16_t *v) {
     std::copy_n(LIDS[et - 36][fid].cbegin(), n, v);
   }(etype, static_cast<int8_T>(facetid - 1), n, &lids_data[0]);
 }
 
-// obtain_natcoords - Obtain the coordinates for nodes in master elements
-void obtain_natcoords(::coder::SizeType etype,
-                      ::coder::array<real_T, 2U> &natcoords)
+// obtain_facets - Query facet information
+static uint8_T obtain_facets(::coder::SizeType etype)
 {
-  real_T natcoords_data[7];
-  ::coder::SizeType natcoords_size;
-  switch (obtain_elemdim(etype)) {
-  case 1:
-    obtain_natcoords1d(etype, natcoords_data, &natcoords_size);
-    natcoords.set_size(natcoords_size, 1);
-    for (::coder::SizeType i{0}; i < natcoords_size; i++) {
-      natcoords[i] = natcoords_data[i];
+  const static std::vector<std::vector<uint8_T>> FACETS{
+      {1, 1},                         // SFE_BAR_2
+      {},                             // 37
+      {},                             // 38
+      {},                             // 39
+      {1, 1},                         // SFE_BAR_3
+      {},                             // 41
+      {},                             // 42
+      {},                             // 43
+      {1, 1},                         // SFE_BAR_4
+      {1, 1},                         // SFE_BAR_FEK_4
+      {},                             // 46
+      {},                             // 47
+      {1, 1},                         // SFE_BAR_5
+      {1, 1},                         // SFE_BAR_FEK_5
+      {},                             // 50
+      {},                             // 51
+      {1, 1},                         // SFE_BAR_6
+      {1, 1},                         // SFE_BAR_FEK_6
+      {},                             // 54
+      {},                             // 55
+      {1, 1},                         // SFE_BAR_7
+      {1, 1},                         // SFE_BAR_FEK_7
+      {},                             // 58
+      {},                             // 59
+      {},                             // 60
+      {},                             // 61
+      {},                             // 62
+      {},                             // 63
+      {},                             // 64
+      {},                             // 65
+      {},                             // 66
+      {},                             // 67
+      {36, 36, 36},                   // SFE_TRI_3
+      {},                             // 69
+      {},                             // 70
+      {},                             // 71
+      {40, 40, 40},                   // SFE_TRI_6
+      {},                             // 73
+      {},                             // 74
+      {},                             // 75
+      {44, 44, 44},                   // SFE_TRI_10
+      {45, 45, 45},                   // SFE_TRI_FEK_10
+      {},                             // 78
+      {},                             // 79
+      {48, 48, 48},                   // SFE_TRI_15
+      {49, 49, 49},                   // SFE_TRI_GL_15
+      {48, 48, 48},                   // SFE_TRI_FEK_15
+      {},                             // 83
+      {52, 52, 52},                   // SFE_TRI_21
+      {53, 53, 53},                   // SFE_TRI_GL_21
+      {52, 52, 52},                   // SFE_TRI_FEK_21
+      {},                             // 87
+      {56, 56, 56},                   // SFE_TRI_28
+      {57, 57, 57},                   // SFE_TRI_GL_28
+      {56, 56, 56},                   // SFE_TRI_FEK_28
+      {},                             // 91
+      {},                             // 92
+      {},                             // 93
+      {},                             // 94
+      {},                             // 95
+      {},                             // 96
+      {},                             // 97
+      {},                             // 98
+      {},                             // 99
+      {36, 36, 36, 36},               // SFE_QUAD_4
+      {},                             // 101
+      {},                             // 102
+      {},                             // 103
+      {40, 40, 40, 40},               // SFE_QUAD_9
+      {},                             // 105
+      {},                             // 106
+      {},                             // 107
+      {44, 44, 44, 44},               // SFE_QUAD_16
+      {45, 45, 45, 45},               // SFE_QUAD_FEK_16
+      {},                             // 110
+      {},                             // 111
+      {48, 48, 48, 48},               // SFE_QUAD_25
+      {49, 49, 49, 49},               // SFE_QUAD_FEK_25
+      {},                             // 114
+      {},                             // 115
+      {52, 52, 52, 52},               // SFE_QUAD_36
+      {53, 53, 53, 53},               // SFE_QUAD_FEK_36
+      {},                             // 118
+      {},                             // 119
+      {56, 56, 56, 56},               // SFE_QUAD_49
+      {57, 57, 57, 57},               // SFE_QUAD_FEK_49
+      {},                             // 122
+      {},                             // 123
+      {},                             // 124
+      {},                             // 125
+      {},                             // 126
+      {},                             // 127
+      {},                             // 128
+      {},                             // 129
+      {},                             // 130
+      {},                             // 131
+      {68, 68, 68, 68},               // SFE_TET_4
+      {},                             // 133
+      {},                             // 134
+      {},                             // 135
+      {72, 72, 72, 72},               // SFE_TET_10
+      {},                             // 137
+      {},                             // 138
+      {},                             // 139
+      {76, 76, 76, 76},               // SFE_TET_20
+      {77, 77, 77, 77},               // SFE_TET_FEK_20
+      {},                             // 142
+      {},                             // 143
+      {80, 80, 80, 80},               // SFE_TET_35
+      {81, 81, 81, 81},               // SFE_TET_GL_35
+      {82, 82, 82, 82},               // SFE_TET_FEK_35
+      {},                             // 147
+      {84, 84, 84, 84},               // SFE_TET_56
+      {85, 85, 85, 85},               // SFE_TET_GL_56
+      {86, 86, 86, 86},               // SFE_TET_FEK_56
+      {},                             // 151
+      {88, 88, 88, 88},               // SFE_TET_84
+      {89, 89, 89, 89},               // SFE_TET_GL_84
+      {90, 90, 90, 90},               // SFE_TET_FEK_84
+      {},                             // 155
+      {},                             // 156
+      {},                             // 157
+      {},                             // 158
+      {},                             // 159
+      {},                             // 160
+      {},                             // 161
+      {},                             // 162
+      {},                             // 163
+      {100, 68, 68, 68, 68},          // SFE_PYRA_5
+      {},                             // 165
+      {},                             // 166
+      {},                             // 167
+      {104, 72, 72, 72, 72},          // SFE_PYRA_14
+      {},                             // 169
+      {},                             // 170
+      {},                             // 171
+      {108, 76, 76, 76, 76},          // SFE_PYRA_30
+      {109, 77, 77, 77, 77},          // SFE_PYRA_FEK_30
+      {},                             // 174
+      {},                             // 175
+      {112, 80, 80, 80, 80},          // SFE_PYRA_55
+      {113, 81, 81, 81, 81},          // SFE_PYRA_GL_55
+      {112, 82, 82, 82, 82},          // SFE_PYRA_FEK_55
+      {},                             // 179
+      {116, 84, 84, 84, 84},          // SFE_PYRA_91
+      {},                             // 181
+      {},                             // 182
+      {},                             // 183
+      {},                             // 184
+      {},                             // 185
+      {},                             // 186
+      {},                             // 187
+      {},                             // 188
+      {},                             // 189
+      {},                             // 190
+      {},                             // 191
+      {},                             // 192
+      {},                             // 193
+      {},                             // 194
+      {},                             // 195
+      {100, 100, 100, 68, 68},        // SFE_PRISM_6
+      {},                             // 197
+      {},                             // 198
+      {},                             // 199
+      {104, 104, 104, 72, 72},        // SFE_PRISM_18
+      {},                             // 201
+      {},                             // 202
+      {},                             // 203
+      {108, 108, 108, 76, 76},        // SFE_PRISM_40
+      {109, 109, 109, 77, 77},        // SFE_PRISM_FEK_40
+      {},                             // 206
+      {},                             // 207
+      {112, 112, 112, 80, 80},        // SFE_PRISM_75
+      {113, 113, 113, 81, 81},        // SFE_PRISM_GL_75
+      {112, 112, 112, 82, 82},        // SFE_PRISM_FEK_75
+      {},                             // 211
+      {116, 116, 116, 84, 84},        // SFE_PRISM_126
+      {117, 117, 117, 85, 85},        // SFE_PRISM_GL_126
+      {},                             // 214
+      {},                             // 215
+      {120, 120, 120, 88, 88},        // SFE_PRISM_196
+      {},                             // 217
+      {},                             // 218
+      {},                             // 219
+      {},                             // 220
+      {},                             // 221
+      {},                             // 222
+      {},                             // 223
+      {},                             // 224
+      {},                             // 225
+      {},                             // 226
+      {},                             // 227
+      {100, 100, 100, 100, 100, 100}, // SFE_HEXA_8
+      {},                             // 229
+      {},                             // 230
+      {},                             // 231
+      {104, 104, 104, 104, 104, 104}, // SFE_HEXA_27
+      {},                             // 233
+      {},                             // 234
+      {},                             // 235
+      {108, 108, 108, 108, 108, 108}, // SFE_HEXA_64
+      {109, 109, 109, 109, 109, 109}, // SFE_HEXA_FEK_64
+      {},                             // 238
+      {},                             // 239
+      {112, 112, 112, 112, 112, 112}, // SFE_HEXA_125
+      {113, 113, 113, 113, 113, 113}, // SFE_HEXA_FEK_125
+      {},                             // 242
+      {},                             // 243
+      {116, 116, 116, 116, 116, 116}, // SFE_HEXA_216
+      {117, 117, 117, 117, 117, 117}, // SFE_HEXA_FEK_216
+      {},                             // 246
+      {},                             // 247
+      {120, 120, 120, 120, 120, 120}, // SFE_HEXA_343
+      {121, 121, 121, 121, 121, 121}, // SFE_HEXA_FEK_343
+  };
+  //  get the number of facets
+  return [&](uint8_T et) { return FACETS[et - 36].size(); }(etype);
+}
+
+// prism_126 - Quintic prismatic element with equidistant nodes
+static inline void prism_126(real_T xi, real_T eta, real_T zeta,
+                             real_T sfvals[126], real_T sdvals[378])
+{
+  ::sfe_sfuncs::prism_126_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_196 - Sextic prismatic element with equidistant nodes
+static inline void prism_196(real_T xi, real_T eta, real_T zeta,
+                             real_T sfvals[196], real_T sdvals[588])
+{
+  ::sfe_sfuncs::prism_196_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_40 - Cubic prismatic element
+static inline void prism_40(real_T xi, real_T eta, real_T zeta,
+                            real_T sfvals[40], real_T sdvals[120])
+{
+  ::sfe_sfuncs::prism_40_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_75 - Quartic prismatic element with equidistant nodes
+static inline void prism_75(real_T xi, real_T eta, real_T zeta,
+                            real_T sfvals[75], real_T sdvals[225])
+{
+  ::sfe_sfuncs::prism_75_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_gl_126 - Quintic prismatic element with equidistant nodes
+static inline void prism_gl_126(real_T xi, real_T eta, real_T zeta,
+                                real_T sfvals[126], real_T sdvals[378])
+{
+  ::sfe_sfuncs::prism_gl_126_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_gl_40 - Quadratic prismatic element with Gauss-Lobatto nodes
+static inline void prism_gl_40(real_T xi, real_T eta, real_T zeta,
+                               real_T sfvals[40], real_T sdvals[120])
+{
+  ::sfe_sfuncs::prism_gl_40_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// prism_gl_75 - Quartic prismatic element with Gauss-Lobatto nodes
+static inline void prism_gl_75(real_T xi, real_T eta, real_T zeta,
+                               real_T sfvals[75], real_T sdvals[225])
+{
+  ::sfe_sfuncs::prism_gl_75_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// pyra_30 - Compute shape functions and their derivatives of pyra_30
+static inline void pyra_30(real_T xi, real_T eta, real_T zeta,
+                           real_T sfvals[30], real_T sdvals[90])
+{
+  ::sfe_sfuncs::pyra_30_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// pyra_55 - Compute shape functions and their derivatives of pyra_55
+static inline void pyra_55(real_T xi, real_T eta, real_T zeta,
+                           real_T sfvals[55], real_T sdvals[165])
+{
+  ::sfe_sfuncs::pyra_55_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// pyra_gl_30 - Compute shape functions and their derivatives of pyra_gl_30
+static inline void pyra_gl_30(real_T xi, real_T eta, real_T zeta,
+                              real_T sfvals[30], real_T sdvals[90])
+{
+  ::sfe_sfuncs::pyra_gl_30_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// pyra_gl_55 - Compute shape functions and their derivatives of pyra_gl_55
+static inline void pyra_gl_55(real_T xi, real_T eta, real_T zeta,
+                              real_T sfvals[55], real_T sdvals[165])
+{
+  ::sfe_sfuncs::pyra_gl_55_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+//  pyra_quadrules - Obtain quadrature points and weights of a pyramidal
+static void pyra_quadrules(::coder::SizeType degree,
+                           ::coder::array<real_T, 2U> &cs,
+                           ::coder::array<real_T, 1U> &ws)
+{
+  if (degree <= 1) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg1_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 2) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg2_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg2_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 3) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg3_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg3_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 5) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg5_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg5_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 6) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg6_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg6_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 7) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg7_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg7_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 9) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg9_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg9_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 11) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::pyra_deg11_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg11_qrule(&cs[0], &(ws.data())[0]);
+  } else {
+    ::coder::SizeType nqp;
+    if (degree > 13) {
+      m2cWarnMsgIdAndTxt("pyra_quadrules:UnsupportedDegree",
+                         "Only support up to degree 13");
     }
-    break;
-  case 2:
-    obtain_natcoords2d(etype, natcoords);
-    break;
-  default:
-    obtain_elemdim(etype);
-    obtain_natcoords3d(etype, natcoords);
-    break;
+    nqp = ::sfe_qrules::pyra_deg13_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg13_qrule(&cs[0], &(ws.data())[0]);
   }
 }
 
-// obtain_natcoords1d - obtain coordinates for elems in 1d in param space
-void obtain_natcoords1d(::coder::SizeType etype, real_T natcoords_data[],
-                        ::coder::SizeType natcoords_size[1])
+// quad_25 - Biquartic quadrilateral element with equidistant points
+static inline void quad_25(real_T xi, real_T eta, real_T sfvals[25],
+                           real_T sdvals[50])
 {
-  switch (etype) {
-  case 36: {
-    real_T b_sfvals[2];
-    ::sfe_sfuncs::bar_2_ncoords(&b_sfvals[0]);
-    natcoords_size[0] = 2;
-    natcoords_data[0] = b_sfvals[0];
-    natcoords_data[1] = b_sfvals[1];
-  } break;
-  case 40: {
-    real_T c_sfvals[3];
-    ::sfe_sfuncs::bar_3_ncoords(&c_sfvals[0]);
-    natcoords_size[0] = 3;
-    natcoords_data[0] = c_sfvals[0];
-    natcoords_data[1] = c_sfvals[1];
-    natcoords_data[2] = c_sfvals[2];
-  } break;
-  case 44: {
-    real_T d_sfvals[4];
-    ::sfe_sfuncs::bar_4_ncoords(&d_sfvals[0]);
-    natcoords_size[0] = 4;
-    natcoords_data[0] = d_sfvals[0];
-    natcoords_data[1] = d_sfvals[1];
-    natcoords_data[2] = d_sfvals[2];
-    natcoords_data[3] = d_sfvals[3];
-  } break;
-  case 48: {
-    real_T e_sfvals[5];
-    ::sfe_sfuncs::bar_5_ncoords(&e_sfvals[0]);
-    natcoords_size[0] = 5;
-    for (::coder::SizeType i{0}; i < 5; i++) {
-      natcoords_data[i] = e_sfvals[i];
+  ::sfe_sfuncs::quad_25_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_36   Biquintic quadrilateral element with equidistant points
+static inline void quad_36(real_T xi, real_T eta, real_T sfvals[36],
+                           real_T sdvals[72])
+{
+  ::sfe_sfuncs::quad_36_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_49 - Bisextic quadrilateral element with equidistant points
+static inline void quad_49(real_T xi, real_T eta, real_T sfvals[49],
+                           real_T sdvals[98])
+{
+  ::sfe_sfuncs::quad_49_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_gl_25 - Biquartic quadrilateral element with Gauss-Lobatto points
+static inline void quad_gl_25(real_T xi, real_T eta, real_T sfvals[25],
+                              real_T sdvals[50])
+{
+  ::sfe_sfuncs::quad_gl_25_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_gl_36 - Biquintic quadrilateral element with equidistant points
+static inline void quad_gl_36(real_T xi, real_T eta, real_T sfvals[36],
+                              real_T sdvals[72])
+{
+  ::sfe_sfuncs::quad_gl_36_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// quad_gl_49 - Bisextic quadrilateral element with equidistant points
+static inline void quad_gl_49(real_T xi, real_T eta, real_T sfvals[49],
+                              real_T sdvals[98])
+{
+  ::sfe_sfuncs::quad_gl_49_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+static void sfe1_tabulate_shapefuncs(::coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals)
+{
+  ::coder::SizeType i;
+  ::coder::SizeType nqp;
+  //  Tabulate shape functions and derivative at given points.
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  if ((etype & 3) == 0) {
+    switch (etype) {
+    case 36: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T N[2];
+        real_T deriv[2];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_2_sfunc(cs[i1], &N[0], &deriv[0]);
+        sfvals[sfvals.size(1) * q] = N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[1];
+      }
+    } break;
+    case 40: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T b_N[3];
+        real_T b_deriv[3];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_3_sfunc(cs[i1], &b_N[0], &b_deriv[0]);
+        sfvals[sfvals.size(1) * q] = b_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = b_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = b_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            b_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = b_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            b_deriv[2];
+      }
+    } break;
+    case 44: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T c_N[4];
+        real_T c_deriv[4];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_4_sfunc(cs[i1], &c_N[0], &c_deriv[0]);
+        sfvals[sfvals.size(1) * q] = c_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = c_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            c_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = c_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            c_deriv[2];
+        sfvals[sfvals.size(1) * q + 3] = c_N[3];
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
+            c_deriv[3];
+      }
+    } break;
+    case 48: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T d_N[5];
+        real_T d_deriv[5];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_5_sfunc(cs[i1], &d_N[0], &d_deriv[0]);
+        sfvals[sfvals.size(1) * q] = d_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = d_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = d_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[2];
+        sfvals[sfvals.size(1) * q + 3] = d_N[3];
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[3];
+        sfvals[sfvals.size(1) * q + 4] = d_N[4];
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[4];
+      }
+    } break;
+    case 52: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T e_N[6];
+        real_T e_deriv[6];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_6_sfunc(cs[i1], &e_N[0], &e_deriv[0]);
+        sfvals[sfvals.size(1) * q] = e_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = e_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = e_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = e_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[2];
+        sfvals[sfvals.size(1) * q + 3] = e_N[3];
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[3];
+        sfvals[sfvals.size(1) * q + 4] = e_N[4];
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[4];
+        sfvals[sfvals.size(1) * q + 5] = e_N[5];
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[5];
+      }
+    } break;
+    default: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      m2cAssert(etype == 56, "Only support up to sextic.");
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T f_N[7];
+        real_T f_deriv[7];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_7_sfunc(cs[i1], &f_N[0], &f_deriv[0]);
+        sfvals[sfvals.size(1) * q] = f_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = f_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = f_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = f_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[2];
+        sfvals[sfvals.size(1) * q + 3] = f_N[3];
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[3];
+        sfvals[sfvals.size(1) * q + 4] = f_N[4];
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[4];
+        sfvals[sfvals.size(1) * q + 5] = f_N[5];
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[5];
+        sfvals[sfvals.size(1) * q + 6] = f_N[6];
+        sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[6];
+      }
+    } break;
     }
-  } break;
-  case 52: {
-    real_T f_sfvals[6];
-    ::sfe_sfuncs::bar_6_ncoords(&f_sfvals[0]);
-    natcoords_size[0] = 6;
-    for (::coder::SizeType i{0}; i < 6; i++) {
-      natcoords_data[i] = f_sfvals[i];
+  } else {
+    //  GL
+    switch (etype) {
+    case 45: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T c_N[4];
+        real_T c_deriv[4];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_gl_4_sfunc(cs[i1], &c_N[0], &c_deriv[0]);
+        sfvals[sfvals.size(1) * q] = c_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = c_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = c_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            c_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = c_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            c_deriv[2];
+        sfvals[sfvals.size(1) * q + 3] = c_N[3];
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
+            c_deriv[3];
+      }
+    } break;
+    case 49: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T d_N[5];
+        real_T d_deriv[5];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_gl_5_sfunc(cs[i1], &d_N[0], &d_deriv[0]);
+        sfvals[sfvals.size(1) * q] = d_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = d_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = d_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = d_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[2];
+        sfvals[sfvals.size(1) * q + 3] = d_N[3];
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[3];
+        sfvals[sfvals.size(1) * q + 4] = d_N[4];
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
+            d_deriv[4];
+      }
+    } break;
+    case 53: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T e_N[6];
+        real_T e_deriv[6];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_gl_6_sfunc(cs[i1], &e_N[0], &e_deriv[0]);
+        sfvals[sfvals.size(1) * q] = e_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = e_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = e_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = e_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[2];
+        sfvals[sfvals.size(1) * q + 3] = e_N[3];
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[3];
+        sfvals[sfvals.size(1) * q + 4] = e_N[4];
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[4];
+        sfvals[sfvals.size(1) * q + 5] = e_N[5];
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
+            e_deriv[5];
+      }
+    } break;
+    default: {
+      ::coder::SizeType i1;
+      boolean_T b;
+      boolean_T b1;
+      m2cAssert(etype == 57, "Only support up to sextic.");
+      b = true;
+      b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+      i = cs.size(1) * cs.size(0);
+      i1 = 0;
+      for (::coder::SizeType q{0}; q <= nqp; q++) {
+        real_T f_N[7];
+        real_T f_deriv[7];
+        if (b1 || (q >= i)) {
+          i1 = 0;
+          b = true;
+        } else if (b) {
+          b = false;
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          ::coder::SizeType i2;
+          i2 = cs.size(1) * cs.size(0) - 1;
+          if (i1 > MAX_int32_T - cs.size(1)) {
+            i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+          } else {
+            i1 += cs.size(1);
+            if (i1 > i2) {
+              i1 -= i2;
+            }
+          }
+        }
+        ::sfe_sfuncs::bar_gl_7_sfunc(cs[i1], &f_N[0], &f_deriv[0]);
+        sfvals[sfvals.size(1) * q] = f_N[0];
+        sdvals[sdvals.size(2) * sdvals.size(1) * q] = f_deriv[0];
+        sfvals[sfvals.size(1) * q + 1] = f_N[1];
+        sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[1];
+        sfvals[sfvals.size(1) * q + 2] = f_N[2];
+        sdvals[sdvals.size(2) * 2 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[2];
+        sfvals[sfvals.size(1) * q + 3] = f_N[3];
+        sdvals[sdvals.size(2) * 3 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[3];
+        sfvals[sfvals.size(1) * q + 4] = f_N[4];
+        sdvals[sdvals.size(2) * 4 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[4];
+        sfvals[sfvals.size(1) * q + 5] = f_N[5];
+        sdvals[sdvals.size(2) * 5 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[5];
+        sfvals[sfvals.size(1) * q + 6] = f_N[6];
+        sdvals[sdvals.size(2) * 6 + sdvals.size(2) * sdvals.size(1) * q] =
+            f_deriv[6];
+      }
+    } break;
     }
-  } break;
-  case 56: {
-    real_T sfvals[7];
-    ::sfe_sfuncs::bar_7_ncoords(&sfvals[0]);
-    natcoords_size[0] = 7;
-    for (::coder::SizeType i{0}; i < 7; i++) {
-      natcoords_data[i] = sfvals[i];
-    }
-  } break;
-  case 45: {
-    real_T d_sfvals[4];
-    ::sfe_sfuncs::bar_gl_4_ncoords(&d_sfvals[0]);
-    natcoords_size[0] = 4;
-    natcoords_data[0] = d_sfvals[0];
-    natcoords_data[1] = d_sfvals[1];
-    natcoords_data[2] = d_sfvals[2];
-    natcoords_data[3] = d_sfvals[3];
-  } break;
-  case 49: {
-    real_T e_sfvals[5];
-    ::sfe_sfuncs::bar_gl_5_ncoords(&e_sfvals[0]);
-    natcoords_size[0] = 5;
-    for (::coder::SizeType i{0}; i < 5; i++) {
-      natcoords_data[i] = e_sfvals[i];
-    }
-  } break;
-  case 53: {
-    real_T f_sfvals[6];
-    ::sfe_sfuncs::bar_gl_6_ncoords(&f_sfvals[0]);
-    natcoords_size[0] = 6;
-    for (::coder::SizeType i{0}; i < 6; i++) {
-      natcoords_data[i] = f_sfvals[i];
-    }
-  } break;
-  default: {
-    real_T sfvals[7];
-    ::sfe_sfuncs::bar_gl_7_ncoords(&sfvals[0]);
-    natcoords_size[0] = 7;
-    for (::coder::SizeType i{0}; i < 7; i++) {
-      natcoords_data[i] = sfvals[i];
-    }
-  } break;
   }
 }
 
-// obtain_natcoords2d - obtain coordinates for elems in 2d in param space
-void obtain_natcoords2d(::coder::SizeType etype,
-                        ::coder::array<real_T, 2U> &natcoords)
+static void sfe2_tabulate_equi_quad(::coder::SizeType etype,
+                                    const ::coder::array<real_T, 2U> &cs,
+                                    ::coder::array<real_T, 2U> &sfvals,
+                                    ::coder::array<real_T, 3U> &sdvals)
 {
+  real_T b_tmp_data[1029];
+  real_T tmp_data[1029];
+  real_T dv10[98];
+  real_T dv7[72];
+  real_T dv6[50];
+  real_T dv11[49];
+  real_T dv9[36];
+  real_T dv8[25];
+  ::coder::SizeType b_tmp_size_idx_1;
+  ::coder::SizeType b_tmp_size_idx_2;
+  ::coder::SizeType i;
+  ::coder::SizeType i4;
+  ::coder::SizeType i5;
+  ::coder::SizeType i6;
+  ::coder::SizeType i7;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType nqp;
+  int16_T b_unnamed_idx_1;
+  int16_T b_unnamed_idx_2;
+  //  triangular
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   switch (etype) {
-  case 68: {
-    real_T g_sfvals[6];
-    natcoords.set_size(3, 2);
-    ::sfe_sfuncs::tri_3_ncoords(&g_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 3; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = g_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = g_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 72: {
-    real_T h_sfvals[12];
-    natcoords.set_size(6, 2);
-    ::sfe_sfuncs::tri_6_ncoords(&h_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 6; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = h_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = h_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 76: {
-    real_T i_sfvals[20];
-    natcoords.set_size(10, 2);
-    ::sfe_sfuncs::tri_10_ncoords(&i_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 10; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = i_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = i_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 77: {
-    real_T i_sfvals[20];
-    natcoords.set_size(10, 2);
-    ::sfe_sfuncs::tri_gl_10_ncoords(&i_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 10; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = i_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = i_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 80: {
-    real_T j_sfvals[30];
-    natcoords.set_size(15, 2);
-    ::sfe_sfuncs::tri_15_ncoords(&j_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 15; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = j_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = j_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 81: {
-    real_T j_sfvals[30];
-    natcoords.set_size(15, 2);
-    ::sfe_sfuncs::tri_gl_15_ncoords(&j_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 15; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = j_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = j_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 84: {
-    real_T k_sfvals[42];
-    natcoords.set_size(21, 2);
-    ::sfe_sfuncs::tri_21_ncoords(&k_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 21; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = k_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = k_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 85: {
-    real_T k_sfvals[42];
-    natcoords.set_size(21, 2);
-    ::sfe_sfuncs::tri_gl_21_ncoords(&k_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 21; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = k_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = k_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 88: {
-    real_T l_sfvals[56];
-    natcoords.set_size(28, 2);
-    ::sfe_sfuncs::tri_28_ncoords(&l_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 28; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = l_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = l_sfvals[natcoords_tmp + 1];
-    }
-  } break;
   case 100: {
-    real_T b_sfvals[8];
-    natcoords.set_size(4, 2);
-    ::sfe_sfuncs::quad_4_ncoords(&b_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 4; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = b_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = b_sfvals[natcoords_tmp + 1];
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv3[8];
+      real_T dv[4];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 3) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 104: {
-    real_T c_sfvals[18];
-    natcoords.set_size(9, 2);
-    ::sfe_sfuncs::quad_9_ncoords(&c_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 9; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = c_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = c_sfvals[natcoords_tmp + 1];
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv4[18];
+      real_T dv1[9];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::quad_9_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv1[0], &dv4[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 8) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 108: {
-    real_T d_sfvals[32];
-    natcoords.set_size(16, 2);
-    ::sfe_sfuncs::quad_16_ncoords(&d_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 16; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = d_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = d_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 109: {
-    real_T d_sfvals[32];
-    natcoords.set_size(16, 2);
-    ::sfe_sfuncs::quad_gl_16_ncoords(&d_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 16; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = d_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = d_sfvals[natcoords_tmp + 1];
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv5[32];
+      real_T dv2[16];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::quad_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                  &dv2[0], &dv5[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 15) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
   case 112: {
-    real_T e_sfvals[50];
-    natcoords.set_size(25, 2);
-    ::sfe_sfuncs::quad_25_ncoords(&e_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 25; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = e_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = e_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 113: {
-    real_T e_sfvals[50];
-    natcoords.set_size(25, 2);
-    ::sfe_sfuncs::quad_gl_25_ncoords(&e_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 25; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = e_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = e_sfvals[natcoords_tmp + 1];
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv6);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 24) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
     }
   } break;
   case 116: {
-    real_T f_sfvals[72];
-    natcoords.set_size(36, 2);
-    ::sfe_sfuncs::quad_36_ncoords(&f_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 36; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = f_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = f_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 117: {
-    real_T f_sfvals[72];
-    natcoords.set_size(36, 2);
-    ::sfe_sfuncs::quad_gl_36_ncoords(&f_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 36; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = f_sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = f_sfvals[natcoords_tmp + 1];
-    }
-  } break;
-  case 120: {
-    real_T sfvals[98];
-    natcoords.set_size(49, 2);
-    ::sfe_sfuncs::quad_49_ncoords(&sfvals[0]);
-    for (::coder::SizeType i{0}; i < 49; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = sfvals[natcoords_tmp + 1];
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv9, dv7);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv7[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 35) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
     }
   } break;
   default: {
-    real_T sfvals[98];
-    natcoords.set_size(49, 2);
-    ::sfe_sfuncs::quad_gl_49_ncoords(&sfvals[0]);
-    for (::coder::SizeType i{0}; i < 49; i++) {
-      ::coder::SizeType natcoords_tmp;
-      natcoords_tmp = i << 1;
-      natcoords[2 * i] = sfvals[natcoords_tmp];
-      natcoords[2 * i + 1] = sfvals[natcoords_tmp + 1];
+    ::coder::SizeType ub_loop;
+    m2cAssert(etype == 120, "Only supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv11, dv10);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 48) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
     }
   } break;
   }
 }
 
-// obtain_natcoords3d - obtain coordinates for elems in 3d in param space
-void obtain_natcoords3d(::coder::SizeType etype,
-                        ::coder::array<real_T, 2U> &natcoords)
+static void sfe2_tabulate_equi_tri(::coder::SizeType etype,
+                                   const ::coder::array<real_T, 2U> &cs,
+                                   ::coder::array<real_T, 2U> &sfvals,
+                                   ::coder::array<real_T, 3U> &sdvals)
 {
+  real_T b_tmp_data[1029];
+  real_T tmp_data[1029];
+  real_T dv9[56];
+  real_T dv7[42];
+  real_T dv10[28];
+  real_T dv8[21];
+  ::coder::SizeType b_tmp_size_idx_1;
+  ::coder::SizeType b_tmp_size_idx_2;
+  ::coder::SizeType i;
+  ::coder::SizeType i3;
+  ::coder::SizeType i5;
+  ::coder::SizeType i6;
+  ::coder::SizeType i7;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType nqp;
+  int16_T b_unnamed_idx_1;
+  int16_T b_unnamed_idx_2;
+  //  triangular
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
   switch (etype) {
-  case 132: {
-    real_T m_sfvals[12];
-    natcoords.set_size(4, 3);
-    ::sfe_sfuncs::tet_4_ncoords(&m_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 4; i++) {
-      natcoords[3 * i] = m_sfvals[3 * i];
-      natcoords[3 * i + 1] = m_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = m_sfvals[3 * i + 2];
+  case 68: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv1[6];
+      real_T dv[3];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                &dv[0], &dv1[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 2) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
-  case 136: {
-    real_T n_sfvals[30];
-    natcoords.set_size(10, 3);
-    ::sfe_sfuncs::tet_10_ncoords(&n_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 10; i++) {
-      natcoords[3 * i] = n_sfvals[3 * i];
-      natcoords[3 * i + 1] = n_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = n_sfvals[3 * i + 2];
+  case 72: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv4[12];
+      real_T dv1[6];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tri_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                &dv1[0], &dv4[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 5) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
-  case 140: {
-    real_T o_sfvals[60];
-    natcoords.set_size(20, 3);
-    ::sfe_sfuncs::tet_20_ncoords(&o_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 20; i++) {
-      natcoords[3 * i] = o_sfvals[3 * i];
-      natcoords[3 * i + 1] = o_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = o_sfvals[3 * i + 2];
+  case 76: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv5[20];
+      real_T dv2[10];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tri_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv2[0], &dv5[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv5[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 9) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
-  case 141: {
-    real_T o_sfvals[60];
-    natcoords.set_size(20, 3);
-    ::sfe_sfuncs::tet_gl_20_ncoords(&o_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 20; i++) {
-      natcoords[3 * i] = o_sfvals[3 * i];
-      natcoords[3 * i + 1] = o_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = o_sfvals[3 * i + 2];
+  case 80: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv6[30];
+      real_T dv3[15];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tri_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv3[0], &dv6[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 14) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
     }
   } break;
-  case 144: {
-    real_T p_sfvals[105];
-    natcoords.set_size(35, 3);
-    ::sfe_sfuncs::tet_35_ncoords(&p_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 35; i++) {
-      natcoords[3 * i] = p_sfvals[3 * i];
-      natcoords[3 * i + 1] = p_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = p_sfvals[3 * i + 2];
-    }
-  } break;
-  case 145: {
-    real_T p_sfvals[105];
-    natcoords.set_size(35, 3);
-    ::sfe_sfuncs::tet_gl_35_ncoords(&p_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 35; i++) {
-      natcoords[3 * i] = p_sfvals[3 * i];
-      natcoords[3 * i + 1] = p_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = p_sfvals[3 * i + 2];
-    }
-  } break;
-  case 148: {
-    real_T q_sfvals[168];
-    natcoords.set_size(56, 3);
-    ::sfe_sfuncs::tet_56_ncoords(&q_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 56; i++) {
-      natcoords[3 * i] = q_sfvals[3 * i];
-      natcoords[3 * i + 1] = q_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = q_sfvals[3 * i + 2];
-    }
-  } break;
-  case 152: {
-    real_T r_sfvals[252];
-    natcoords.set_size(84, 3);
-    ::sfe_sfuncs::tet_84_ncoords(&r_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 84; i++) {
-      natcoords[3 * i] = r_sfvals[3 * i];
-      natcoords[3 * i + 1] = r_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = r_sfvals[3 * i + 2];
-    }
-  } break;
-  case 164: {
-    real_T s_sfvals[15];
-    natcoords.set_size(5, 3);
-    ::sfe_sfuncs::pyra_5_ncoords(&s_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 5; i++) {
-      natcoords[3 * i] = s_sfvals[3 * i];
-      natcoords[3 * i + 1] = s_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = s_sfvals[3 * i + 2];
-    }
-  } break;
-  case 168: {
-    real_T t_sfvals[42];
-    natcoords.set_size(14, 3);
-    ::sfe_sfuncs::pyra_14_ncoords(&t_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 14; i++) {
-      natcoords[3 * i] = t_sfvals[3 * i];
-      natcoords[3 * i + 1] = t_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = t_sfvals[3 * i + 2];
-    }
-  } break;
-  case 172: {
-    real_T u_sfvals[90];
-    natcoords.set_size(30, 3);
-    ::sfe_sfuncs::pyra_30_ncoords(&u_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 30; i++) {
-      natcoords[3 * i] = u_sfvals[3 * i];
-      natcoords[3 * i + 1] = u_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = u_sfvals[3 * i + 2];
-    }
-  } break;
-  case 173: {
-    real_T u_sfvals[90];
-    natcoords.set_size(30, 3);
-    ::sfe_sfuncs::pyra_gl_30_ncoords(&u_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 30; i++) {
-      natcoords[3 * i] = u_sfvals[3 * i];
-      natcoords[3 * i + 1] = u_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = u_sfvals[3 * i + 2];
-    }
-  } break;
-  case 176: {
-    real_T v_sfvals[165];
-    natcoords.set_size(55, 3);
-    ::sfe_sfuncs::pyra_55_ncoords(&v_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 55; i++) {
-      natcoords[3 * i] = v_sfvals[3 * i];
-      natcoords[3 * i + 1] = v_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = v_sfvals[3 * i + 2];
-    }
-  } break;
-  case 177: {
-    real_T v_sfvals[165];
-    natcoords.set_size(55, 3);
-    ::sfe_sfuncs::pyra_gl_55_ncoords(&v_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 55; i++) {
-      natcoords[3 * i] = v_sfvals[3 * i];
-      natcoords[3 * i + 1] = v_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = v_sfvals[3 * i + 2];
-    }
-  } break;
-  case 180: {
-    real_T w_sfvals[273];
-    natcoords.set_size(91, 3);
-    ::sfe_sfuncs::pyra_91_ncoords(&w_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 91; i++) {
-      natcoords[3 * i] = w_sfvals[3 * i];
-      natcoords[3 * i + 1] = w_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = w_sfvals[3 * i + 2];
-    }
-  } break;
-  case 196: {
-    real_T sfvals[18];
-    natcoords.set_size(6, 3);
-    ::sfe_sfuncs::prism_6_ncoords(&sfvals[0]);
-    for (::coder::SizeType i{0}; i < 6; i++) {
-      natcoords[3 * i] = sfvals[3 * i];
-      natcoords[3 * i + 1] = sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = sfvals[3 * i + 2];
-    }
-  } break;
-  case 200: {
-    real_T b_sfvals[54];
-    natcoords.set_size(18, 3);
-    ::sfe_sfuncs::prism_18_ncoords(&b_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 18; i++) {
-      natcoords[3 * i] = b_sfvals[3 * i];
-      natcoords[3 * i + 1] = b_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = b_sfvals[3 * i + 2];
-    }
-  } break;
-  case 204: {
-    real_T c_sfvals[120];
-    natcoords.set_size(40, 3);
-    ::sfe_sfuncs::prism_40_ncoords(&c_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 40; i++) {
-      natcoords[3 * i] = c_sfvals[3 * i];
-      natcoords[3 * i + 1] = c_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = c_sfvals[3 * i + 2];
-    }
-  } break;
-  case 205: {
-    real_T c_sfvals[120];
-    natcoords.set_size(40, 3);
-    ::sfe_sfuncs::prism_gl_40_ncoords(&c_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 40; i++) {
-      natcoords[3 * i] = c_sfvals[3 * i];
-      natcoords[3 * i + 1] = c_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = c_sfvals[3 * i + 2];
-    }
-  } break;
-  case 208: {
-    real_T d_sfvals[225];
-    natcoords.set_size(75, 3);
-    ::sfe_sfuncs::prism_75_ncoords(&d_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 75; i++) {
-      natcoords[3 * i] = d_sfvals[3 * i];
-      natcoords[3 * i + 1] = d_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = d_sfvals[3 * i + 2];
-    }
-  } break;
-  case 209: {
-    real_T d_sfvals[225];
-    natcoords.set_size(75, 3);
-    ::sfe_sfuncs::prism_gl_75_ncoords(&d_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 75; i++) {
-      natcoords[3 * i] = d_sfvals[3 * i];
-      natcoords[3 * i + 1] = d_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = d_sfvals[3 * i + 2];
-    }
-  } break;
-  case 210: {
-    real_T d_sfvals[225];
-    natcoords.set_size(75, 3);
-    ::sfe_sfuncs::prism_fek_75_ncoords(&d_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 75; i++) {
-      natcoords[3 * i] = d_sfvals[3 * i];
-      natcoords[3 * i + 1] = d_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = d_sfvals[3 * i + 2];
-    }
-  } break;
-  case 212: {
-    real_T j_sfvals[378];
-    natcoords.set_size(126, 3);
-    ::sfe_sfuncs::prism_126_ncoords(&j_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 126; i++) {
-      natcoords[3 * i] = j_sfvals[3 * i];
-      natcoords[3 * i + 1] = j_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = j_sfvals[3 * i + 2];
-    }
-  } break;
-  case 216: {
-    real_T k_sfvals[588];
-    natcoords.set_size(196, 3);
-    ::sfe_sfuncs::prism_196_ncoords(&k_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 196; i++) {
-      natcoords[3 * i] = k_sfvals[3 * i];
-      natcoords[3 * i + 1] = k_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = k_sfvals[3 * i + 2];
-    }
-  } break;
-  case 228: {
-    real_T e_sfvals[24];
-    natcoords.set_size(8, 3);
-    ::sfe_sfuncs::hexa_8_ncoords(&e_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 8; i++) {
-      natcoords[3 * i] = e_sfvals[3 * i];
-      natcoords[3 * i + 1] = e_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = e_sfvals[3 * i + 2];
-    }
-  } break;
-  case 232: {
-    real_T f_sfvals[81];
-    natcoords.set_size(27, 3);
-    ::sfe_sfuncs::hexa_27_ncoords(&f_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 27; i++) {
-      natcoords[3 * i] = f_sfvals[3 * i];
-      natcoords[3 * i + 1] = f_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = f_sfvals[3 * i + 2];
-    }
-  } break;
-  case 236: {
-    real_T g_sfvals[192];
-    natcoords.set_size(64, 3);
-    ::sfe_sfuncs::hexa_64_ncoords(&g_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 64; i++) {
-      natcoords[3 * i] = g_sfvals[3 * i];
-      natcoords[3 * i + 1] = g_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = g_sfvals[3 * i + 2];
-    }
-  } break;
-  case 237: {
-    real_T g_sfvals[192];
-    natcoords.set_size(64, 3);
-    ::sfe_sfuncs::hexa_gl_64_ncoords(&g_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 64; i++) {
-      natcoords[3 * i] = g_sfvals[3 * i];
-      natcoords[3 * i + 1] = g_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = g_sfvals[3 * i + 2];
-    }
-  } break;
-  case 240: {
-    real_T h_sfvals[375];
-    natcoords.set_size(125, 3);
-    ::sfe_sfuncs::hexa_125_ncoords(&h_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 125; i++) {
-      natcoords[3 * i] = h_sfvals[3 * i];
-      natcoords[3 * i + 1] = h_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = h_sfvals[3 * i + 2];
-    }
-  } break;
-  case 241: {
-    real_T h_sfvals[375];
-    natcoords.set_size(125, 3);
-    ::sfe_sfuncs::hexa_gl_125_ncoords(&h_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 125; i++) {
-      natcoords[3 * i] = h_sfvals[3 * i];
-      natcoords[3 * i + 1] = h_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = h_sfvals[3 * i + 2];
-    }
-  } break;
-  case 244: {
-    real_T l_sfvals[648];
-    natcoords.set_size(216, 3);
-    ::sfe_sfuncs::hexa_216_ncoords(&l_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 216; i++) {
-      natcoords[3 * i] = l_sfvals[3 * i];
-      natcoords[3 * i + 1] = l_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = l_sfvals[3 * i + 2];
-    }
-  } break;
-  case 245: {
-    real_T l_sfvals[648];
-    natcoords.set_size(216, 3);
-    ::sfe_sfuncs::hexa_gl_216_ncoords(&l_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 216; i++) {
-      natcoords[3 * i] = l_sfvals[3 * i];
-      natcoords[3 * i + 1] = l_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = l_sfvals[3 * i + 2];
-    }
-  } break;
-  case 248: {
-    real_T i_sfvals[1029];
-    natcoords.set_size(343, 3);
-    ::sfe_sfuncs::hexa_343_ncoords(&i_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 343; i++) {
-      natcoords[3 * i] = i_sfvals[3 * i];
-      natcoords[3 * i + 1] = i_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = i_sfvals[3 * i + 2];
+  case 84: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tri_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv8, dv7);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv8[i3];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv7[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 20) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
     }
   } break;
   default: {
-    real_T i_sfvals[1029];
-    natcoords.set_size(343, 3);
-    ::sfe_sfuncs::hexa_gl_343_ncoords(&i_sfvals[0]);
-    for (::coder::SizeType i{0}; i < 343; i++) {
-      natcoords[3 * i] = i_sfvals[3 * i];
-      natcoords[3 * i + 1] = i_sfvals[3 * i + 1];
-      natcoords[3 * i + 2] = i_sfvals[3 * i + 2];
+    ::coder::SizeType ub_loop;
+    m2cAssert(etype == 88, "Only support up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tri_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv10, dv9);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv10[i3];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv9[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 27) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
     }
   } break;
+  }
+}
+
+static void sfe2_tabulate_fek_tri(::coder::SizeType etype,
+                                  const ::coder::array<real_T, 2U> &cs,
+                                  ::coder::array<real_T, 2U> &sfvals,
+                                  ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T tmp_data[1029];
+  real_T dv4[56];
+  real_T dv1[42];
+  real_T dv[30];
+  real_T dv5[28];
+  real_T dv3[21];
+  real_T dv2[15];
+  ::coder::SizeType i;
+  ::coder::SizeType i1;
+  ::coder::SizeType i2;
+  ::coder::SizeType i3;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType tmp_size_idx_1;
+  ::coder::SizeType tmp_size_idx_2;
+  ::coder::SizeType ub_loop;
+  int16_T unnamed_idx_1;
+  int16_T unnamed_idx_2;
+  //  triangular
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  switch (etype) {
+  case 82:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      tri_fek_15(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv2, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + (loop_ub << 1)];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 14) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  case 86:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      tri_fek_21(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv3, dv1);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (loop_ub << 1)];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 20) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  default:
+    m2cAssert(etype == 90, "Only supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      tri_fek_28(cs[cs.size(1) * q], cs[cs.size(1) * q + 1], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv5[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + (loop_ub << 1)];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 27) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  }
+}
+
+static void sfe2_tabulate_gl_quad(::coder::SizeType etype,
+                                  const ::coder::array<real_T, 2U> &cs,
+                                  ::coder::array<real_T, 2U> &sfvals,
+                                  ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T b_tmp_data[1029];
+  real_T tmp_data[1029];
+  real_T dv6[98];
+  real_T dv3[72];
+  real_T dv2[50];
+  real_T dv7[49];
+  real_T dv5[36];
+  real_T dv4[25];
+  ::coder::SizeType b_tmp_size_idx_1;
+  ::coder::SizeType b_tmp_size_idx_2;
+  ::coder::SizeType i;
+  ::coder::SizeType i4;
+  ::coder::SizeType i5;
+  ::coder::SizeType i6;
+  ::coder::SizeType i7;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType nqp;
+  int16_T b_unnamed_idx_1;
+  int16_T b_unnamed_idx_2;
+  //  quad
+  nqp = cs.size(0);
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 109: {
+    for (::coder::SizeType q{0}; q < nqp; q++) {
+      real_T dv1[32];
+      real_T dv[16];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::quad_gl_16_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                     &dv[0], &dv1[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 15) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 113: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_gl_25(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv4, dv2);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv4[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv2[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 24) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  case 117: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_gl_36(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv3);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv5[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 35) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  default: {
+    ::coder::SizeType ub_loop;
+    m2cAssert(etype == 121, "Only supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      quad_gl_49(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 48) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+static void sfe2_tabulate_gl_tri(::coder::SizeType etype,
+                                 const ::coder::array<real_T, 2U> &cs,
+                                 ::coder::array<real_T, 2U> &sfvals,
+                                 ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T b_tmp_data[1029];
+  real_T tmp_data[1029];
+  real_T dv6[56];
+  real_T dv4[42];
+  real_T dv7[28];
+  real_T dv5[21];
+  ::coder::SizeType b_tmp_size_idx_1;
+  ::coder::SizeType b_tmp_size_idx_2;
+  ::coder::SizeType i;
+  ::coder::SizeType i3;
+  ::coder::SizeType i5;
+  ::coder::SizeType i6;
+  ::coder::SizeType i7;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType nqp;
+  int16_T b_unnamed_idx_1;
+  int16_T b_unnamed_idx_2;
+  //  triangular
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 77: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv2[20];
+      real_T dv[10];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tri_gl_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                    &dv[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 9) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 81: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv3[30];
+      real_T dv1[15];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tri_gl_15_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                    &dv1[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + (ub_loop << 1)];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 14) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 85: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tri_gl_21(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv5[i3];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv4[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 20) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  default: {
+    ::coder::SizeType ub_loop;
+    m2cAssert(etype == 85, "Only support up to sextic");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tri_fek_28(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1], dv7, dv6);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv7[i3];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv6[i6 + (loop_ub << 1)];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 27) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+// sfe2_tabulate_shapefuncs - Tabulate shape functions and sdvals at given
+static inline void sfe2_tabulate_shapefuncs(
+    ::coder::SizeType etype, const ::coder::array<real_T, 2U> &cs,
+    ::coder::array<real_T, 2U> &sfvals, ::coder::array<real_T, 3U> &sdvals)
+{
+  switch (etype & 3) {
+  case 0:
+    //  equi kernel
+    if ((etype >> 5 & 7) == 2) {
+      sfe2_tabulate_equi_tri(etype, cs, sfvals, sdvals);
+    } else {
+      sfe2_tabulate_equi_quad(etype, cs, sfvals, sdvals);
+    }
+    break;
+  case 1:
+    //  GL kernel
+    if ((etype >> 5 & 7) == 2) {
+      sfe2_tabulate_gl_tri(etype, cs, sfvals, sdvals);
+    } else {
+      sfe2_tabulate_gl_quad(etype, cs, sfvals, sdvals);
+    }
+    break;
+  default:
+    //  FEK kernel
+    sfe2_tabulate_fek_tri(etype, cs, sfvals, sdvals);
+    break;
+  }
+}
+
+static void sfe3_tabulate_equi_hexa(::coder::SizeType etype,
+                                    const ::coder::array<real_T, 2U> &cs,
+                                    ::coder::array<real_T, 2U> &sfvals,
+                                    ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T b_tmp_data[1029];
+  real_T dv10[1029];
+  real_T tmp_data[1029];
+  real_T dv6[648];
+  real_T dv5[375];
+  real_T dv11[343];
+  real_T dv9[216];
+  real_T dv4[192];
+  real_T dv8[125];
+  real_T dv7[64];
+  ::coder::SizeType b_tmp_size_idx_1;
+  ::coder::SizeType b_tmp_size_idx_2;
+  ::coder::SizeType i;
+  ::coder::SizeType i4;
+  ::coder::SizeType i5;
+  ::coder::SizeType i6;
+  ::coder::SizeType i7;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType nqp;
+  int16_T b_unnamed_idx_1;
+  int16_T b_unnamed_idx_2;
+  //  hex
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 228: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv2[24];
+      real_T dv[8];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::hexa_8_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 7) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 232: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv3[81];
+      real_T dv1[27];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::hexa_27_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 26) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 236: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      hexa_64(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+              cs[cs.size(1) * b_q + 2], dv7, dv4);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 63) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  case 240: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      hexa_125(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv8, dv5);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 124) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  case 244: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      hexa_216(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv9, dv6);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv9[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv6[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 215) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  default: {
+    ::coder::SizeType ub_loop;
+    m2cAssert(etype == 248, "Hex elements supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      hexa_343(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv11, dv10);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv11[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv10[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 342) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+static void sfe3_tabulate_equi_prism(::coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T b_tmp_data[1029];
+  real_T tmp_data[1029];
+  real_T dv9[588];
+  real_T dv5[378];
+  real_T dv4[225];
+  real_T dv10[196];
+  real_T dv8[126];
+  real_T dv3[120];
+  real_T dv7[75];
+  real_T dv6[40];
+  ::coder::SizeType b_tmp_size_idx_1;
+  ::coder::SizeType b_tmp_size_idx_2;
+  ::coder::SizeType i;
+  ::coder::SizeType i4;
+  ::coder::SizeType i5;
+  ::coder::SizeType i6;
+  ::coder::SizeType i7;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType nqp;
+  int16_T b_unnamed_idx_1;
+  int16_T b_unnamed_idx_2;
+  //  prisms
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 196: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv1[18];
+      real_T dv[6];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::prism_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                  cs[cs.size(1) * q + 2], &dv[0], &dv1[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 5) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 200: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv2[54];
+      real_T dv1[18];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::prism_18_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                   cs[cs.size(1) * q + 2], &dv1[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 17) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 204: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      prism_40(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv6, dv3);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv6[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv3[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 39) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  case 208: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      prism_75(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+               cs[cs.size(1) * b_q + 2], dv7, dv4);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv7[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv4[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 74) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  case 212: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      prism_126(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+                cs[cs.size(1) * b_q + 2], dv8, dv5);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv8[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv5[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 125) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  default: {
+    ::coder::SizeType ub_loop;
+    m2cAssert(etype == 216, "prismatic elements supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      prism_196(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+                cs[cs.size(1) * b_q + 2], dv10, dv9);
+      loop_ub = sfvals.size(1);
+      for (i4 = 0; i4 < loop_ub; i4++) {
+        sfvals[i4 + sfvals.size(1) * b_q] = dv10[i4];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i4 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i4] = dv9[i6 + 3 * loop_ub];
+        loop_ub++;
+        i4++;
+        if (i4 > b_tmp_size_idx_1 - 1) {
+          i4 = 0;
+          i5++;
+        }
+        if (loop_ub > 195) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i4 = 0; i4 < b_tmp_size_idx_1; i4++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i4) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i4];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+static void sfe3_tabulate_equi_pyra(::coder::SizeType etype,
+                                    const ::coder::array<real_T, 2U> &cs,
+                                    ::coder::array<real_T, 2U> &sfvals,
+                                    ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T b_tmp_data[1029];
+  real_T tmp_data[1029];
+  real_T dv6[165];
+  real_T dv4[90];
+  real_T dv7[55];
+  real_T dv5[30];
+  ::coder::SizeType b_tmp_size_idx_1;
+  ::coder::SizeType b_tmp_size_idx_2;
+  ::coder::SizeType i;
+  ::coder::SizeType i2;
+  ::coder::SizeType i5;
+  ::coder::SizeType i6;
+  ::coder::SizeType i7;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType nqp;
+  int16_T b_unnamed_idx_1;
+  int16_T b_unnamed_idx_2;
+  //  pyra
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 164: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv2[15];
+      real_T dv[5];
+      ::coder::SizeType i1;
+      ::coder::SizeType i3;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::pyra_5_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i3 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i3 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 4) {
+          ub_loop = 0;
+          i3++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 168: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv3[42];
+      real_T dv1[14];
+      ::coder::SizeType i1;
+      ::coder::SizeType i3;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::pyra_14_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                  cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i3 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i3 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 13) {
+          ub_loop = 0;
+          i3++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 172: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      pyra_30(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+              cs[cs.size(1) * b_q + 2], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        sfvals[i2 + sfvals.size(1) * b_q] = dv5[i2];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i2 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i2] = dv4[i6 + 3 * loop_ub];
+        loop_ub++;
+        i2++;
+        if (i2 > b_tmp_size_idx_1 - 1) {
+          i2 = 0;
+          i5++;
+        }
+        if (loop_ub > 29) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i2 = 0; i2 < b_tmp_size_idx_1; i2++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i2) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i2];
+        }
+      }
+    }
+  } break;
+  default: {
+    ::coder::SizeType ub_loop;
+    m2cAssert(etype == 176, "Pyramid only support up to quartic");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      pyra_55(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+              cs[cs.size(1) * b_q + 2], dv7, dv6);
+      loop_ub = sfvals.size(1);
+      for (i2 = 0; i2 < loop_ub; i2++) {
+        sfvals[i2 + sfvals.size(1) * b_q] = dv7[i2];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i2 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i2] = dv6[i6 + 3 * loop_ub];
+        loop_ub++;
+        i2++;
+        if (i2 > b_tmp_size_idx_1 - 1) {
+          i2 = 0;
+          i5++;
+        }
+        if (loop_ub > 54) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i2 = 0; i2 < b_tmp_size_idx_1; i2++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i2) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i2];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+static void sfe3_tabulate_equi_tet(::coder::SizeType etype,
+                                   const ::coder::array<real_T, 2U> &cs,
+                                   ::coder::array<real_T, 2U> &sfvals,
+                                   ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T b_tmp_data[1029];
+  real_T tmp_data[1029];
+  real_T dv10[252];
+  real_T dv6[168];
+  real_T dv5[105];
+  real_T dv11[84];
+  real_T dv4[60];
+  real_T dv9[56];
+  real_T dv8[35];
+  real_T dv7[20];
+  ::coder::SizeType b_tmp_size_idx_1;
+  ::coder::SizeType b_tmp_size_idx_2;
+  ::coder::SizeType i;
+  ::coder::SizeType i3;
+  ::coder::SizeType i5;
+  ::coder::SizeType i6;
+  ::coder::SizeType i7;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType nqp;
+  int16_T b_unnamed_idx_1;
+  int16_T b_unnamed_idx_2;
+  //  tet
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 132: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv2[12];
+      real_T dv[4];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tet_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                cs[cs.size(1) * q + 2], &dv[0], &dv2[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 3) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 136: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv3[30];
+      real_T dv1[10];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      ::coder::SizeType ub_loop;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tet_10_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 cs[cs.size(1) * q + 2], &dv1[0], &dv3[0]);
+      ub_loop = sfvals.size(1);
+      for (i = 0; i < ub_loop; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      ub_loop = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i4{0}; i4 < unnamed_idx_1 * unnamed_idx_2; i4++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * ub_loop];
+        ub_loop++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (ub_loop > 9) {
+          ub_loop = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 140: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tet_20(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+             cs[cs.size(1) * b_q + 2], dv7, dv4);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv7[i3];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv4[i6 + 3 * loop_ub];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 19) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  case 144: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tet_35(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+             cs[cs.size(1) * b_q + 2], dv8, dv5);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv8[i3];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv5[i6 + 3 * loop_ub];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 34) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  case 148: {
+    ::coder::SizeType ub_loop;
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tet_56(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+             cs[cs.size(1) * b_q + 2], dv9, dv6);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv9[i3];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv6[i6 + 3 * loop_ub];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 55) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  default: {
+    ::coder::SizeType ub_loop;
+    m2cAssert(etype == 152, "equidistant tets only supported up to sextic");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType b_q = 0; b_q <= ub_loop; b_q++) {
+      tet_84(cs[cs.size(1) * b_q], cs[cs.size(1) * b_q + 1],
+             cs[cs.size(1) * b_q + 2], dv11, dv10);
+      loop_ub = sfvals.size(1);
+      for (i3 = 0; i3 < loop_ub; i3++) {
+        sfvals[i3 + sfvals.size(1) * b_q] = dv11[i3];
+      }
+      b_unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      b_unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i3 = 0;
+      i5 = 0;
+      loop_ub = 0;
+      i6 = 0;
+      b_tmp_size_idx_2 = sdvals.size(2);
+      b_tmp_size_idx_1 = sdvals.size(1);
+      for (i7 = 0; i7 < b_unnamed_idx_1 * b_unnamed_idx_2; i7++) {
+        b_tmp_data[i5 + b_tmp_size_idx_2 * i3] = dv10[i6 + 3 * loop_ub];
+        loop_ub++;
+        i3++;
+        if (i3 > b_tmp_size_idx_1 - 1) {
+          i3 = 0;
+          i5++;
+        }
+        if (loop_ub > 83) {
+          loop_ub = 0;
+          i6++;
+        }
+      }
+      for (i3 = 0; i3 < b_tmp_size_idx_1; i3++) {
+        for (i5 = 0; i5 < b_tmp_size_idx_2; i5++) {
+          sdvals[(i5 + sdvals.size(2) * i3) +
+                 sdvals.size(2) * sdvals.size(1) * b_q] =
+              b_tmp_data[i5 + b_tmp_size_idx_2 * i3];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+static void sfe3_tabulate_gl_hexa(::coder::SizeType etype,
+                                  const ::coder::array<real_T, 2U> &cs,
+                                  ::coder::array<real_T, 2U> &sfvals,
+                                  ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T dv6[1029];
+  real_T tmp_data[1029];
+  real_T dv2[648];
+  real_T dv1[375];
+  real_T dv7[343];
+  real_T dv5[216];
+  real_T dv[192];
+  real_T dv4[125];
+  real_T dv3[64];
+  ::coder::SizeType i;
+  ::coder::SizeType i1;
+  ::coder::SizeType i2;
+  ::coder::SizeType i3;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType tmp_size_idx_1;
+  ::coder::SizeType tmp_size_idx_2;
+  ::coder::SizeType ub_loop;
+  int16_T unnamed_idx_1;
+  int16_T unnamed_idx_2;
+  //  hex
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  switch (etype) {
+  case 237:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      hexa_gl_64(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                 cs[cs.size(1) * q + 2], dv3, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 63) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  case 241:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      hexa_gl_125(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv4, dv1);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv4[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 124) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  case 245:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      hexa_gl_216(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv5, dv2);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv5[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 215) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  default:
+    m2cAssert(etype == 249, "Gauss-Lobatto only supports up to sextic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      hexa_gl_343(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv7, dv6);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv7[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 342) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  }
+}
+
+static void sfe3_tabulate_gl_prism(::coder::SizeType etype,
+                                   const ::coder::array<real_T, 2U> &cs,
+                                   ::coder::array<real_T, 2U> &sfvals,
+                                   ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T tmp_data[1029];
+  real_T dv4[378];
+  real_T dv1[225];
+  real_T dv5[126];
+  real_T dv[120];
+  real_T dv3[75];
+  real_T dv2[40];
+  ::coder::SizeType i;
+  ::coder::SizeType i1;
+  ::coder::SizeType i2;
+  ::coder::SizeType i3;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType tmp_size_idx_1;
+  ::coder::SizeType tmp_size_idx_2;
+  ::coder::SizeType ub_loop;
+  int16_T unnamed_idx_1;
+  int16_T unnamed_idx_2;
+  //  prisms
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  switch (etype) {
+  case 205:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      prism_gl_40(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv2, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 39) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  case 209:
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      prism_gl_75(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                  cs[cs.size(1) * q + 2], dv3, dv1);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv1[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 74) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  default:
+    m2cAssert(etype == 213, "Gauss-Lobatto only supports up to quintic.");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      prism_gl_126(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                   cs[cs.size(1) * q + 2], dv5, dv4);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv5[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 125) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+    break;
+  }
+}
+
+static void sfe3_tabulate_gl_pyra(::coder::SizeType etype,
+                                  const ::coder::array<real_T, 2U> &cs,
+                                  ::coder::array<real_T, 2U> &sfvals,
+                                  ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T tmp_data[1029];
+  real_T dv2[165];
+  real_T dv[90];
+  real_T dv3[55];
+  real_T dv1[30];
+  ::coder::SizeType i;
+  ::coder::SizeType i1;
+  ::coder::SizeType i2;
+  ::coder::SizeType i3;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType tmp_size_idx_1;
+  ::coder::SizeType tmp_size_idx_2;
+  ::coder::SizeType ub_loop;
+  int16_T unnamed_idx_1;
+  int16_T unnamed_idx_2;
+  //  pyra
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  if (etype == 173) {
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      pyra_gl_30(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                 cs[cs.size(1) * q + 2], dv1, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 29) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } else {
+    m2cAssert(etype == 177, "Pyramid only support up to quartic");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      pyra_gl_55(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                 cs[cs.size(1) * q + 2], dv3, dv2);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 54) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  }
+}
+
+static void sfe3_tabulate_gl_tet(::coder::SizeType etype,
+                                 const ::coder::array<real_T, 2U> &cs,
+                                 ::coder::array<real_T, 2U> &sfvals,
+                                 ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T tmp_data[1029];
+  real_T dv2[105];
+  real_T dv[60];
+  real_T dv3[35];
+  real_T dv1[20];
+  ::coder::SizeType i;
+  ::coder::SizeType i1;
+  ::coder::SizeType i2;
+  ::coder::SizeType i3;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType tmp_size_idx_1;
+  ::coder::SizeType tmp_size_idx_2;
+  ::coder::SizeType ub_loop;
+  int16_T unnamed_idx_1;
+  int16_T unnamed_idx_2;
+  //  tet
+  ub_loop = iv[etype - 1];
+  sfvals.set_size(cs.size(0), ub_loop);
+  sdvals.set_size(cs.size(0), ub_loop, cs.size(1));
+  if (etype == 141) {
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      tet_gl_20(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                cs[cs.size(1) * q + 2], dv1, dv);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 19) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } else {
+    m2cAssert(
+        etype == 145,
+        "Gauss-Lobatto tetrahedral elements are supported only up to quartic");
+    //  Serial mode
+    ub_loop = cs.size(0) - 1;
+    for (::coder::SizeType q = 0; q <= ub_loop; q++) {
+      tet_gl_35(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                cs[cs.size(1) * q + 2], dv3, dv2);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv3[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (i3 = 0; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 34) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  }
+}
+
+// sfe3_tabulate_shapefuncs - Tabulate shape functions and sdvals at qpoints
+static void sfe3_tabulate_shapefuncs(::coder::SizeType etype,
+                                     const ::coder::array<real_T, 2U> &cs,
+                                     ::coder::array<real_T, 2U> &sfvals,
+                                     ::coder::array<real_T, 3U> &sdvals)
+{
+  ::coder::SizeType postype;
+  postype = etype & 3;
+  if (postype == 0) {
+    ::coder::SizeType i;
+    i = etype >> 5 & 7;
+    if (i == 4) {
+      sfe3_tabulate_equi_tet(etype, cs, sfvals, sdvals);
+    } else if (i == 5) {
+      sfe3_tabulate_equi_pyra(etype, cs, sfvals, sdvals);
+    } else if (i == 6) {
+      sfe3_tabulate_equi_prism(etype, cs, sfvals, sdvals);
+    } else {
+      sfe3_tabulate_equi_hexa(etype, cs, sfvals, sdvals);
+    }
+  } else {
+    ::coder::SizeType i;
+    m2cAssert(postype == 1,
+              "Only supports Equidistant and Gauss-Lobatto points in 3D");
+    i = etype >> 5 & 7;
+    if (i == 4) {
+      sfe3_tabulate_gl_tet(etype, cs, sfvals, sdvals);
+    } else if (i == 5) {
+      sfe3_tabulate_gl_pyra(etype, cs, sfvals, sdvals);
+    } else if (i == 6) {
+      sfe3_tabulate_gl_prism(etype, cs, sfvals, sdvals);
+    } else {
+      sfe3_tabulate_gl_hexa(etype, cs, sfvals, sdvals);
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                     const ::coder::array<real_T, 2U> &xs,
+                     ::coder::SizeType qd_or_natcoords)
+{
+  real_T dv[9];
+  real_T v;
+  ::coder::SizeType i;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType sfe_idx_0_tmp_tmp;
+  ::coder::SizeType topo_dim;
+  uint8_T c;
+  uint8_T geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (static_cast<::coder::SizeType>(static_cast<uint32_T>(etypes[0]) >>
+                                           5) ==
+            static_cast<::coder::SizeType>(static_cast<uint32_T>(geom_etype) >>
+                                           5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<uint8_T>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  Set up quadrature
+  if (qd_or_natcoords != -1) {
+    if (qd_or_natcoords == 0) {
+      //  trial+test+nonlinear_geom?1:0
+      qd_or_natcoords =
+          (((etypes[0] >> 2 & 7) << 1) + ((geom_etype >> 2 & 7) > 1)) +
+          (xs.size(1) > topo_dim);
+    }
+    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+    b_sfe->nqp = b_sfe->ws.size(0);
+  } else {
+    m2cErrMsgIdAndTxt("sfe_init:missUserQuad", "missing user quadrature data");
+    m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                      "bad user quadrature data size");
+    b_sfe->nqp = 0;
+    b_sfe->ws.set_size(0);
+    b_sfe->cs.set_size(0, topo_dim);
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (::coder::SizeType k{0}; k < i; k++) {
+      ::coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    real_T d;
+    ::coder::SizeType geom_dim;
+    ::coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(real_T));
+    n = xs.size(0);
+    for (::coder::SizeType k{0}; k < n; k++) {
+      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (::coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    //  Super-parametric
+    loop_ub = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(loop_ub, 3);
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      ::coder::SizeType geom_dim;
+      ::coder::SizeType n;
+      ::coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(real_T));
+      n = xs.size(0);
+      for (::coder::SizeType k{0}; k < n; k++) {
+        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (::coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        loop_ub = i + y;
+        b_sfe->jacTs[3 * loop_ub] = dv[3 * i];
+        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                     const ::coder::array<real_T, 2U> &xs,
+                     ::coder::SizeType qd_or_natcoords,
+                     const ::coder::array<real_T, 2U> &userquad)
+{
+  real_T dv[9];
+  real_T v;
+  ::coder::SizeType i;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType sfe_idx_0_tmp_tmp;
+  ::coder::SizeType topo_dim;
+  uint8_T c;
+  uint8_T geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (static_cast<::coder::SizeType>(static_cast<uint32_T>(etypes[0]) >>
+                                           5) ==
+            static_cast<::coder::SizeType>(static_cast<uint32_T>(geom_etype) >>
+                                           5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<uint8_T>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  Set up quadrature
+  if (qd_or_natcoords != -1) {
+    if (qd_or_natcoords == 0) {
+      //  trial+test+nonlinear_geom?1:0
+      qd_or_natcoords =
+          (((etypes[0] >> 2 & 7) << 1) + ((geom_etype >> 2 & 7) > 1)) +
+          (xs.size(1) > topo_dim);
+    }
+    tabulate_quadratures((etypes[0]), qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+    b_sfe->nqp = b_sfe->ws.size(0);
+  } else {
+    if ((userquad.size(0) == 0) || (userquad.size(1) == 0)) {
+      m2cErrMsgIdAndTxt("sfe_init:missUserQuad",
+                        "missing user quadrature data");
+    }
+    if (userquad.size(1) != topo_dim + 1) {
+      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                        "bad user quadrature data size");
+    }
+    b_sfe->nqp = userquad.size(0);
+    b_sfe->ws.set_size(userquad.size(0));
+    b_sfe->cs.set_size(userquad.size(0), topo_dim);
+    i = userquad.size(0);
+    for (::coder::SizeType q{0}; q < i; q++) {
+      b_sfe->ws[q] = userquad[userquad.size(1) * q];
+      for (::coder::SizeType k{0}; k < topo_dim; k++) {
+        b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+            userquad[(k + userquad.size(1) * q) + 1];
+      }
+    }
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (::coder::SizeType k{0}; k < i; k++) {
+      ::coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    real_T d;
+    ::coder::SizeType geom_dim;
+    ::coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(real_T));
+    n = xs.size(0);
+    for (::coder::SizeType k{0}; k < n; k++) {
+      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (::coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    //  Super-parametric
+    loop_ub = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(loop_ub, 3);
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      ::coder::SizeType geom_dim;
+      ::coder::SizeType n;
+      ::coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(real_T));
+      n = xs.size(0);
+      for (::coder::SizeType k{0}; k < n; k++) {
+        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (::coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        loop_ub = i + y;
+        b_sfe->jacTs[3 * loop_ub] = dv[3 * i];
+        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                     const ::coder::array<real_T, 2U> &xs)
+{
+  real_T dv[9];
+  real_T v;
+  ::coder::SizeType i;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType sfe_idx_0_tmp_tmp;
+  ::coder::SizeType topo_dim;
+  uint8_T c;
+  uint8_T geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (static_cast<::coder::SizeType>(static_cast<uint32_T>(etypes[0]) >>
+                                           5) ==
+            static_cast<::coder::SizeType>(static_cast<uint32_T>(geom_etype) >>
+                                           5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<uint8_T>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  Set up quadrature
+  tabulate_quadratures(
+      (etypes[0]),
+      (((etypes[0] >> 2 & 7) << 1) + ((geom_etype >> 2 & 7) > 1)) +
+          (xs.size(1) > topo_dim),
+      b_sfe->cs, b_sfe->ws);
+  b_sfe->nqp = b_sfe->ws.size(0);
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (::coder::SizeType k{0}; k < i; k++) {
+      ::coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((geom_etype == 68) || (geom_etype == 132) || (geom_etype == 36)) {
+    real_T d;
+    ::coder::SizeType geom_dim;
+    ::coder::SizeType n;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(real_T));
+    n = xs.size(0);
+    for (::coder::SizeType k{0}; k < n; k++) {
+      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (::coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    //  Super-parametric
+    loop_ub = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(loop_ub, 3);
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      ::coder::SizeType geom_dim;
+      ::coder::SizeType n;
+      ::coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(real_T));
+      n = xs.size(0);
+      for (::coder::SizeType k{0}; k < n; k++) {
+        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (::coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        loop_ub = i + y;
+        b_sfe->jacTs[3 * loop_ub] = dv[3 * i];
+        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const uint8_T etypes[2],
+                     const ::coder::array<real_T, 2U> &xs,
+                     const ::coder::array<real_T, 2U> &qd_or_natcoords)
+{
+  ::coder::SizeType i;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType topo_dim;
+  uint8_T c;
+  uint8_T geom_etype;
+  boolean_T flag;
+  if (etypes[1] == 0) {
+    geom_etype = etypes[0];
+  } else {
+    geom_etype = etypes[1];
+  }
+  flag = etypes[0] == geom_etype;
+  if (!flag) {
+    //  then the shapes must match
+    flag = (static_cast<::coder::SizeType>(static_cast<uint32_T>(etypes[0]) >>
+                                           5) ==
+            static_cast<::coder::SizeType>(static_cast<uint32_T>(geom_etype) >>
+                                           5));
+  }
+  m2cAssert(flag, "invalid element combinations");
+  c = static_cast<uint8_T>((etypes[0]) >> 5);
+  topo_dim = ((c > 0) + (c > 1)) + (c > 3);
+  //  Geometric dimension
+  if (xs.size(1) < topo_dim) {
+    m2cErrMsgIdAndTxt("sfe_init:badDim",
+                      "geometric dim cannot be smaller than topo dim");
+  }
+  b_sfe->geom_dim = xs.size(1);
+  //  assign geom dimension
+  b_sfe->topo_dim = topo_dim;
+  //  assign topo dimension
+  m2cAssert(iv[geom_etype - 1] == xs.size(0), "nnodes do not match");
+  b_sfe->etypes[0] = etypes[0];
+  b_sfe->etypes[1] = geom_etype;
+  //  Get number of nodes per element
+  b_sfe->nnodes[0] = iv[etypes[0] - 1];
+  b_sfe->nnodes[1] = iv[geom_etype - 1];
+  //  User-input natural coordinates
+  b_sfe->nqp = qd_or_natcoords.size(0);
+  b_sfe->ws.set_size(qd_or_natcoords.size(0));
+  loop_ub = qd_or_natcoords.size(0);
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->ws[i] = 1.0;
+  }
+  //  user ones for dummy quad weights
+  b_sfe->cs.set_size(qd_or_natcoords.size(0), topo_dim);
+  i = qd_or_natcoords.size(0);
+  for (::coder::SizeType q{0}; q < i; q++) {
+    for (::coder::SizeType k{0}; k < topo_dim; k++) {
+      b_sfe->cs[k + b_sfe->cs.size(1) * q] =
+          qd_or_natcoords[k + qd_or_natcoords.size(1) * q];
+    }
+  }
+  //  Solution space shape functions & derivs
+  tabulate_shapefuncs((etypes[0]), b_sfe->cs, b_sfe->shapes_geom,
+                      b_sfe->derivs_geom);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
+                             b_sfe->shapes_geom.size(1));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
+  }
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
+  b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
+                             b_sfe->derivs_geom.size(1),
+                             b_sfe->derivs_geom.size(2));
+  for (i = 0; i < loop_ub; i++) {
+    b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
+  }
+  //  Geometry space shape functions & derivs
+  if (etypes[0] != geom_etype) {
+    tabulate_shapefuncs(geom_etype, b_sfe->cs, b_sfe->shapes_geom,
+                        b_sfe->derivs_geom);
+  }
+  //  potentially skip re-tabulating
+  b_sfe->cs_phy.set_size(qd_or_natcoords.size(0), xs.size(1));
+  i = qd_or_natcoords.size(0);
+  for (::coder::SizeType q{0}; q < i; q++) {
+    loop_ub = xs.size(1);
+    for (::coder::SizeType k{0}; k < loop_ub; k++) {
+      real_T v;
+      ::coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+}
+
+// sfe_init - Initialize/reinitialize an sfe object for non-boundary element
+static void sfe_init(SfeObject *b_sfe, const ::coder::array<real_T, 2U> &xs)
+{
+  real_T dv[9];
+  real_T v;
+  ::coder::SizeType i;
+  ::coder::SizeType sfe_idx_0_tmp_tmp;
+  boolean_T cond;
+  if ((b_sfe->etypes[0] > 0) && (iv[b_sfe->etypes[0] - 1] != 0)) {
+    cond = true;
+  } else {
+    cond = false;
+  }
+  m2cAssert(cond, "");
+  //  potentially skip re-tabulating
+  sfe_idx_0_tmp_tmp = b_sfe->nqp;
+  b_sfe->cs_phy.set_size(sfe_idx_0_tmp_tmp, xs.size(1));
+  for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+    i = xs.size(1);
+    for (::coder::SizeType k{0}; k < i; k++) {
+      ::coder::SizeType m;
+      m = b_sfe->shapes_geom.size(1);
+      v = b_sfe->shapes_geom[b_sfe->shapes_geom.size(1) * q] * xs[k];
+      for (::coder::SizeType b_i{2}; b_i <= m; b_i++) {
+        v += b_sfe->shapes_geom[(b_i + b_sfe->shapes_geom.size(1) * q) - 1] *
+             xs[k + xs.size(1) * (b_i - 1)];
+      }
+      b_sfe->cs_phy[k + b_sfe->cs_phy.size(1) * q] = v;
+    }
+  }
+  //  Compute Jacobian
+  b_sfe->wdetJ.set_size(b_sfe->nqp);
+  if ((b_sfe->etypes[1] == 68) || (b_sfe->etypes[1] == 132) ||
+      (b_sfe->etypes[1] == 36)) {
+    real_T d;
+    ::coder::SizeType geom_dim;
+    ::coder::SizeType n;
+    ::coder::SizeType topo_dim;
+    //  A single Jacobian matrix (transpose) is needed for simplex elements
+    geom_dim = xs.size(1);
+    topo_dim = b_sfe->derivs_geom.size(2);
+    std::memset(&dv[0], 0, 9U * sizeof(real_T));
+    n = xs.size(0);
+    for (::coder::SizeType k{0}; k < n; k++) {
+      for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+        for (::coder::SizeType j{0}; j < geom_dim; j++) {
+          i = j + 3 * b_i;
+          dv[i] += xs[j + xs.size(1) * k] *
+                   b_sfe->derivs_geom[b_i + b_sfe->derivs_geom.size(2) * k];
+        }
+      }
+    }
+    if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+      if (xs.size(1) == 1) {
+        d = dv[0];
+      } else if (xs.size(1) == 2) {
+        d = dv[0] * dv[4] - dv[1] * dv[3];
+      } else {
+        d = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+             dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+            dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+      }
+    } else if (b_sfe->derivs_geom.size(2) == 1) {
+      d = dv[0] * dv[0] + dv[1] * dv[1];
+      if (xs.size(1) == 3) {
+        d += dv[2] * dv[2];
+      }
+      d = std::sqrt(d);
+    } else {
+      //  must be 2x3
+      dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+      dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+      dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+      d = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+    }
+    b_sfe->jacTs.set_size(3, 3);
+    for (i = 0; i < 9; i++) {
+      b_sfe->jacTs[i] = dv[i];
+    }
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      b_sfe->wdetJ[q] = d * b_sfe->ws[q];
+    }
+  } else {
+    ::coder::SizeType sfe_idx_0;
+    //  Super-parametric
+    sfe_idx_0 = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(sfe_idx_0, 3);
+    for (::coder::SizeType q{0}; q < sfe_idx_0_tmp_tmp; q++) {
+      ::coder::SizeType geom_dim;
+      ::coder::SizeType n;
+      ::coder::SizeType topo_dim;
+      ::coder::SizeType y;
+      y = q * 3;
+      geom_dim = xs.size(1);
+      topo_dim = b_sfe->derivs_geom.size(2);
+      std::memset(&dv[0], 0, 9U * sizeof(real_T));
+      n = xs.size(0);
+      for (::coder::SizeType k{0}; k < n; k++) {
+        for (::coder::SizeType b_i{0}; b_i < topo_dim; b_i++) {
+          for (::coder::SizeType j{0}; j < geom_dim; j++) {
+            i = j + 3 * b_i;
+            dv[i] += xs[j + xs.size(1) * k] *
+                     b_sfe->derivs_geom[(b_i + b_sfe->derivs_geom.size(2) * k) +
+                                        b_sfe->derivs_geom.size(2) *
+                                            b_sfe->derivs_geom.size(1) * q];
+          }
+        }
+      }
+      if (xs.size(1) == b_sfe->derivs_geom.size(2)) {
+        if (xs.size(1) == 1) {
+          v = dv[0];
+        } else if (xs.size(1) == 2) {
+          v = dv[0] * dv[4] - dv[1] * dv[3];
+        } else {
+          v = (dv[2] * (dv[3] * dv[7] - dv[4] * dv[6]) +
+               dv[5] * (dv[1] * dv[6] - dv[0] * dv[7])) +
+              dv[8] * (dv[0] * dv[4] - dv[1] * dv[3]);
+        }
+      } else if (b_sfe->derivs_geom.size(2) == 1) {
+        v = dv[0] * dv[0] + dv[1] * dv[1];
+        if (xs.size(1) == 3) {
+          v += dv[2] * dv[2];
+        }
+        v = std::sqrt(v);
+      } else {
+        //  must be 2x3
+        dv[6] = dv[1] * dv[5] - dv[2] * dv[4];
+        dv[7] = dv[2] * dv[3] - dv[0] * dv[5];
+        dv[8] = dv[0] * dv[4] - dv[1] * dv[3];
+        v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
+      }
+      for (i = 0; i < 3; i++) {
+        sfe_idx_0 = i + y;
+        b_sfe->jacTs[3 * sfe_idx_0] = dv[3 * i];
+        b_sfe->jacTs[3 * sfe_idx_0 + 1] = dv[3 * i + 1];
+        b_sfe->jacTs[3 * sfe_idx_0 + 2] = dv[3 * i + 2];
+      }
+      b_sfe->wdetJ[q] = v;
+      b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
+    }
+  }
+}
+
+static boolean_T solve_sq(real_T J[9], ::coder::SizeType n,
+                          ::coder::array<real_T, 2U> &b1)
+{
+  ::coder::SizeType m1;
+  boolean_T info;
+  m1 = b1.size(0) - 1;
+  info = false;
+  if (n == 1) {
+    if (J[0] == 0.0) {
+      info = true;
+    } else {
+      real_T ji;
+      ji = 1.0 / J[0];
+      for (::coder::SizeType i{0}; i <= m1; i++) {
+        b1[b1.size(1) * i] = b1[b1.size(1) * i] * ji;
+      }
+    }
+  } else {
+    real_T pivot;
+    real_T t;
+    boolean_T guard1{false};
+    boolean_T guard2{false};
+    boolean_T guard3{false};
+    guard1 = false;
+    guard2 = false;
+    guard3 = false;
+    if (n == 2) {
+      if (std::abs(J[0]) >= std::abs(J[3])) {
+        pivot = J[0];
+        if (J[0] == 0.0) {
+          info = true;
+        } else {
+          guard2 = true;
+        }
+      } else {
+        pivot = J[3];
+        t = J[3];
+        J[3] = J[0];
+        J[0] = t;
+        t = J[4];
+        J[4] = J[1];
+        J[1] = t;
+        for (::coder::SizeType i{0}; i <= m1; i++) {
+          t = b1[b1.size(1) * i + 1];
+          b1[b1.size(1) * i + 1] = b1[b1.size(1) * i];
+          b1[b1.size(1) * i] = t;
+        }
+        guard2 = true;
+      }
+    } else {
+      real_T d;
+      real_T d1;
+      //  3x3
+      d = std::abs(J[0]);
+      d1 = std::abs(J[3]);
+      if ((d >= d1) && (d >= std::abs(J[6]))) {
+        pivot = J[0];
+        if (J[0] == 0.0) {
+          info = true;
+        } else {
+          guard3 = true;
+        }
+      } else if (d1 >= std::abs(J[6])) {
+        pivot = J[3];
+        if (J[3] == 0.0) {
+          info = true;
+        } else {
+          t = J[3];
+          J[3] = J[0];
+          J[0] = t;
+          t = J[4];
+          J[4] = J[1];
+          J[1] = t;
+          t = J[5];
+          J[5] = J[2];
+          J[2] = t;
+          for (::coder::SizeType i{0}; i <= m1; i++) {
+            t = b1[b1.size(1) * i + 1];
+            b1[b1.size(1) * i + 1] = b1[b1.size(1) * i];
+            b1[b1.size(1) * i] = t;
+          }
+          guard3 = true;
+        }
+      } else {
+        pivot = J[6];
+        t = J[6];
+        J[6] = J[0];
+        J[0] = t;
+        t = J[7];
+        J[7] = J[1];
+        J[1] = t;
+        t = J[8];
+        J[8] = J[2];
+        J[2] = t;
+        for (::coder::SizeType i{0}; i <= m1; i++) {
+          t = b1[b1.size(1) * i + 2];
+          b1[b1.size(1) * i + 2] = b1[b1.size(1) * i];
+          b1[b1.size(1) * i] = t;
+        }
+        guard3 = true;
+      }
+    }
+    if (guard3) {
+      J[3] /= pivot;
+      J[4] -= J[1] * J[3];
+      J[5] -= J[2] * J[3];
+      J[6] /= pivot;
+      J[7] -= J[1] * J[6];
+      J[8] -= J[2] * J[6];
+      for (::coder::SizeType i{0}; i <= m1; i++) {
+        b1[b1.size(1) * i + 1] =
+            b1[b1.size(1) * i + 1] - J[3] * b1[b1.size(1) * i];
+        b1[b1.size(1) * i + 2] =
+            b1[b1.size(1) * i + 2] - J[6] * b1[b1.size(1) * i];
+      }
+      if (std::abs(J[4]) >= std::abs(J[7])) {
+        pivot = J[4];
+        if (J[4] == 0.0) {
+          info = true;
+        } else {
+          guard1 = true;
+        }
+      } else {
+        pivot = J[7];
+        t = J[6];
+        J[6] = J[3];
+        J[3] = t;
+        t = J[7];
+        J[7] = J[4];
+        J[4] = t;
+        t = J[8];
+        J[8] = J[5];
+        J[5] = t;
+        for (::coder::SizeType i{0}; i <= m1; i++) {
+          t = b1[b1.size(1) * i + 2];
+          b1[b1.size(1) * i + 2] = b1[b1.size(1) * i + 1];
+          b1[b1.size(1) * i + 1] = t;
+        }
+        guard1 = true;
+      }
+    }
+    if (guard2) {
+      J[3] /= pivot;
+      J[4] -= J[1] * J[3];
+      if (J[4] == 0.0) {
+        info = true;
+      } else {
+        for (::coder::SizeType i{0}; i <= m1; i++) {
+          b1[b1.size(1) * i + 1] =
+              (b1[b1.size(1) * i + 1] - J[3] * b1[b1.size(1) * i]) / J[4];
+          b1[b1.size(1) * i] =
+              (b1[b1.size(1) * i] - J[1] * b1[b1.size(1) * i + 1]) / J[0];
+        }
+      }
+    }
+    if (guard1) {
+      J[7] /= pivot;
+      J[8] -= J[5] * J[7];
+      if (J[8] == 0.0) {
+        info = true;
+      } else {
+        for (::coder::SizeType i{0}; i <= m1; i++) {
+          b1[b1.size(1) * i + 2] =
+              (b1[b1.size(1) * i + 2] - J[7] * b1[b1.size(1) * i + 1]) / J[8];
+          b1[b1.size(1) * i + 1] =
+              (b1[b1.size(1) * i + 1] - J[5] * b1[b1.size(1) * i + 2]) / J[4];
+          b1[b1.size(1) * i] =
+              ((b1[b1.size(1) * i] - J[2] * b1[b1.size(1) * i + 2]) -
+               J[1] * b1[b1.size(1) * i + 1]) /
+              J[0];
+        }
+      }
+    }
+  }
+  return info;
+}
+
+// tabulate_quadratures - Tabulate quadrature rule for given element type
+static void tabulate_quadratures(::coder::SizeType etype, ::coder::SizeType qd,
+                                 ::coder::array<real_T, 2U> &cs,
+                                 ::coder::array<real_T, 1U> &ws)
+{
+  ::coder::SizeType shape;
+  shape = etype >> 5 & 7;
+  switch (shape) {
+  case 1:
+    bar_quadrules(qd, cs, ws);
+    break;
+  case 2:
+    tri_quadrules(qd, cs, ws);
+    break;
+  case 3: {
+    if (qd <= 1) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg1_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 3) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg3_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg3_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 5) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg5_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg5_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 7) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg7_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg7_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 9) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg9_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg9_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 11) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::quad_deg11_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg11_qrule(&cs[0], &(ws.data())[0]);
+    } else {
+      ::coder::SizeType nqp;
+      if (qd > 13) {
+        m2cWarnMsgIdAndTxt("bar_quadrules:UnsupportedDegree",
+                           "Only support up to degree 13");
+      }
+      nqp = ::sfe_qrules::quad_deg13_qrule();
+      cs.set_size(nqp, 2);
+      ws.set_size(nqp);
+      ::sfe_qrules::quad_deg13_qrule(&cs[0], &(ws.data())[0]);
+    }
+  } break;
+  case 4: {
+    if (qd <= 1) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg1_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg1_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 2) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg2_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg2_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 3) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg3_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg3_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 5) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg5_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg5_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 6) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg6_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg6_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 7) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg7_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg7_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 9) {
+      ::coder::SizeType nqp;
+      //  The degree-8 quadrature rule KEAST9 has negative weights, so we do
+      nqp = ::sfe_qrules::tet_deg9_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg9_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 11) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::tet_deg11_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg11_qrule(&cs[0], &(ws.data())[0]);
+    } else {
+      ::coder::SizeType nqp;
+      if (qd > 13) {
+        m2cWarnMsgIdAndTxt("tet_quadrules:UnsupportedDegree",
+                           "Only support up to degree 13");
+      }
+      nqp = ::sfe_qrules::tet_deg13_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::tet_deg13_qrule(&cs[0], &(ws.data())[0]);
+    }
+  } break;
+  case 7: {
+    if (qd <= 1) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg1_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg1_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 3) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg3_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg3_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 5) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg5_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg5_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 7) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg7_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg7_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 9) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg9_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg9_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 11) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::hexa_deg11_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg11_qrule(&cs[0], &(ws.data())[0]);
+    } else {
+      ::coder::SizeType nqp;
+      if (qd > 13) {
+        m2cWarnMsgIdAndTxt("hexa_quadrules:UnsupportedDegree",
+                           "Only support up to degree 13");
+      }
+      nqp = ::sfe_qrules::hexa_deg13_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::hexa_deg13_qrule(&cs[0], &(ws.data())[0]);
+    }
+  } break;
+  case 6: {
+    if (qd <= 1) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg1_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg1_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 2) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg2_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg2_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 3) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg3_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg3_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 5) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg5_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg5_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 7) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg7_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg7_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 9) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg9_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg9_qrule(&cs[0], &(ws.data())[0]);
+    } else if (qd <= 11) {
+      ::coder::SizeType nqp;
+      nqp = ::sfe_qrules::prism_deg11_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg11_qrule(&cs[0], &(ws.data())[0]);
+    } else {
+      ::coder::SizeType nqp;
+      if (qd > 13) {
+        m2cWarnMsgIdAndTxt("prism_quadrules:UnsupportedDegree",
+                           "Only support up to degree 13");
+      }
+      nqp = ::sfe_qrules::prism_deg13_qrule();
+      cs.set_size(nqp, 3);
+      ws.set_size(nqp);
+      ::sfe_qrules::prism_deg13_qrule(&cs[0], &(ws.data())[0]);
+    }
+  } break;
+  default:
+    m2cAssert(shape == 5, "Unsupported element type");
+    pyra_quadrules(qd, cs, ws);
+    break;
+  }
+}
+
+// tabulate_quadratures_deg_1 - Tabulate quadrature rule for given element
+static void tabulate_quadratures_deg_1(::coder::SizeType etype,
+                                       ::coder::array<real_T, 2U> &cs,
+                                       ::coder::array<real_T, 1U> &ws)
+{
+  ::coder::SizeType shape;
+  shape = etype >> 5 & 7;
+  switch (shape) {
+  case 1: {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::bar_deg1_qrule();
+    cs.set_size(nqp, 1);
+    ws.set_size(nqp);
+    ::sfe_qrules::bar_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } break;
+  case 2: {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg1_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } break;
+  case 3: {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::quad_deg1_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } break;
+  case 4: {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tet_deg1_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::tet_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } break;
+  case 7: {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::hexa_deg1_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::hexa_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } break;
+  case 6: {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::prism_deg1_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::prism_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } break;
+  default: {
+    ::coder::SizeType nqp;
+    m2cAssert(shape == 5, "Unsupported element type");
+    nqp = ::sfe_qrules::pyra_deg1_qrule();
+    cs.set_size(nqp, 3);
+    ws.set_size(nqp);
+    ::sfe_qrules::pyra_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } break;
+  }
+}
+
+// tabulate_shapefuncs - kernel for tabulating shape functions
+static void tabulate_shapefuncs(::coder::SizeType etype,
+                                const ::coder::array<real_T, 2U> &cs,
+                                ::coder::array<real_T, 2U> &sfvals,
+                                ::coder::array<real_T, 3U> &sdvals)
+{
+  ::coder::SizeType shape;
+  shape = etype >> 5 & 7;
+  switch (((shape > 0) + (shape > 1)) + (shape > 3)) {
+  case 3:
+    sfe3_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
+    break;
+  case 2:
+    sfe2_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
+    break;
+  default:
+    sfe1_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
+    break;
+  }
+}
+
+static void tabulate_shapefuncs_deg_1(::coder::SizeType etype,
+                                      const ::coder::array<real_T, 2U> &cs,
+                                      ::coder::array<real_T, 2U> &sfvals,
+                                      ::coder::array<real_T, 3U> &sdvals)
+{
+  real_T tmp_data[1029];
+  ::coder::SizeType i;
+  ::coder::SizeType nqp;
+  nqp = cs.size(0) - 1;
+  i = iv[etype - 1];
+  sfvals.set_size(cs.size(0), i);
+  sdvals.set_size(cs.size(0), i, cs.size(1));
+  switch (etype) {
+  case 36: {
+    ::coder::SizeType i1;
+    boolean_T b;
+    boolean_T b1;
+    b = true;
+    b1 = ((cs.size(1) <= 0) || (cs.size(0) <= 0));
+    i = cs.size(1) * cs.size(0);
+    i1 = 0;
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T N[2];
+      real_T deriv[2];
+      if (b1 || (q >= i)) {
+        i1 = 0;
+        b = true;
+      } else if (b) {
+        b = false;
+        i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+      } else {
+        ::coder::SizeType loop_ub;
+        loop_ub = cs.size(1) * cs.size(0) - 1;
+        if (i1 > MAX_int32_T - cs.size(1)) {
+          i1 = q % cs.size(0) * cs.size(1) + q / cs.size(0);
+        } else {
+          i1 += cs.size(1);
+          if (i1 > loop_ub) {
+            i1 -= loop_ub;
+          }
+        }
+      }
+      ::sfe_sfuncs::bar_2_sfunc(cs[i1], &N[0], &deriv[0]);
+      sfvals[sfvals.size(1) * q] = N[0];
+      sdvals[sdvals.size(2) * sdvals.size(1) * q] = deriv[0];
+      sfvals[sfvals.size(1) * q + 1] = N[1];
+      sdvals[sdvals.size(2) + sdvals.size(2) * sdvals.size(1) * q] = deriv[1];
+    }
+  } break;
+  case 68: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv2[6];
+      real_T dv5[3];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType loop_ub;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tri_3_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                &dv5[0], &dv2[0]);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv5[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv2[i2 + (loop_ub << 1)];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 2) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 100: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv[8];
+      real_T dv1[4];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType loop_ub;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::quad_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 &dv1[0], &dv[0]);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv[i2 + (loop_ub << 1)];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 3) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 132: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv6[12];
+      real_T dv1[4];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType loop_ub;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::tet_4_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                cs[cs.size(1) * q + 2], &dv1[0], &dv6[0]);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv1[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv6[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 3) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 164: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv8[15];
+      real_T dv7[5];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType loop_ub;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::pyra_5_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 cs[cs.size(1) * q + 2], &dv7[0], &dv8[0]);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv7[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv8[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 4) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  case 196: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv4[18];
+      real_T dv2[6];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType loop_ub;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::prism_6_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                  cs[cs.size(1) * q + 2], &dv2[0], &dv4[0]);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv2[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv4[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 5) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  default: {
+    for (::coder::SizeType q{0}; q <= nqp; q++) {
+      real_T dv3[24];
+      real_T dv[8];
+      ::coder::SizeType i1;
+      ::coder::SizeType i2;
+      ::coder::SizeType loop_ub;
+      ::coder::SizeType tmp_size_idx_1;
+      ::coder::SizeType tmp_size_idx_2;
+      int16_T unnamed_idx_1;
+      int16_T unnamed_idx_2;
+      ::sfe_sfuncs::hexa_8_sfunc(cs[cs.size(1) * q], cs[cs.size(1) * q + 1],
+                                 cs[cs.size(1) * q + 2], &dv[0], &dv3[0]);
+      loop_ub = sfvals.size(1);
+      for (i = 0; i < loop_ub; i++) {
+        sfvals[i + sfvals.size(1) * q] = dv[i];
+      }
+      unnamed_idx_1 = static_cast<int16_T>(sdvals.size(1));
+      unnamed_idx_2 = static_cast<int16_T>(sdvals.size(2));
+      i = 0;
+      i1 = 0;
+      loop_ub = 0;
+      i2 = 0;
+      tmp_size_idx_2 = sdvals.size(2);
+      tmp_size_idx_1 = sdvals.size(1);
+      for (::coder::SizeType i3{0}; i3 < unnamed_idx_1 * unnamed_idx_2; i3++) {
+        tmp_data[i1 + tmp_size_idx_2 * i] = dv3[i2 + 3 * loop_ub];
+        loop_ub++;
+        i++;
+        if (i > tmp_size_idx_1 - 1) {
+          i = 0;
+          i1++;
+        }
+        if (loop_ub > 7) {
+          loop_ub = 0;
+          i2++;
+        }
+      }
+      for (i = 0; i < tmp_size_idx_1; i++) {
+        for (i1 = 0; i1 < tmp_size_idx_2; i1++) {
+          sdvals[(i1 + sdvals.size(2) * i) +
+                 sdvals.size(2) * sdvals.size(1) * q] =
+              tmp_data[i1 + tmp_size_idx_2 * i];
+        }
+      }
+    }
+  } break;
+  }
+}
+
+// tet_20 - Compute shape functions and their derivatives of tet_20
+static inline void tet_20(real_T xi, real_T eta, real_T zeta, real_T sfvals[20],
+                          real_T sdvals[60])
+{
+  ::sfe_sfuncs::tet_20_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_35 - Compute shape functions and their derivatives of tet_35
+static inline void tet_35(real_T xi, real_T eta, real_T zeta, real_T sfvals[35],
+                          real_T sdvals[105])
+{
+  ::sfe_sfuncs::tet_35_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_56 - Compute shape functions and their derivatives of tet_56
+static inline void tet_56(real_T xi, real_T eta, real_T zeta, real_T sfvals[56],
+                          real_T sdvals[168])
+{
+  ::sfe_sfuncs::tet_56_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_84 - Compute shape functions and their derivatives of tet_84
+static inline void tet_84(real_T xi, real_T eta, real_T zeta, real_T sfvals[84],
+                          real_T sdvals[252])
+{
+  ::sfe_sfuncs::tet_84_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_gl_20 - Compute shape functions and their derivatives of tet_gl_20
+static inline void tet_gl_20(real_T xi, real_T eta, real_T zeta,
+                             real_T sfvals[20], real_T sdvals[60])
+{
+  ::sfe_sfuncs::tet_gl_20_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tet_gl_35 - Compute shape functions and their derivatives of tet_gl_35
+static inline void tet_gl_35(real_T xi, real_T eta, real_T zeta,
+                             real_T sfvals[35], real_T sdvals[105])
+{
+  ::sfe_sfuncs::tet_gl_35_sfunc(xi, eta, zeta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_21 - Compute shape functions and their derivatives of tri_21
+static inline void tri_21(real_T xi, real_T eta, real_T sfvals[21],
+                          real_T sdvals[42])
+{
+  ::sfe_sfuncs::tri_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_28 - Compute shape functions and their derivatives of tri_28
+static inline void tri_28(real_T xi, real_T eta, real_T sfvals[28],
+                          real_T sdvals[56])
+{
+  ::sfe_sfuncs::tri_28_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_fek_15 - Compute shape functions and their derivatives of tri_fek_15
+static inline void tri_fek_15(real_T xi, real_T eta, real_T sfvals[15],
+                              real_T sdvals[30])
+{
+  ::sfe_sfuncs::tri_fek_15_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_fek_21 - Compute shape functions and their derivatives of tri_fek_21
+static inline void tri_fek_21(real_T xi, real_T eta, real_T sfvals[21],
+                              real_T sdvals[42])
+{
+  ::sfe_sfuncs::tri_fek_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_fek_28 - Compute shape functions and their derivatives of tri_fek_28
+static inline void tri_fek_28(real_T xi, real_T eta, real_T sfvals[28],
+                              real_T sdvals[56])
+{
+  ::sfe_sfuncs::tri_fek_28_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+// tri_gl_21 - Compute shape functions and their derivatives of tri_gl_21
+static inline void tri_gl_21(real_T xi, real_T eta, real_T sfvals[21],
+                             real_T sdvals[42])
+{
+  ::sfe_sfuncs::tri_gl_21_sfunc(xi, eta, &sfvals[0], &sdvals[0]);
+}
+
+//  tri_quadrules - Obtain quadrature points and weights of a triangular
+static void tri_quadrules(::coder::SizeType degree,
+                          ::coder::array<real_T, 2U> &cs,
+                          ::coder::array<real_T, 1U> &ws)
+{
+  if (degree <= 1) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg1_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg1_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 2) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg2_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg2_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 4) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg4_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg4_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 5) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg5_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg5_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 7) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg7_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg7_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 8) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg8_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg8_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 9) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg9_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg9_qrule(&cs[0], &(ws.data())[0]);
+  } else if (degree <= 11) {
+    ::coder::SizeType nqp;
+    nqp = ::sfe_qrules::tri_deg11_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg11_qrule(&cs[0], &(ws.data())[0]);
+  } else {
+    ::coder::SizeType nqp;
+    if (degree > 13) {
+      m2cWarnMsgIdAndTxt("tri_quadrules:UnsupportedDegree",
+                         "Only support up to degree 13");
+    }
+    nqp = ::sfe_qrules::tri_deg13_qrule();
+    cs.set_size(nqp, 2);
+    ws.set_size(nqp);
+    ::sfe_qrules::tri_deg13_qrule(&cs[0], &(ws.data())[0]);
   }
 }
 
@@ -14237,10 +7702,8 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
   boolean_T flag;
   flag = b_sfe->etypes[0] == b_sfe->etypes[1];
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(b_sfe->etypes[0]);
-    flag = solshape == obtain_elemshape(b_sfe->etypes[1]);
+    flag = (b_sfe->etypes[0] >> 5 & 7) == (b_sfe->etypes[1] >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combination");
   if ((facetid >= 1) && (facetid <= obtain_facets(b_sfe->etypes[0]))) {
@@ -14275,10 +7738,8 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
   boolean_T flag;
   flag = b_sfe->etypes[0] == b_sfe->etypes[1];
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(b_sfe->etypes[0]);
-    flag = solshape == obtain_elemshape(b_sfe->etypes[1]);
+    flag = (b_sfe->etypes[0] >> 5 & 7) == (b_sfe->etypes[1] >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combination");
   if ((facetid >= 1) && (facetid <= obtain_facets(b_sfe->etypes[0]))) {
@@ -14314,10 +7775,8 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
   boolean_T flag;
   flag = b_sfe->etypes[0] == b_sfe->etypes[1];
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(b_sfe->etypes[0]);
-    flag = solshape == obtain_elemshape(b_sfe->etypes[1]);
+    flag = (b_sfe->etypes[0] >> 5 & 7) == (b_sfe->etypes[1] >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combination");
   if ((facetid >= 1) && (facetid <= obtain_facets(b_sfe->etypes[0]))) {
@@ -14478,10 +7937,8 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   //  check if valid combo
   flag = etypes[0] == geom_etype;
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(etypes[0]);
-    flag = solshape == obtain_elemshape(geom_etype);
+    flag = (etypes[0] >> 5 & 7) == (geom_etype >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combination");
   if ((facetid >= 1) && (facetid <= obtain_facets(etypes[0]))) {
@@ -14533,10 +7990,8 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   //  check if valid combo
   flag = etypes[0] == geom_etype;
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(etypes[0]);
-    flag = solshape == obtain_elemshape(geom_etype);
+    flag = (etypes[0] >> 5 & 7) == (geom_etype >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combination");
   if ((facetid >= 1) && (facetid <= obtain_facets(etypes[0]))) {
@@ -14586,10 +8041,8 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   //  check if valid combo
   flag = etypes[0] == geom_etype;
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(etypes[0]);
-    flag = solshape == obtain_elemshape(geom_etype);
+    flag = (etypes[0] >> 5 & 7) == (geom_etype >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combination");
   if ((facetid >= 1) && (facetid <= obtain_facets(etypes[0]))) {
@@ -14640,10 +8093,8 @@ void sfe_bnd_init(SfeObject *b_sfe, const int32_T etypes[2], int8_T facetid,
   //  check if valid combo
   flag = etypes[0] == geom_etype;
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(etypes[0]);
-    flag = solshape == obtain_elemshape(geom_etype);
+    flag = (etypes[0] >> 5 & 7) == (geom_etype >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combination");
   if ((facetid >= 1) && (facetid <= obtain_facets(etypes[0]))) {
@@ -14687,10 +8138,8 @@ void sfe_bnd_init(SfeObject *b_sfe, int8_T facetid,
   boolean_T flag;
   flag = b_sfe->etypes[0] == b_sfe->etypes[1];
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(b_sfe->etypes[0]);
-    flag = solshape == obtain_elemshape(b_sfe->etypes[1]);
+    flag = (b_sfe->etypes[0] >> 5 & 7) == (b_sfe->etypes[1] >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combination");
   if ((facetid >= 1) && (facetid <= obtain_facets(b_sfe->etypes[0]))) {
@@ -15104,7 +8553,8 @@ void sfe_elem_le3d(SfeObject *b_sfe, real_T mu, real_T lambda,
 
 // sfe_elem_load - Computing load vector for an element
 void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
-                   boolean_T compwise, ::coder::array<real_T, 1U> &load)
+                   boolean_T compwise, ::coder::array<real_T, 1U> &load,
+                   ::coder::array<real_T, 1U> &mlump)
 {
   ::coder::SizeType i;
   ::coder::SizeType loop_ub;
@@ -15118,11 +8568,18 @@ void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
   for (i = 0; i < loop_ub; i++) {
     load[i] = 0.0;
   }
+  mlump.set_size(fs.size(1) * b_sfe->nnodes[0]);
+  loop_ub = fs.size(1) * b_sfe->nnodes[0];
+  for (i = 0; i < loop_ub; i++) {
+    mlump[i] = 0.0;
+  }
   //  for each quadrature point
   if (compwise) {
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
+      real_T wdetj;
       ::coder::SizeType j;
+      wdetj = b_sfe->wdetJ[q];
       j = 0;
       for (::coder::SizeType k{0}; k < ncomps; k++) {
         real_T a;
@@ -15134,12 +8591,15 @@ void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
           v += b_sfe->shapes_sol[(b_i + b_sfe->shapes_sol.size(1) * q) - 1] *
                fs[k + fs.size(1) * (b_i - 1)];
         }
-        a = v * b_sfe->wdetJ[q];
+        a = v * wdetj;
         for (::coder::SizeType b_i{0}; b_i <= n; b_i++) {
           loop_ub = j + b_i;
           load[loop_ub] =
               load[loop_ub] +
               a * b_sfe->shapes_sol[b_i + b_sfe->shapes_sol.size(1) * q];
+          mlump[loop_ub] =
+              mlump[loop_ub] +
+              wdetj * b_sfe->shapes_sol[b_i + b_sfe->shapes_sol.size(1) * q];
         }
         j = (j + n) + 1;
       }
@@ -15148,6 +8608,8 @@ void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
     //  tensor blocks of DOFs, not component-wise
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
+      real_T wdetj;
+      wdetj = b_sfe->wdetJ[q];
       for (::coder::SizeType k{0}; k < ncomps; k++) {
         real_T a;
         real_T v;
@@ -15158,11 +8620,14 @@ void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
           v += b_sfe->shapes_sol[(b_i + b_sfe->shapes_sol.size(1) * q) - 1] *
                fs[k + fs.size(1) * (b_i - 1)];
         }
-        a = v * b_sfe->wdetJ[q];
+        a = v * wdetj;
         for (::coder::SizeType b_i{0}; b_i <= n; b_i++) {
           load[k + b_i * ncomps] =
               load[k + b_i * ncomps] +
               a * b_sfe->shapes_sol[b_i + b_sfe->shapes_sol.size(1) * q];
+          mlump[k + b_i * ncomps] =
+              mlump[k + b_i * ncomps] +
+              wdetj * b_sfe->shapes_sol[b_i + b_sfe->shapes_sol.size(1) * q];
         }
       }
     }
@@ -15171,7 +8636,8 @@ void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
 
 // sfe_elem_load - Computing load vector for an element
 void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
-                   ::coder::array<real_T, 1U> &load)
+                   ::coder::array<real_T, 1U> &load,
+                   ::coder::array<real_T, 1U> &mlump)
 {
   ::coder::SizeType i;
   ::coder::SizeType loop_ub;
@@ -15185,9 +8651,16 @@ void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
   for (i = 0; i < loop_ub; i++) {
     load[i] = 0.0;
   }
+  mlump.set_size(fs.size(1) * b_sfe->nnodes[0]);
+  loop_ub = fs.size(1) * b_sfe->nnodes[0];
+  for (i = 0; i < loop_ub; i++) {
+    mlump[i] = 0.0;
+  }
   //  for each quadrature point
   i = b_sfe->nqp;
   for (::coder::SizeType q{0}; q < i; q++) {
+    real_T wdetj;
+    wdetj = b_sfe->wdetJ[q];
     for (::coder::SizeType k{0}; k < ncomps; k++) {
       real_T a;
       real_T v;
@@ -15198,11 +8671,14 @@ void sfe_elem_load(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &fs,
         v += b_sfe->shapes_sol[(b_i + b_sfe->shapes_sol.size(1) * q) - 1] *
              fs[k + fs.size(1) * (b_i - 1)];
       }
-      a = v * b_sfe->wdetJ[q];
+      a = v * wdetj;
       for (::coder::SizeType b_i{0}; b_i < n; b_i++) {
         load[k + b_i * ncomps] =
             load[k + b_i * ncomps] +
             a * b_sfe->shapes_sol[b_i + b_sfe->shapes_sol.size(1) * q];
+        mlump[k + b_i * ncomps] =
+            mlump[k + b_i * ncomps] +
+            wdetj * b_sfe->shapes_sol[b_i + b_sfe->shapes_sol.size(1) * q];
       }
     }
   }
@@ -15353,6 +8829,8 @@ void sfe_elem_nbc(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &g,
   //  for each quadrature point
   i = b_sfe->nqp;
   for (::coder::SizeType q{0}; q < i; q++) {
+    real_T wdetj;
+    wdetj = b_sfe->wdetJ[q];
     for (::coder::SizeType k{0}; k < ncomps; k++) {
       real_T a;
       real_T v;
@@ -15363,7 +8841,7 @@ void sfe_elem_nbc(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &g,
         v += b_sfe->shapes_sol[(b_i + b_sfe->shapes_sol.size(1) * q) - 1] *
              g[k + g.size(1) * (b_i - 1)];
       }
-      a = v * b_sfe->wdetJ[q];
+      a = v * wdetj;
       for (::coder::SizeType b_i{0}; b_i < n; b_i++) {
         load[k + b_i * ncomps] =
             load[k + b_i * ncomps] +
@@ -15394,7 +8872,9 @@ void sfe_elem_nbc(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &g,
   if (compwise) {
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
+      real_T wdetj;
       ::coder::SizeType j;
+      wdetj = b_sfe->wdetJ[q];
       j = 0;
       for (::coder::SizeType k{0}; k < ncomps; k++) {
         real_T a;
@@ -15406,7 +8886,7 @@ void sfe_elem_nbc(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &g,
           v += b_sfe->shapes_sol[(b_i + b_sfe->shapes_sol.size(1) * q) - 1] *
                g[k + g.size(1) * (b_i - 1)];
         }
-        a = v * b_sfe->wdetJ[q];
+        a = v * wdetj;
         for (::coder::SizeType b_i{0}; b_i <= n; b_i++) {
           loop_ub = j + b_i;
           load[loop_ub] =
@@ -15420,6 +8900,8 @@ void sfe_elem_nbc(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &g,
     //  tensor blocks of DOFs, not component-wise
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
+      real_T wdetj;
+      wdetj = b_sfe->wdetJ[q];
       for (::coder::SizeType k{0}; k < ncomps; k++) {
         real_T a;
         real_T v;
@@ -15430,7 +8912,7 @@ void sfe_elem_nbc(const SfeObject *b_sfe, const ::coder::array<real_T, 2U> &g,
           v += b_sfe->shapes_sol[(b_i + b_sfe->shapes_sol.size(1) * q) - 1] *
                g[k + g.size(1) * (b_i - 1)];
         }
-        a = v * b_sfe->wdetJ[q];
+        a = v * wdetj;
         for (::coder::SizeType b_i{0}; b_i <= n; b_i++) {
           load[k + b_i * ncomps] =
               load[k + b_i * ncomps] +
@@ -15846,11 +9328,13 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
 {
   real_T dv[9];
   real_T v;
-  ::coder::SizeType a;
   ::coder::SizeType i;
   ::coder::SizeType i1;
+  ::coder::SizeType qd_or_natcoords_tmp;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
-  topo_dim = obtain_elemdim(etypes);
+  shape = etypes >> 5;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init:badDim",
@@ -15871,9 +9355,10 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
   if (qd_or_natcoords != -1) {
     if (qd_or_natcoords == 0) {
       //  trial+test+nonlinear_geom?1:0
-      a = obtain_elemdegree(etypes);
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(etypes) > 1)) +
-                        (xs.size(1) > topo_dim);
+      qd_or_natcoords_tmp = etypes >> 2 & 7;
+      qd_or_natcoords =
+          ((qd_or_natcoords_tmp << 1) + (qd_or_natcoords_tmp > 1)) +
+          (xs.size(1) > topo_dim);
     }
     tabulate_quadratures(etypes, qd_or_natcoords, b_sfe->cs, b_sfe->ws);
     b_sfe->nqp = b_sfe->ws.size(0);
@@ -15901,18 +9386,18 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
   //  Solution space shape functions & derivs
   tabulate_shapefuncs(etypes, b_sfe->cs, b_sfe->shapes_sol, b_sfe->derivs_sol);
   //  Geometry space shape functions & derivs
-  a = b_sfe->shapes_sol.size(1) * b_sfe->shapes_sol.size(0);
+  qd_or_natcoords_tmp = b_sfe->shapes_sol.size(1) * b_sfe->shapes_sol.size(0);
   b_sfe->shapes_geom.set_size(b_sfe->shapes_sol.size(0),
                               b_sfe->shapes_sol.size(1));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < qd_or_natcoords_tmp; i++) {
     b_sfe->shapes_geom[i] = b_sfe->shapes_sol[i];
   }
-  a = b_sfe->derivs_sol.size(2) * b_sfe->derivs_sol.size(1) *
-      b_sfe->derivs_sol.size(0);
+  qd_or_natcoords_tmp = b_sfe->derivs_sol.size(2) * b_sfe->derivs_sol.size(1) *
+                        b_sfe->derivs_sol.size(0);
   b_sfe->derivs_geom.set_size(b_sfe->derivs_sol.size(0),
                               b_sfe->derivs_sol.size(1),
                               b_sfe->derivs_sol.size(2));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < qd_or_natcoords_tmp; i++) {
     b_sfe->derivs_geom[i] = b_sfe->derivs_sol[i];
   }
   //  potentially skip re-tabulating
@@ -15984,8 +9469,8 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
     }
   } else {
     //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
+    qd_or_natcoords_tmp = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(qd_or_natcoords_tmp, 3);
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
       ::coder::SizeType geom_dim;
@@ -16031,10 +9516,10 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
         v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
       }
       for (i1 = 0; i1 < 3; i1++) {
-        a = i1 + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i1];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
+        qd_or_natcoords_tmp = i1 + y;
+        b_sfe->jacTs[3 * qd_or_natcoords_tmp] = dv[3 * i1];
+        b_sfe->jacTs[3 * qd_or_natcoords_tmp + 1] = dv[3 * i1 + 1];
+        b_sfe->jacTs[3 * qd_or_natcoords_tmp + 2] = dv[3 * i1 + 2];
       }
       b_sfe->wdetJ[q] = v;
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
@@ -16371,11 +9856,13 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
 {
   real_T dv[9];
   real_T v;
-  ::coder::SizeType a;
   ::coder::SizeType i;
   ::coder::SizeType i1;
+  ::coder::SizeType qd_or_natcoords_tmp;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
-  topo_dim = obtain_elemdim(etypes);
+  shape = etypes >> 5;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init:badDim",
@@ -16396,18 +9883,17 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
   if (qd_or_natcoords != -1) {
     if (qd_or_natcoords == 0) {
       //  trial+test+nonlinear_geom?1:0
-      a = obtain_elemdegree(etypes);
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(etypes) > 1)) +
-                        (xs.size(1) > topo_dim);
+      qd_or_natcoords_tmp = etypes >> 2 & 7;
+      qd_or_natcoords =
+          ((qd_or_natcoords_tmp << 1) + (qd_or_natcoords_tmp > 1)) +
+          (xs.size(1) > topo_dim);
     }
     tabulate_quadratures(etypes, qd_or_natcoords, b_sfe->cs, b_sfe->ws);
     b_sfe->nqp = b_sfe->ws.size(0);
   } else {
     m2cErrMsgIdAndTxt("sfe_init:missUserQuad", "missing user quadrature data");
-    if (topo_dim + 1 != 0) {
-      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                        "bad user quadrature data size");
-    }
+    m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                      "bad user quadrature data size");
     b_sfe->nqp = 0;
     b_sfe->ws.set_size(0);
     b_sfe->cs.set_size(0, topo_dim);
@@ -16415,18 +9901,18 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
   //  Solution space shape functions & derivs
   tabulate_shapefuncs(etypes, b_sfe->cs, b_sfe->shapes_sol, b_sfe->derivs_sol);
   //  Geometry space shape functions & derivs
-  a = b_sfe->shapes_sol.size(1) * b_sfe->shapes_sol.size(0);
+  qd_or_natcoords_tmp = b_sfe->shapes_sol.size(1) * b_sfe->shapes_sol.size(0);
   b_sfe->shapes_geom.set_size(b_sfe->shapes_sol.size(0),
                               b_sfe->shapes_sol.size(1));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < qd_or_natcoords_tmp; i++) {
     b_sfe->shapes_geom[i] = b_sfe->shapes_sol[i];
   }
-  a = b_sfe->derivs_sol.size(2) * b_sfe->derivs_sol.size(1) *
-      b_sfe->derivs_sol.size(0);
+  qd_or_natcoords_tmp = b_sfe->derivs_sol.size(2) * b_sfe->derivs_sol.size(1) *
+                        b_sfe->derivs_sol.size(0);
   b_sfe->derivs_geom.set_size(b_sfe->derivs_sol.size(0),
                               b_sfe->derivs_sol.size(1),
                               b_sfe->derivs_sol.size(2));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < qd_or_natcoords_tmp; i++) {
     b_sfe->derivs_geom[i] = b_sfe->derivs_sol[i];
   }
   //  potentially skip re-tabulating
@@ -16498,8 +9984,8 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
     }
   } else {
     //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
+    qd_or_natcoords_tmp = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(qd_or_natcoords_tmp, 3);
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
       ::coder::SizeType geom_dim;
@@ -16545,10 +10031,10 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
         v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
       }
       for (i1 = 0; i1 < 3; i1++) {
-        a = i1 + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i1];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
+        qd_or_natcoords_tmp = i1 + y;
+        b_sfe->jacTs[3 * qd_or_natcoords_tmp] = dv[3 * i1];
+        b_sfe->jacTs[3 * qd_or_natcoords_tmp + 1] = dv[3 * i1 + 1];
+        b_sfe->jacTs[3 * qd_or_natcoords_tmp + 2] = dv[3 * i1 + 2];
       }
       b_sfe->wdetJ[q] = v;
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
@@ -16562,12 +10048,13 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
 {
   real_T dv[9];
   real_T v;
-  ::coder::SizeType a;
   ::coder::SizeType i;
   ::coder::SizeType i1;
-  ::coder::SizeType qd_or_natcoords;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
-  topo_dim = obtain_elemdim(etypes);
+  shape = etypes >> 5;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init:badDim",
@@ -16585,26 +10072,26 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
   b_sfe->nnodes[0] = i;
   b_sfe->nnodes[1] = i;
   //  Set up quadrature
-  a = obtain_elemdegree(etypes);
-  qd_or_natcoords =
-      ((a << 1) + (obtain_elemdegree(etypes) > 1)) + (xs.size(1) > topo_dim);
-  tabulate_quadratures(etypes, qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+  tabulate_quadratures(etypes,
+                       (((etypes >> 2 & 7) << 1) + ((etypes >> 2 & 7) > 1)) +
+                           (xs.size(1) > topo_dim),
+                       b_sfe->cs, b_sfe->ws);
   b_sfe->nqp = b_sfe->ws.size(0);
   //  Solution space shape functions & derivs
   tabulate_shapefuncs(etypes, b_sfe->cs, b_sfe->shapes_sol, b_sfe->derivs_sol);
   //  Geometry space shape functions & derivs
-  a = b_sfe->shapes_sol.size(1) * b_sfe->shapes_sol.size(0);
+  loop_ub = b_sfe->shapes_sol.size(1) * b_sfe->shapes_sol.size(0);
   b_sfe->shapes_geom.set_size(b_sfe->shapes_sol.size(0),
                               b_sfe->shapes_sol.size(1));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->shapes_geom[i] = b_sfe->shapes_sol[i];
   }
-  a = b_sfe->derivs_sol.size(2) * b_sfe->derivs_sol.size(1) *
-      b_sfe->derivs_sol.size(0);
+  loop_ub = b_sfe->derivs_sol.size(2) * b_sfe->derivs_sol.size(1) *
+            b_sfe->derivs_sol.size(0);
   b_sfe->derivs_geom.set_size(b_sfe->derivs_sol.size(0),
                               b_sfe->derivs_sol.size(1),
                               b_sfe->derivs_sol.size(2));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->derivs_geom[i] = b_sfe->derivs_sol[i];
   }
   //  potentially skip re-tabulating
@@ -16676,8 +10163,8 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
     }
   } else {
     //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
+    loop_ub = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(loop_ub, 3);
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
       ::coder::SizeType geom_dim;
@@ -16723,10 +10210,10 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
         v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
       }
       for (i1 = 0; i1 < 3; i1++) {
-        a = i1 + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i1];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
+        loop_ub = i1 + y;
+        b_sfe->jacTs[3 * loop_ub] = dv[3 * i1];
+        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i1 + 1];
+        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i1 + 2];
       }
       b_sfe->wdetJ[q] = v;
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
@@ -16741,8 +10228,10 @@ void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
 {
   ::coder::SizeType i;
   ::coder::SizeType loop_ub;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
-  topo_dim = obtain_elemdim(etypes);
+  shape = etypes >> 5;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init:badDim",
@@ -16820,10 +10309,11 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
 {
   real_T dv[9];
   real_T v;
-  ::coder::SizeType a;
   ::coder::SizeType geom_etype;
   ::coder::SizeType i;
   ::coder::SizeType i1;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
   boolean_T flag;
   if (etypes[1] == 0) {
@@ -16833,13 +10323,12 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   }
   flag = etypes[0] == geom_etype;
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(etypes[0]);
-    flag = solshape == obtain_elemshape(geom_etype);
+    flag = (etypes[0] >> 5 & 7) == (geom_etype >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combinations");
-  topo_dim = obtain_elemdim(etypes[0]);
+  shape = etypes[0] >> 5 & 7;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init:badDim",
@@ -16859,9 +10348,9 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   if (qd_or_natcoords != -1) {
     if (qd_or_natcoords == 0) {
       //  trial+test+nonlinear_geom?1:0
-      a = obtain_elemdegree(etypes[0]);
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                        (xs.size(1) > topo_dim);
+      qd_or_natcoords =
+          (((etypes[0] >> 2 & 7) << 1) + ((geom_etype >> 2 & 7) > 1)) +
+          (xs.size(1) > topo_dim);
     }
     tabulate_quadratures(etypes[0], qd_or_natcoords, b_sfe->cs, b_sfe->ws);
     b_sfe->nqp = b_sfe->ws.size(0);
@@ -16889,18 +10378,18 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   //  Solution space shape functions & derivs
   tabulate_shapefuncs(etypes[0], b_sfe->cs, b_sfe->shapes_geom,
                       b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
   b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
                              b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
   }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
   b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
                              b_sfe->derivs_geom.size(1),
                              b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
   }
   //  Geometry space shape functions & derivs
@@ -16977,8 +10466,8 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
     }
   } else {
     //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
+    loop_ub = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(loop_ub, 3);
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
       ::coder::SizeType geom_dim;
@@ -17025,10 +10514,10 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
         v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
       }
       for (i1 = 0; i1 < 3; i1++) {
-        a = i1 + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i1];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
+        loop_ub = i1 + y;
+        b_sfe->jacTs[3 * loop_ub] = dv[3 * i1];
+        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i1 + 1];
+        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i1 + 2];
       }
       b_sfe->wdetJ[q] = v;
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
@@ -17043,10 +10532,11 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
 {
   real_T dv[9];
   real_T v;
-  ::coder::SizeType a;
   ::coder::SizeType geom_etype;
   ::coder::SizeType i;
   ::coder::SizeType i1;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
   boolean_T flag;
   if (etypes[1] == 0) {
@@ -17056,13 +10546,12 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   }
   flag = etypes[0] == geom_etype;
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(etypes[0]);
-    flag = solshape == obtain_elemshape(geom_etype);
+    flag = (etypes[0] >> 5 & 7) == (geom_etype >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combinations");
-  topo_dim = obtain_elemdim(etypes[0]);
+  shape = etypes[0] >> 5 & 7;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init:badDim",
@@ -17082,18 +10571,16 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   if (qd_or_natcoords != -1) {
     if (qd_or_natcoords == 0) {
       //  trial+test+nonlinear_geom?1:0
-      a = obtain_elemdegree(etypes[0]);
-      qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                        (xs.size(1) > topo_dim);
+      qd_or_natcoords =
+          (((etypes[0] >> 2 & 7) << 1) + ((geom_etype >> 2 & 7) > 1)) +
+          (xs.size(1) > topo_dim);
     }
     tabulate_quadratures(etypes[0], qd_or_natcoords, b_sfe->cs, b_sfe->ws);
     b_sfe->nqp = b_sfe->ws.size(0);
   } else {
     m2cErrMsgIdAndTxt("sfe_init:missUserQuad", "missing user quadrature data");
-    if (topo_dim + 1 != 0) {
-      m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
-                        "bad user quadrature data size");
-    }
+    m2cErrMsgIdAndTxt("sfe_init:badUserQuadDim",
+                      "bad user quadrature data size");
     b_sfe->nqp = 0;
     b_sfe->ws.set_size(0);
     b_sfe->cs.set_size(0, topo_dim);
@@ -17101,18 +10588,18 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   //  Solution space shape functions & derivs
   tabulate_shapefuncs(etypes[0], b_sfe->cs, b_sfe->shapes_geom,
                       b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
   b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
                              b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
   }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
   b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
                              b_sfe->derivs_geom.size(1),
                              b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
   }
   //  Geometry space shape functions & derivs
@@ -17189,8 +10676,8 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
     }
   } else {
     //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
+    loop_ub = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(loop_ub, 3);
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
       ::coder::SizeType geom_dim;
@@ -17237,10 +10724,10 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
         v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
       }
       for (i1 = 0; i1 < 3; i1++) {
-        a = i1 + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i1];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
+        loop_ub = i1 + y;
+        b_sfe->jacTs[3 * loop_ub] = dv[3 * i1];
+        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i1 + 1];
+        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i1 + 2];
       }
       b_sfe->wdetJ[q] = v;
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
@@ -17254,11 +10741,11 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
 {
   real_T dv[9];
   real_T v;
-  ::coder::SizeType a;
   ::coder::SizeType geom_etype;
   ::coder::SizeType i;
   ::coder::SizeType i1;
-  ::coder::SizeType qd_or_natcoords;
+  ::coder::SizeType loop_ub;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
   boolean_T flag;
   if (etypes[1] == 0) {
@@ -17268,13 +10755,12 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   }
   flag = etypes[0] == geom_etype;
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(etypes[0]);
-    flag = solshape == obtain_elemshape(geom_etype);
+    flag = (etypes[0] >> 5 & 7) == (geom_etype >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combinations");
-  topo_dim = obtain_elemdim(etypes[0]);
+  shape = etypes[0] >> 5 & 7;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init:badDim",
@@ -17291,26 +10777,27 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   b_sfe->nnodes[0] = iv[etypes[0] - 1];
   b_sfe->nnodes[1] = iv[geom_etype - 1];
   //  Set up quadrature
-  a = obtain_elemdegree(etypes[0]);
-  qd_or_natcoords = ((a << 1) + (obtain_elemdegree(geom_etype) > 1)) +
-                    (xs.size(1) > topo_dim);
-  tabulate_quadratures(etypes[0], qd_or_natcoords, b_sfe->cs, b_sfe->ws);
+  tabulate_quadratures(
+      etypes[0],
+      (((etypes[0] >> 2 & 7) << 1) + ((geom_etype >> 2 & 7) > 1)) +
+          (xs.size(1) > topo_dim),
+      b_sfe->cs, b_sfe->ws);
   b_sfe->nqp = b_sfe->ws.size(0);
   //  Solution space shape functions & derivs
   tabulate_shapefuncs(etypes[0], b_sfe->cs, b_sfe->shapes_geom,
                       b_sfe->derivs_geom);
-  a = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
+  loop_ub = b_sfe->shapes_geom.size(1) * b_sfe->shapes_geom.size(0);
   b_sfe->shapes_sol.set_size(b_sfe->shapes_geom.size(0),
                              b_sfe->shapes_geom.size(1));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->shapes_sol[i] = b_sfe->shapes_geom[i];
   }
-  a = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
-      b_sfe->derivs_geom.size(0);
+  loop_ub = b_sfe->derivs_geom.size(2) * b_sfe->derivs_geom.size(1) *
+            b_sfe->derivs_geom.size(0);
   b_sfe->derivs_sol.set_size(b_sfe->derivs_geom.size(0),
                              b_sfe->derivs_geom.size(1),
                              b_sfe->derivs_geom.size(2));
-  for (i = 0; i < a; i++) {
+  for (i = 0; i < loop_ub; i++) {
     b_sfe->derivs_sol[i] = b_sfe->derivs_geom[i];
   }
   //  Geometry space shape functions & derivs
@@ -17387,8 +10874,8 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
     }
   } else {
     //  Super-parametric
-    a = b_sfe->nqp * 3;
-    b_sfe->jacTs.set_size(a, 3);
+    loop_ub = b_sfe->nqp * 3;
+    b_sfe->jacTs.set_size(loop_ub, 3);
     i = b_sfe->nqp;
     for (::coder::SizeType q{0}; q < i; q++) {
       ::coder::SizeType geom_dim;
@@ -17435,10 +10922,10 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
         v = std::sqrt((dv[6] * dv[6] + dv[7] * dv[7]) + dv[8] * dv[8]);
       }
       for (i1 = 0; i1 < 3; i1++) {
-        a = i1 + y;
-        b_sfe->jacTs[3 * a] = dv[3 * i1];
-        b_sfe->jacTs[3 * a + 1] = dv[3 * i1 + 1];
-        b_sfe->jacTs[3 * a + 2] = dv[3 * i1 + 2];
+        loop_ub = i1 + y;
+        b_sfe->jacTs[3 * loop_ub] = dv[3 * i1];
+        b_sfe->jacTs[3 * loop_ub + 1] = dv[3 * i1 + 1];
+        b_sfe->jacTs[3 * loop_ub + 2] = dv[3 * i1 + 2];
       }
       b_sfe->wdetJ[q] = v;
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
@@ -17454,6 +10941,7 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   ::coder::SizeType geom_etype;
   ::coder::SizeType i;
   ::coder::SizeType loop_ub;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
   boolean_T flag;
   if (etypes[1] == 0) {
@@ -17463,13 +10951,12 @@ void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
   }
   flag = etypes[0] == geom_etype;
   if (!flag) {
-    ::coder::SizeType solshape;
     //  then the shapes must match
-    solshape = obtain_elemshape(etypes[0]);
-    flag = solshape == obtain_elemshape(geom_etype);
+    flag = (etypes[0] >> 5 & 7) == (geom_etype >> 5 & 7);
   }
   m2cAssert(flag, "invalid element combinations");
-  topo_dim = obtain_elemdim(etypes[0]);
+  shape = etypes[0] >> 5 & 7;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init:badDim",
@@ -17742,8 +11229,10 @@ void sfe_init_linear(SfeObject *b_sfe, ::coder::SizeType etypes,
   ::coder::SizeType i;
   ::coder::SizeType i1;
   ::coder::SizeType loop_ub;
+  ::coder::SizeType shape;
   ::coder::SizeType topo_dim;
-  topo_dim = obtain_elemdim(etypes);
+  shape = etypes >> 5;
+  topo_dim = ((shape > 0) + (shape > 1)) + (shape > 3);
   //  Geometric dimension
   if (xs.size(1) < topo_dim) {
     m2cErrMsgIdAndTxt("sfe_init_linear:badDim",
@@ -17903,300 +11392,6 @@ void sfe_init_linear(SfeObject *b_sfe, ::coder::SizeType etypes,
       b_sfe->wdetJ[q] = v;
       b_sfe->wdetJ[q] = b_sfe->wdetJ[q] * b_sfe->ws[q];
     }
-  }
-}
-
-// tabulate_quadratures - Tabulate quadrature rule for given element type
-void tabulate_quadratures(::coder::SizeType etype, ::coder::SizeType qd,
-                          ::coder::array<real_T, 2U> &cs,
-                          ::coder::array<real_T, 1U> &ws)
-{
-  ::coder::SizeType shape;
-  shape = obtain_elemshape(etype);
-  switch (shape) {
-  case 1:
-    bar_quadrules(qd, cs, ws);
-    break;
-  case 2:
-    tri_quadrules(qd, cs, ws);
-    break;
-  case 3: {
-    if (qd <= 1) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::quad_deg1_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::quad_deg1_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 3) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::quad_deg3_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::quad_deg3_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 5) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::quad_deg5_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::quad_deg5_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 7) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::quad_deg7_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::quad_deg7_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 9) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::quad_deg9_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::quad_deg9_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 11) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::quad_deg11_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::quad_deg11_qrule(&cs[0], &(ws.data())[0]);
-    } else {
-      ::coder::SizeType nqp;
-      if (qd > 13) {
-        m2cWarnMsgIdAndTxt("bar_quadrules:UnsupportedDegree",
-                           "Only support up to degree 13");
-      }
-      nqp = ::sfe_qrules::quad_deg13_qrule();
-      cs.set_size(nqp, 2);
-      ws.set_size(nqp);
-      ::sfe_qrules::quad_deg13_qrule(&cs[0], &(ws.data())[0]);
-    }
-  } break;
-  case 4: {
-    if (qd <= 1) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::tet_deg1_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg1_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 2) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::tet_deg2_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg2_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 3) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::tet_deg3_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg3_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 5) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::tet_deg5_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg5_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 6) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::tet_deg6_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg6_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 7) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::tet_deg7_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg7_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 9) {
-      ::coder::SizeType nqp;
-      //  The degree-8 quadrature rule KEAST9 has negative weights, so we do
-      nqp = ::sfe_qrules::tet_deg9_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg9_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 11) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::tet_deg11_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg11_qrule(&cs[0], &(ws.data())[0]);
-    } else {
-      ::coder::SizeType nqp;
-      if (qd > 13) {
-        m2cWarnMsgIdAndTxt("tet_quadrules:UnsupportedDegree",
-                           "Only support up to degree 13");
-      }
-      nqp = ::sfe_qrules::tet_deg13_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::tet_deg13_qrule(&cs[0], &(ws.data())[0]);
-    }
-  } break;
-  case 7: {
-    if (qd <= 1) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::hexa_deg1_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::hexa_deg1_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 3) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::hexa_deg3_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::hexa_deg3_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 5) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::hexa_deg5_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::hexa_deg5_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 7) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::hexa_deg7_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::hexa_deg7_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 9) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::hexa_deg9_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::hexa_deg9_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 11) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::hexa_deg11_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::hexa_deg11_qrule(&cs[0], &(ws.data())[0]);
-    } else {
-      ::coder::SizeType nqp;
-      if (qd > 13) {
-        m2cWarnMsgIdAndTxt("hexa_quadrules:UnsupportedDegree",
-                           "Only support up to degree 13");
-      }
-      nqp = ::sfe_qrules::hexa_deg13_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::hexa_deg13_qrule(&cs[0], &(ws.data())[0]);
-    }
-  } break;
-  case 6: {
-    if (qd <= 1) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::prism_deg1_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::prism_deg1_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 2) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::prism_deg2_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::prism_deg2_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 3) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::prism_deg3_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::prism_deg3_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 5) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::prism_deg5_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::prism_deg5_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 7) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::prism_deg7_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::prism_deg7_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 9) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::prism_deg9_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::prism_deg9_qrule(&cs[0], &(ws.data())[0]);
-    } else if (qd <= 11) {
-      ::coder::SizeType nqp;
-      nqp = ::sfe_qrules::prism_deg11_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::prism_deg11_qrule(&cs[0], &(ws.data())[0]);
-    } else {
-      ::coder::SizeType nqp;
-      if (qd > 13) {
-        m2cWarnMsgIdAndTxt("prism_quadrules:UnsupportedDegree",
-                           "Only support up to degree 13");
-      }
-      nqp = ::sfe_qrules::prism_deg13_qrule();
-      cs.set_size(nqp, 3);
-      ws.set_size(nqp);
-      ::sfe_qrules::prism_deg13_qrule(&cs[0], &(ws.data())[0]);
-    }
-  } break;
-  default:
-    m2cAssert(shape == 5, "Unsupported element type");
-    pyra_quadrules(qd, cs, ws);
-    break;
-  }
-}
-
-// tabulate_shapefuncs - kernel for tabulating shape functions
-static inline void tabulate_shapefuncs(::coder::SizeType etype,
-                                       const ::coder::array<real_T, 2U> &cs,
-                                       ::coder::array<real_T, 2U> &sfvals,
-                                       ::coder::array<real_T, 3U> &sdvals)
-{
-  switch (obtain_elemdim(etype)) {
-  case 3:
-    sfe3_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
-    break;
-  case 2:
-    sfe2_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
-    break;
-  default:
-    sfe1_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
-    break;
-  }
-}
-
-// tabulate_shapefuncs - kernel for tabulating shape functions
-static inline void tabulate_shapefuncs(::coder::SizeType etype,
-                                       const ::coder::array<real_T, 2U> &cs,
-                                       ::coder::SizeType varargin_2,
-                                       ::coder::array<real_T, 2U> &sfvals,
-                                       ::coder::array<real_T, 3U> &sdvals)
-{
-  switch (obtain_elemdim(etype)) {
-  case 3:
-    sfe3_tabulate_shapefuncs(etype, cs, varargin_2, sfvals, sdvals);
-    break;
-  case 2:
-    sfe2_tabulate_shapefuncs(etype, cs, varargin_2, sfvals, sdvals);
-    break;
-  default:
-    sfe1_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
-    break;
-  }
-}
-
-// tabulate_shapefuncs - kernel for tabulating shape functions
-static inline void tabulate_shapefuncs3(::coder::SizeType etype,
-                                        const ::coder::array<real_T, 2U> &cs,
-                                        ::coder::array<real_T, 2U> &sfvals,
-                                        ::coder::array<real_T, 3U> &sdvals)
-{
-  switch (obtain_elemdim(etype)) {
-  case 3:
-    b_sfe3_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
-    break;
-  case 2:
-    b_sfe2_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
-    break;
-  default:
-    sfe1_tabulate_shapefuncs(etype, cs, sfvals, sdvals);
-    break;
   }
 }
 
