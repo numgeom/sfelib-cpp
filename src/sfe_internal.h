@@ -188,9 +188,9 @@ static inline void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
 static inline void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
                             const ::coder::array<real_T, 2U> &xs);
 
-static inline void sfe_init(SfeObject *b_sfe, ::coder::SizeType etypes,
-                            const ::coder::array<real_T, 2U> &xs,
-                            const ::coder::array<real_T, 2U> &qd_or_natcoords);
+static inline void sfe_init4(SfeObject *b_sfe, ::coder::SizeType etypes,
+                             const ::coder::array<real_T, 2U> &xs,
+                             const ::coder::array<real_T, 2U> &qd_or_natcoords);
 
 static inline void sfe_init(SfeObject *b_sfe, const int32_T etypes[2],
                             const ::coder::array<real_T, 2U> &xs,
@@ -217,6 +217,13 @@ static inline void sfe_init_grad(SfeObject *b_sfe, ::coder::SizeType q);
 
 static inline void sfe_init_linear(SfeObject *b_sfe, ::coder::SizeType etypes,
                                    const ::coder::array<real_T, 2U> &xs);
+
+static inline void
+sfe_raisebyfacet(::coder::array<real_T, 2U> &xsloc, ::coder::SizeType etype,
+                 ::coder::SizeType etype_new,
+                 const ::coder::array<uint8_T, 1U> &facet,
+                 const ::coder::array<real_T, 2U> &bndxsloc,
+                 const ::coder::array<int32_T, 1U> &ftype_bnd);
 
 } // namespace sfe
 
